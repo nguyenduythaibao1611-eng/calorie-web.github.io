@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Chặn thư viện của trang docs
+docs/node_modules/
+docs/.astro/
+docs/dist/
