@@ -19,10 +19,12 @@ calorie-web/
 │   └── globals.css        # Các style toàn cục
 ├── components/            # UI components tái sử dụng (Reusable React components)
 ├── lib/                   # Hàm xử lý logic (Logic handling functions)
+│   └── storage.ts        # Quản lý localStorage (Storage management)
 ├── store/                 # Quản lý trạng thái (State management)
 │   └── useAppStore.ts    # Trạng thái toàn cục với Zustand
 ├── types/                 # Định nghĩa kiểu dữ liệu (TypeScript type definitions)
-│   └── user.ts           # Các kiểu dữ liệu người dùng
+│   ├── index.ts          # Các interface chính (MacroTarget, UserProfile, ...)
+│   └── user.ts           # Các kiểu dữ liệu người dùng cơ bản
 ├── public/                # Tài nguyên tĩnh (Static assets)
 └── docs/                  # Trang tài liệu Starlight
 ```
@@ -73,6 +75,185 @@ const MyComponent = () => {
   );
 };
 ```
+
+## Định Nghĩa Kiểu Dữ Liệu (Type Definitions)
+
+### Tổng Quan
+
+TypeScript là một phần quan trọng của dự án. Tất cả các interface chính được định nghĩa trong `types/index.ts`. Các interface này mô tả cấu trúc dữ liệu và đảm bảo an toàn kiểu dữ liệu (type safety) trong toàn bộ ứng dụng.
+
+### Cấu Trúc Dữ Liệu Chính
+
+| Interface | Mô Tả | Quan Hệ |
+|-----------|-------|---------|
+| **MacroTarget** | Mục tiêu dinh dưỡng hàng ngày (calo, protein, carbs, fat) | Được sử dụng trong `UserProfile` |
+| **UserProfile** | Thông tin cá nhân người dùng và mục tiêu dinh dưỡng | Chứa `MacroTarget` |
+| **Ingredient** | Nguyên liệu cơ bản (tên, calo, macros, số lượng) | Được sử dụng trong `MealEntry` |
+| **MealEntry** | Một bữa ăn cụ thể (loại, nguyên liệu, thời gian) | Chứa `Ingredient[]`, được sử dụng trong `DailyLog` |
+| **DailyLog** | Nhật ký calo toàn bộ một ngày | Chứa `MealEntry[]` |
+
+### Sơ Đồ Mối Quan Hệ (Dependency Diagram)
+
+```
+MacroTarget
+    ↓
+UserProfile
+
+Ingredient
+    ↓
+MealEntry
+    ↓
+DailyLog
+```
+
+### Ví dụ Sử Dụng
+
+```typescript
+import { UserProfile, DailyLog, MealEntry, Ingredient, MacroTarget } from '@/types'
+
+// 1. Tạo MacroTarget
+const macroTarget: MacroTarget = {
+  calories: 2000,
+  protein: 150,
+  carbs: 200,
+  fat: 65,
+}
+
+// 2. Tạo UserProfile
+const userProfile: UserProfile = {
+  name: 'Nguyễn Văn A',
+  age: 25,
+  weight: 70,
+  height: 175,
+  goal: 'lose',
+  macroTarget,
+}
+
+// 3. Tạo Ingredient
+const ingredient: Ingredient = {
+  name: 'Gạo trắng',
+  calories: 130,
+  protein: 2.7,
+  carbs: 28,
+  fat: 0.3,
+  amount: 100,
+}
+
+// 4. Tạo MealEntry
+const breakfast: MealEntry = {
+  id: 'meal-1',
+  mealType: 'breakfast',
+  time: '08:00',
+  ingredients: [ingredient],
+  totalCalories: 130,
+}
+
+// 5. Tạo DailyLog
+const dailyLog: DailyLog = {
+  date: '2024-05-08',
+  meals: [breakfast],
+  totalCalories: 130,
+}
+```
+
+### Quy Tắc Đặt Tên & Format
+
+- **ID**: Sử dụng string (UUID hoặc custom string)
+- **Ngày**: Format `YYYY-MM-DD` (ví dụ: `2024-05-08`)
+- **Thời gian**: Format `HH:mm` (ví dụ: `08:00` hoặc `14:30`)
+- **Giá trị số**: Calo và macros lưu dưới dạng số (`number`)
+- **Goal**: Chỉ chấp nhận 3 giá trị: `lose`, `maintain`, `gain`
+- **MealType**: Chỉ chấp nhận 4 loại: `breakfast`, `lunch`, `dinner`, `snack`
+
+## Storage Layer (lib/storage.ts)
+
+### Tổng Quan
+
+Storage Layer (`lib/storage.ts`) cung cấp các hàm an toàn để quản lý localStorage. Nó hoạt động như một lớp trung gian giữa ứng dụng và trình duyệt, đảm bảo:
+- ✅ Xử lý lỗi tự động (try-catch)
+- ✅ Type-safe với TypeScript
+- ✅ Client-only (không chạy trên server)
+- ✅ Dữ liệu được validate trước khi lưu/đọc
+
+### Quy Tắc Bắt Buộc
+
+- ❌ **KHÔNG** truy cập `localStorage` trực tiếp từ component
+- ✅ **LUÔN** import và sử dụng hàm từ `@/lib/storage`
+- ✅ Tất cả lỗi được xử lý tự động
+
+### Các Hàm Chính
+
+| Hàm | Tham số | Trả về | Mô tả |
+|-----|---------|--------|-------|
+| `getProfile()` | - | `UserProfile \| null` | Đọc thông tin hồ sơ người dùng |
+| `saveProfile(profile)` | `profile: UserProfile` | `void` | Lưu thông tin hồ sơ người dùng |
+| `getLog(date)` | `date: string (YYYY-MM-DD)` | `DailyLog \| null` | Đọc nhật ký calo theo ngày |
+| `saveLog(date, log)` | `date: string, log: DailyLog` | `void` | Lưu nhật ký calo theo ngày |
+| `getLogs(startDate, endDate)` | `startDate, endDate: string` | `DailyLog[]` | Lấy logs trong khoảng thời gian |
+
+### Ví dụ Sử Dụng
+
+```typescript
+import { 
+  getProfile, 
+  saveProfile, 
+  getLog, 
+  saveLog, 
+  getLogs 
+} from '@/lib/storage'
+
+// 1. Lấy profile hiện tại
+const profile = getProfile()
+
+// 2. Lưu profile
+saveProfile({
+  name: 'Nguyễn Văn A',
+  age: 25,
+  weight: 70,
+  height: 175,
+  goal: 'lose',
+  macroTarget: {
+    calories: 2000,
+    protein: 150,
+    carbs: 200,
+    fat: 65,
+  },
+})
+
+// 3. Lấy log của một ngày
+const todayLog = getLog('2024-05-08')
+
+// 4. Lưu log mới
+saveLog('2024-05-08', {
+  date: '2024-05-08',
+  meals: [],
+  totalCalories: 0,
+})
+
+// 5. Lấy logs từ khoảng thời gian (7 ngày)
+const weekLogs = getLogs('2024-05-01', '2024-05-08')
+weekLogs.forEach(log => {
+  console.log(`${log.date}: ${log.totalCalories} kcal`)
+})
+```
+
+### Cơ Chế Lưu Trữ
+
+```
+localStorage
+├── "calorie_profile"              # Lưu UserProfile
+└── "calorie_log_YYYY-MM-DD"       # Lưu DailyLog theo ngày
+    ├── "calorie_log_2024-05-08"
+    ├── "calorie_log_2024-05-07"
+    └── ...
+```
+
+### Lưu Ý Quan Trọng
+
+- **Format ngày**: Luôn `YYYY-MM-DD` (ví dụ: `2024-05-08`)
+- **Xử lý lỗi**: Hàm trả về `null` hoặc `[]` nếu lỗi, không bao giờ throw
+- **Client-only**: Storage chỉ hoạt động trên browser
+- **LocalStorage limit**: ~5-10MB, cần quản lý dữ liệu cũ để tránh vượt quá
 
 ## Các Thành Phần (Components)
 

@@ -1,0 +1,136 @@
+import { UserProfile, MacroTarget } from "@/types";
+
+// ─────────────────────────────────────────────
+// Constants
+// ─────────────────────────────────────────────
+
+/** Activity multipliers (sedentary → very active) */
+const ACTIVITY_MULTIPLIER = {
+  sedentary: 1.2, // Ít vận động, ngồi nhiều
+  light: 1.375, // Tập nhẹ 1-3 ngày/tuần
+  moderate: 1.55, // Tập vừa 3-5 ngày/tuần
+  active: 1.725, // Tập nặng 6-7 ngày/tuần
+  veryActive: 1.9, // Vận động viên / lao động nặng
+} as const;
+
+export type ActivityLevel = keyof typeof ACTIVITY_MULTIPLIER;
+
+/** Calorie adjustment theo goal */
+const GOAL_ADJUSTMENT: Record<UserProfile["goal"], number> = {
+  lose: -500, // Giảm ~0.5kg/tuần
+  maintain: 0,
+  gain: +300, // Tăng cơ, tăng cân chậm
+};
+
+/** Macro ratio theo goal (protein%, carbs%, fat%) */
+const MACRO_RATIO: Record<
+  UserProfile["goal"],
+  { protein: number; carbs: number; fat: number }
+> = {
+  lose: { protein: 0.35, carbs: 0.35, fat: 0.3 },
+  maintain: { protein: 0.25, carbs: 0.5, fat: 0.25 },
+  gain: { protein: 0.3, carbs: 0.45, fat: 0.25 },
+};
+
+/** Calories per gram */
+const CAL_PER_GRAM = {
+  protein: 4,
+  carbs: 4,
+  fat: 9,
+} as const;
+
+// ─────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────
+
+/**
+ * Tính BMR theo công thức Mifflin-St Jeor.
+ *
+ * Nam  : BMR = 10 × weight + 6.25 × height − 5 × age + 5
+ * Nữ   : BMR = 10 × weight + 6.25 × height − 5 × age − 161
+ *
+ * @param weight  Cân nặng (kg)
+ * @param height  Chiều cao (cm)
+ * @param age     Tuổi
+ * @param gender  'male' | 'female' (mặc định 'male' nếu không truyền)
+ */
+export function calcBMR(
+  weight: number,
+  height: number,
+  age: number,
+  gender: "male" | "female" = "male",
+): number {
+  const base = 10 * weight + 6.25 * height - 5 * age;
+  return gender === "male" ? base + 5 : base - 161;
+}
+
+// ─────────────────────────────────────────────
+// Main exports
+// ─────────────────────────────────────────────
+
+/**
+ * Tính TDEE (Total Daily Energy Expenditure) từ UserProfile.
+ *
+ * TDEE = BMR × activityMultiplier + goalAdjustment
+ *
+ * Vì UserProfile không chứa gender & activityLevel,
+ * hai giá trị đó được truyền riêng với default hợp lý.
+ *
+ * @param profile        Thông tin người dùng
+ * @param activityLevel  Mức độ hoạt động (mặc định 'moderate')
+ * @param gender         Giới tính (mặc định 'male')
+ * @returns              TDEE đã được làm tròn (kcal/ngày)
+ */
+export function calcTDEE(
+  profile: UserProfile,
+  activityLevel: ActivityLevel = "moderate",
+  gender: "male" | "female" = "male",
+): number {
+  const { weight, height, age, goal } = profile;
+
+  const bmr = calcBMR(weight, height, age, gender);
+  const maintenance = bmr * ACTIVITY_MULTIPLIER[activityLevel];
+  const tdee = maintenance + GOAL_ADJUSTMENT[goal];
+
+  return Math.round(tdee);
+}
+
+/**
+ * Tính mục tiêu macros (protein, carbs, fat) từ tổng calo mục tiêu.
+ *
+ * Tỷ lệ macro mặc định theo goal 'maintain'.
+ * Truyền `goal` để lấy ratio phù hợp hơn.
+ *
+ * @param calories  Tổng calo mục tiêu (kcal)
+ * @param goal      Mục tiêu (lose | maintain | gain), mặc định 'maintain'
+ * @returns         MacroTarget với đơn vị gram, đã làm tròn
+ */
+export function calcMacroTarget(
+  calories: number,
+  goal: UserProfile["goal"] = "maintain",
+): MacroTarget {
+  const ratio = MACRO_RATIO[goal];
+
+  return {
+    calories: Math.round(calories),
+    protein: Math.round((calories * ratio.protein) / CAL_PER_GRAM.protein),
+    carbs: Math.round((calories * ratio.carbs) / CAL_PER_GRAM.carbs),
+    fat: Math.round((calories * ratio.fat) / CAL_PER_GRAM.fat),
+  };
+}
+
+/**
+ * Shortcut: tính cả TDEE lẫn MacroTarget từ profile trong một lần gọi.
+ *
+ * @example
+ * const { tdee, macros } = calcNutritionPlan(userProfile)
+ */
+export function calcNutritionPlan(
+  profile: UserProfile,
+  activityLevel: ActivityLevel = "moderate",
+  gender: "male" | "female" = "male",
+): { tdee: number; macros: MacroTarget } {
+  const tdee = calcTDEE(profile, activityLevel, gender);
+  const macros = calcMacroTarget(tdee, profile.goal);
+  return { tdee, macros };
+}

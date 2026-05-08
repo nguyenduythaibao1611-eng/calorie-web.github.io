@@ -1,0 +1,18 @@
+[
+  { "id": "thit-ga-ta", "name": "Thịt gà ta (thịt)", "calPer100g": 199, "protein": 20.3, "carb": 0.0, "fat": 13.1, "unit": "gram" },
+  { "id": "thit-ga-rung", "name": "Thịt gà rừng", "calPer100g": 141, "protein": 24.4, "carb": 0.0, "fat": 4.8, "unit": "gram" },
+  { "id": "thit-heo-nac", "name": "Thịt heo nạc", "calPer100g": 139, "protein": 19.0, "carb": 0.0, "fat": 6.8, "unit": "gram" },
+  { "id": "thit-bo-nac", "name": "Thịt bò nạc", "calPer100g": 118, "protein": 21.0, "carb": 0.0, "fat": 3.8, "unit": "gram" },
+  { "id": "ca-hoi", "name": "Cá hồi", "calPer100g": 136, "protein": 22.0, "carb": 0.0, "fat": 5.3, "unit": "gram" },
+  { "id": "trung-ga", "name": "Trứng gà", "calPer100g": 166, "protein": 14.8, "carb": 0.5, "fat": 11.6, "unit": "gram" },
+  { "id": "dau-phu", "name": "Đậu phụ", "calPer100g": 95, "protein": 10.9, "carb": 0.7, "fat": 5.4, "unit": "gram" },
+  { "id": "gao-te-may", "name": "Gạo tẻ máy (sống)", "calPer100g": 344, "protein": 7.9, "carb": 75.9, "fat": 1.0, "unit": "gram" },
+  { "id": "bun", "name": "Bún", "calPer100g": 110, "protein": 1.7, "carb": 25.0, "fat": 0.1, "unit": "gram" },
+  { "id": "khoai-lang-trang", "name": "Khoai lang trắng", "calPer100g": 119, "protein": 0.8, "carb": 28.5, "fat": 0.2, "unit": "gram" },
+  { "id": "khoai-lang-nghe", "name": "Khoai lang nghệ", "calPer100g": 105, "protein": 1.2, "carb": 24.5, "fat": 0.1, "unit": "gram" },
+  { "id": "cai-thia", "name": "Cải thìa (cải trắng)", "calPer100g": 17, "protein": 1.4, "carb": 2.4, "fat": 0.3, "unit": "gram" },
+  { "id": "cai-xanh", "name": "Cải xanh", "calPer100g": 16, "protein": 1.7, "carb": 2.0, "fat": 0.3, "unit": "gram" },
+  { "id": "rau-muong", "name": "Rau muống", "calPer100g": 25, "protein": 3.2, "carb": 3.0, "fat": 0.3, "unit": "gram" },
+  { "id": "chuoi-xanh", "name": "Chuối xanh", "calPer100g": 74, "protein": 1.2, "carb": 16.4, "fat": 0.5, "unit": "gram" },
+  { "id": "bo-tim", "name": "Bơ tím (quả bơ)", "calPer100g": 74, "protein": 1.8, "carb": 2.8, "fat": 6.2, "unit": "gram" }
+]
