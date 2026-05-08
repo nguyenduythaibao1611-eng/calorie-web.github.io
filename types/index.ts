@@ -50,6 +50,7 @@ export interface UserProfile {
  * Lưu trữ thông tin về tên, calo, macros (protein, carbs, fat) và số lượng.
  */
 export interface Ingredient {
+  id: string
   /** Tên nguyên liệu (ví dụ: "Gạo trắng", "Cá hồi") */
   name: string
   /** Lượng calo trong 100g hoặc 1 đơn vị */
@@ -61,7 +62,7 @@ export interface Ingredient {
   /** Lượng fat (gram) */
   fat: number
   /** Số lượng (100g, 1 cốc, 1 miếng, v.v.) */
-  amount: number
+  amount?: number
 }
 
 /**
