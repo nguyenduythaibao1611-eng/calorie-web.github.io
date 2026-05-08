@@ -1,11 +1,9 @@
-import { Home } from "lucide-react"
+import ProfileForm from "@/components/ProfileForm";
 
-export default function Page() {
+export default function Home() {
   return (
-    <div>
-      <Home />
-      App Ready
-    </div>
-  )
+    <main>
+      <ProfileForm />
+    </main>
+  );
 }
-
