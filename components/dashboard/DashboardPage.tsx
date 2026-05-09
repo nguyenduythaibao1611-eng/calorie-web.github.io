@@ -36,6 +36,10 @@ export default function DashboardPage() {
 
   const macroTargets = { p: 120, c: 250, f: 65 };
 
+  // Lấy lượng nước hiện tại (Giả sử mỗi ly = 250ml)
+  const waterGlasses = currentLog?.water || 0;
+  const waterMl = waterGlasses * 250;
+
   return (
     <div className="bg-[#f4fbf6] text-[#161d1a] font-['Be_Vietnam_Pro'] min-h-screen">
       {/* Link Material Symbols */}
@@ -119,14 +123,14 @@ export default function DashboardPage() {
         <section className="bg-white/88 backdrop-blur-md border border-[#005239]/10 shadow-lg rounded-[32px] p-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-[18px] font-bold text-[#005239]">Uống nước</h3>
-            <span className="font-semibold text-[#005239] font-['Space_Grotesk']">1,250 / 2,000 ml</span>
+            <span className="font-semibold text-[#005239] font-['Space_Grotesk']">{waterMl.toLocaleString()} / 2,000 ml</span>
           </div>
           <div className="flex justify-between items-center gap-1">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <span 
                 key={i} 
-                className={`material-symbols-outlined text-3xl ${i <= 5 ? 'text-[#005239]' : 'text-[#6f7973]/30'}`}
-                style={{ fontVariationSettings: i <= 5 ? "'FILL' 1" : "'FILL' 0" }}
+                className={`material-symbols-outlined text-3xl ${i <= waterGlasses ? 'text-[#005239]' : 'text-[#6f7973]/30'}`}
+                style={{ fontVariationSettings: i <= waterGlasses ? "'FILL' 1" : "'FILL' 0" }}
               >
                 water_full
               </span>

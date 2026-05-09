@@ -11,6 +11,7 @@ type DiaryState = {
   addMeal: (meal: MealEntry) => void
   removeMeal: (mealId: string) => void
   updateMeal: (mealId: string, updated: MealEntry) => void
+  updateWater: (water: number) => void
 }
 
 function getTodayDate(): string {
@@ -31,6 +32,10 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
       date,
       meals: [],
       totalCalories: 0,
+      water: 0,
+    }
+    if (log.water === undefined) {
+      log.water = 0
     }
     set({ currentLog: log, currentDate: date })
   },
@@ -78,6 +83,19 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
       totalCalories: 0,
     }
     updated.totalCalories = calcTotalCalories(updated)
+    saveLog(currentDate, updated)
+    set({ currentLog: updated })
+  },
+
+  // Cập nhật lượng nước uống
+  updateWater: (water: number) => {
+    const { currentLog, currentDate } = get()
+    if (!currentLog) return
+
+    const updated: DailyLog = {
+      ...currentLog,
+      water,
+    }
     saveLog(currentDate, updated)
     set({ currentLog: updated })
   },

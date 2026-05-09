@@ -1,398 +1,560 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import {
-  Flame, Settings, CalendarDays,
-  Sun, UtensilsCrossed, Moon, Cookie,
-  PlusCircle, Plus, ArrowLeft, Trash2, Search,
-  BookOpen, Home, BarChart2,
+  Flame, Settings, Sun, Moon,
+  UtensilsCrossed, Cookie, Home, BookOpen, BarChart2,
+  ChevronRight, Plus, Minus, Droplets, User,
 } from 'lucide-react';
 import { useDiaryStore } from '@/store/diaryStore';
-import { useProfileStore } from '@/store/profileStore'; // ← THÊM
-import type { Ingredient, MealEntry } from '@/types';
+import { useProfileStore } from '@/store/profileStore';
 
-// ── Dữ liệu nguyên liệu ───────────────────────────────────────────────────────
-const INGREDIENTS_DB = [
-  { name: 'Cơm trắng',            calories: 130, protein: 2.7, carbs: 28,  fat: 0.3 },
-  { name: 'Thịt gà (ức)',         calories: 165, protein: 31,  carbs: 0,   fat: 3.6 },
-  { name: 'Thịt bò',              calories: 250, protein: 26,  carbs: 0,   fat: 15  },
-  { name: 'Thịt lợn nạc',         calories: 143, protein: 22,  carbs: 0,   fat: 6   },
-  { name: 'Trứng gà',             calories: 155, protein: 13,  carbs: 1.1, fat: 11  },
-  { name: 'Cá hồi',               calories: 208, protein: 20,  carbs: 0,   fat: 13  },
-  { name: 'Tôm',                  calories: 99,  protein: 24,  carbs: 0.2, fat: 0.3 },
-  { name: 'Đậu phụ',              calories: 76,  protein: 8,   carbs: 1.9, fat: 4.8 },
-  { name: 'Sữa tươi',             calories: 61,  protein: 3.2, carbs: 4.8, fat: 3.3 },
-  { name: 'Bánh mì',              calories: 265, protein: 9,   carbs: 49,  fat: 3.2 },
-  { name: 'Phở bò',               calories: 90,  protein: 6.5, carbs: 12,  fat: 1.8 },
-  { name: 'Bún chả',              calories: 120, protein: 9,   carbs: 14,  fat: 3.5 },
-  { name: 'Gỏi cuốn',             calories: 100, protein: 4,   carbs: 16,  fat: 2   },
-  { name: 'Khoai lang',           calories: 86,  protein: 1.6, carbs: 20,  fat: 0.1 },
-  { name: 'Sữa chua không đường', calories: 59,  protein: 10,  carbs: 3.6, fat: 0.4 },
-];
-
-const MEAL_CONFIG = [
-  { type: 'breakfast' as const, label: 'Bữa sáng', Icon: Sun,             activeBg: '#caeadd' },
-  { type: 'lunch'     as const, label: 'Bữa trưa', Icon: UtensilsCrossed, activeBg: '#e8f0eb' },
-  { type: 'dinner'    as const, label: 'Bữa tối',  Icon: Moon,            activeBg: '#e8f0eb' },
-  { type: 'snack'     as const, label: 'Ăn vặt',   Icon: Cookie,          activeBg: '#e8f0eb' },
-];
+// ─────────────────────────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────────────────────────
 
 function getToday() {
   return new Date().toISOString().slice(0, 10);
 }
 
-function getTodayLabel() {
-  return new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 5)  return { text: 'Đêm khuya rồi 🌙', sub: 'Nhớ nghỉ ngơi đủ giấc nhé' };
+  if (h < 11) return { text: 'Chào buổi sáng ☀️', sub: 'Hãy bắt đầu ngày mới thật tốt' };
+  if (h < 13) return { text: 'Bữa trưa chưa? 🍱', sub: 'Đừng bỏ bữa, cơ thể cần năng lượng' };
+  if (h < 18) return { text: 'Buổi chiều năng động 💪', sub: 'Giữ vững mục tiêu của bạn' };
+  return       { text: 'Chào buổi tối 🌆', sub: 'Tổng kết một ngày nào' };
 }
 
-// ── Modal ─────────────────────────────────────────────────────────────────────
-function AddModal({ mealLabel, onClose, onAdd }: {
-  mealLabel: string;
-  onClose: () => void;
-  onAdd: (ing: Ingredient) => void;
-}) {
-  const [search, setSearch] = useState('');
-  const [selected, setSelected] = useState<typeof INGREDIENTS_DB[number] | null>(null);
-  const [gram, setGram] = useState(100);
+const WATER_TARGET = 8;
 
-  const filtered = INGREDIENTS_DB.filter((i) =>
-    i.name.toLowerCase().includes(search.toLowerCase())
-  );
+// ─────────────────────────────────────────────────────────────────────────────
+// Calorie Ring
+// ─────────────────────────────────────────────────────────────────────────────
 
-  const preview = selected ? Math.round((selected.calories / 100) * gram) : 0;
-
-  function handleAdd() {
-    if (!selected || gram <= 0) return;
-    onAdd({
-      id: crypto.randomUUID(),
-      name: selected.name,
-      calories: Math.round((selected.calories / 100) * gram),
-      protein: +((selected.protein / 100) * gram).toFixed(1),
-      carbs:   +((selected.carbs   / 100) * gram).toFixed(1),
-      fat:     +((selected.fat     / 100) * gram).toFixed(1),
-      amount:  gram,
-    });
-  }
+function CalorieRing({ consumed, target }: { consumed: number; target: number }) {
+  const SIZE = 196, STROKE = 14;
+  const R = (SIZE - STROKE) / 2;
+  const CIRC = 2 * Math.PI * R;
+  const pct = Math.min(consumed / (target || 1), 1);
+  const over = consumed > target;
+  const stroke = over ? '#ba1a1a' : '#005239';
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}>
-      <div style={{ width: '100%', maxWidth: 520, borderRadius: '20px 20px 0 0', padding: 24, display: 'flex', flexDirection: 'column', gap: 16, maxHeight: '85vh', background: 'rgba(244,251,246,0.97)', border: '1px solid rgba(26,107,78,0.12)', boxShadow: '0 -20px 60px rgba(26,107,78,0.15)' }}>
-
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontFamily: 'var(--font-be-vietnam-pro)', fontWeight: 700, fontSize: 20, color: '#161d1a' }}>
-            Thêm vào {mealLabel}
-          </span>
-          <button onClick={onClose} style={{ width: 36, height: 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#e8f0eb', border: 'none', cursor: 'pointer' }}>
-            <Plus size={18} color="#3f4943" style={{ transform: 'rotate(45deg)' }} />
-          </button>
-        </div>
-
-        {/* Search */}
-        <div style={{ position: 'relative' }}>
-          <Search size={18} color="#3f4943" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
-          <input
-            type="text"
-            placeholder="Tìm nguyên liệu..."
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); setSelected(null); }}
-            style={{ width: '100%', paddingLeft: 40, paddingRight: 16, paddingTop: 12, paddingBottom: 12, borderRadius: 12, border: '1px solid rgba(26,107,78,0.2)', background: 'rgba(255,255,255,0.8)', fontFamily: 'var(--font-be-vietnam-pro)', fontSize: 15, color: '#161d1a', outline: 'none', boxSizing: 'border-box' }}
-          />
-        </div>
-
-        {/* Bước 1 – chọn nguyên liệu */}
-        {!selected && (
-          <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {filtered.length === 0 && (
-              <p style={{ textAlign: 'center', color: '#3f4943', padding: '24px 0', fontFamily: 'var(--font-be-vietnam-pro)' }}>Không tìm thấy</p>
-            )}
-            {filtered.map((item) => (
-              <button
-                key={item.name}
-                onClick={() => setSelected(item)}
-                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderRadius: 12, border: 'none', background: 'transparent', cursor: 'pointer', textAlign: 'left', width: '100%' }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.7)')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-              >
-                <div>
-                  <p style={{ fontFamily: 'var(--font-be-vietnam-pro)', fontWeight: 600, color: '#161d1a', margin: 0 }}>{item.name}</p>
-                  <p style={{ fontFamily: 'var(--font-be-vietnam-pro)', fontSize: 13, color: '#3f4943', margin: 0 }}>
-                    P {item.protein}g · C {item.carbs}g · F {item.fat}g
-                  </p>
-                </div>
-                <span style={{ fontFamily: 'var(--font-space-grotesk)', fontWeight: 600, color: '#005239', marginLeft: 16, flexShrink: 0 }}>
-                  {item.calories} kcal/100g
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Bước 2 – nhập gram */}
-        {selected && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <button
-              onClick={() => setSelected(null)}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: '#005239', cursor: 'pointer', fontFamily: 'var(--font-be-vietnam-pro)', fontSize: 14 }}
-            >
-              <ArrowLeft size={16} />
-              Chọn lại
-            </button>
-
-            <div style={{ borderRadius: 12, padding: 16, background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(26,107,78,0.1)' }}>
-              <p style={{ fontFamily: 'var(--font-be-vietnam-pro)', fontWeight: 700, fontSize: 17, color: '#161d1a', margin: '0 0 4px' }}>{selected.name}</p>
-              <p style={{ fontFamily: 'var(--font-be-vietnam-pro)', fontSize: 13, color: '#3f4943', margin: 0 }}>
-                {selected.calories} kcal · P {selected.protein}g · C {selected.carbs}g · F {selected.fat}g / 100g
-              </p>
-            </div>
-
-            <div>
-              <label style={{ fontFamily: 'var(--font-be-vietnam-pro)', fontSize: 13, color: '#3f4943', display: 'block', marginBottom: 6 }}>Số gram</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <input
-                  type="number"
-                  min={1}
-                  max={2000}
-                  value={gram}
-                  onChange={(e) => setGram(Number(e.target.value))}
-                  style={{ flex: 1, padding: '12px 16px', borderRadius: 12, border: '1px solid rgba(26,107,78,0.2)', background: 'rgba(255,255,255,0.8)', fontFamily: 'var(--font-be-vietnam-pro)', fontSize: 18, color: '#161d1a', outline: 'none' }}
-                />
-                <span style={{ fontFamily: 'var(--font-be-vietnam-pro)', color: '#3f4943' }}>gram</span>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: 12, padding: '12px 16px', background: 'rgba(26,107,78,0.08)' }}>
-              <span style={{ fontFamily: 'var(--font-be-vietnam-pro)', color: '#161d1a' }}>Calories tính được</span>
-              <span style={{ fontFamily: 'var(--font-space-grotesk)', fontWeight: 700, fontSize: 22, color: '#005239' }}>{preview} kcal</span>
-            </div>
-
-            <button
-              onClick={handleAdd}
-              disabled={gram <= 0}
-              style={{ width: '100%', padding: '14px 0', borderRadius: 9999, background: '#005239', color: '#fff', border: 'none', cursor: gram > 0 ? 'pointer' : 'not-allowed', opacity: gram > 0 ? 1 : 0.4, fontFamily: 'var(--font-be-vietnam-pro)', fontWeight: 600, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-            >
-              <Plus size={20} />
-              Thêm vào nhật ký
-            </button>
-          </div>
+    <div style={{ position: 'relative', width: SIZE, height: SIZE, flexShrink: 0 }}>
+      <svg width={SIZE} height={SIZE} style={{ transform: 'rotate(-90deg)' }}>
+        <circle cx={SIZE/2} cy={SIZE/2} r={R} fill="none"
+          stroke="rgba(26,107,78,0.1)" strokeWidth={STROKE} />
+        <circle cx={SIZE/2} cy={SIZE/2} r={R} fill="none"
+          stroke={stroke} strokeWidth={STROKE}
+          strokeDasharray={CIRC} strokeDashoffset={CIRC * (1 - pct)}
+          strokeLinecap="round"
+          style={{ transition: 'stroke-dashoffset 0.9s cubic-bezier(.4,0,.2,1), stroke 0.3s' }}
+        />
+      </svg>
+      <div style={{
+        position: 'absolute', inset: 0,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2,
+      }}>
+        <span style={{
+          fontFamily: 'var(--font-space-grotesk)', fontWeight: 700, fontSize: 34,
+          color: over ? '#ba1a1a' : '#005239', lineHeight: 1, letterSpacing: '-0.03em',
+        }}>
+          {consumed.toLocaleString()}
+        </span>
+        <span style={{
+          fontFamily: 'var(--font-space-grotesk)', fontSize: 11,
+          color: '#3f4943', letterSpacing: '0.06em', textTransform: 'uppercase',
+        }}>
+          / {target.toLocaleString()} kcal
+        </span>
+        {over && (
+          <span style={{
+            fontFamily: 'var(--font-be-vietnam-pro)', fontSize: 11,
+            color: '#ba1a1a', fontWeight: 600, marginTop: 2,
+          }}>⚠️ Vượt mục tiêu</span>
         )}
       </div>
     </div>
   );
 }
 
-// ── Meal Section ──────────────────────────────────────────────────────────────
-function MealSection({ config, meal, onOpenModal, onRemove }: {
-  config: typeof MEAL_CONFIG[number];
-  meal: MealEntry | undefined;
-  onOpenModal: () => void;
-  onRemove: (id: string) => void;
+// ─────────────────────────────────────────────────────────────────────────────
+// Macro Bar
+// ─────────────────────────────────────────────────────────────────────────────
+
+function MacroBar({ label, value, target, color }: {
+  label: string; value: number; target: number; color: string;
 }) {
-  const [expanded, setExpanded] = useState(false);
-  const hasItems = !!meal?.ingredients?.length;
-  const total = meal?.totalCalories ?? 0;
-  const { Icon } = config;
-
+  const pct = Math.min((value / (target || 1)) * 100, 100);
   return (
-    <section style={{ borderRadius: 12, overflow: 'hidden', background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(12px)', border: '1px solid rgba(26,107,78,0.12)', boxShadow: '0 10px 30px rgba(26,107,78,0.06)' }}>
-      <div
-        onClick={() => hasItems && setExpanded((v) => !v)}
-        style={{ padding: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: hasItems ? 'pointer' : 'default', borderBottom: hasItems && expanded ? '1px solid rgba(26,107,78,0.05)' : undefined }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ width: 48, height: 48, borderRadius: '50%', background: config.activeBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Icon size={22} color="#005239" />
-          </div>
-          <div>
-            <h2 style={{ fontFamily: 'var(--font-be-vietnam-pro)', fontWeight: 600, fontSize: 22, color: '#161d1a', margin: 0, lineHeight: 1.2 }}>{config.label}</h2>
-            <p style={{ fontFamily: 'var(--font-space-grotesk)', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#3f4943', margin: 0 }}>
-              {total} kcal {hasItems ? (expanded ? '▲' : '▼') : ''}
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={(e) => { e.stopPropagation(); onOpenModal(); }}
-          style={{ width: 40, height: 40, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer' }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(26,107,78,0.08)')}
-          onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
-        >
-          <PlusCircle size={24} color="#005239" />
-        </button>
+    <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
+        <span style={{
+          fontFamily: 'var(--font-space-grotesk)', fontSize: 10,
+          letterSpacing: '0.08em', textTransform: 'uppercase', color: '#3f4943',
+        }}>{label}</span>
+        <span style={{ fontFamily: 'var(--font-space-grotesk)', fontWeight: 600, fontSize: 13, color: '#161d1a' }}>
+          {value.toFixed(0)}
+          <span style={{ fontWeight: 400, color: '#3f4943', fontSize: 10 }}>/{target}g</span>
+        </span>
       </div>
-
-      {expanded && hasItems && (
-        <div style={{ padding: '16px 20px', background: 'rgba(238,245,240,0.5)', display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {meal!.ingredients.map((ing, idx) => (
-            <div key={ing.id}>
-              {idx > 0 && <div style={{ height: 1, background: 'rgba(26,107,78,0.05)', marginBottom: 12 }} />}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <p style={{ fontFamily: 'var(--font-be-vietnam-pro)', fontWeight: 600, color: '#161d1a', margin: 0 }}>{ing.name}</p>
-                  <p style={{ fontFamily: 'var(--font-be-vietnam-pro)', fontSize: 13, color: '#3f4943', margin: 0 }}>{ing.amount}g</p>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontFamily: 'var(--font-space-grotesk)', fontWeight: 600, fontSize: 20, color: '#005239' }}>{ing.calories} kcal</span>
-                  <button
-                    onClick={() => onRemove(ing.id)}
-                    style={{ width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer' }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(186,26,26,0.08)')}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
-                  >
-                    <Trash2 size={16} color="#ba1a1a" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </section>
+      <div style={{ height: 6, borderRadius: 9999, background: 'rgba(26,107,78,0.1)', overflow: 'hidden' }}>
+        <div style={{
+          height: '100%', borderRadius: 9999, width: `${pct}%`, background: color,
+          transition: 'width 0.9s cubic-bezier(.4,0,.2,1)',
+        }} />
+      </div>
+    </div>
   );
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────────
-export default function DiaryPage() {
-  const { currentLog, loadLog, addMeal, updateMeal, removeMeal } = useDiaryStore();
-  const profile = useProfileStore((state) => state.profile); // ← THÊM
-  const [openModal, setOpenModal] = useState<MealEntry['mealType'] | null>(null);
+// ─────────────────────────────────────────────────────────────────────────────
+// Meal Row
+// ─────────────────────────────────────────────────────────────────────────────
 
+const MEAL_META = {
+  breakfast: { label: 'Bữa sáng', Icon: Sun },
+  lunch:     { label: 'Bữa trưa', Icon: UtensilsCrossed },
+  dinner:    { label: 'Bữa tối',  Icon: Moon },
+  snack:     { label: 'Ăn vặt',   Icon: Cookie },
+} as const;
+
+function MealRow({ mealType, calories, itemCount }: {
+  mealType: keyof typeof MEAL_META; calories: number; itemCount: number;
+}) {
+  const { label, Icon } = MEAL_META[mealType];
+  return (
+    <Link href="/diary" style={{ textDecoration: 'none' }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 14,
+        padding: '13px 0', borderBottom: '1px solid rgba(26,107,78,0.06)', cursor: 'pointer',
+      }}>
+        <div style={{
+          width: 38, height: 38, borderRadius: '50%',
+          background: 'rgba(26,107,78,0.08)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        }}>
+          <Icon size={17} color="#005239" />
+        </div>
+        <div style={{ flex: 1 }}>
+          <p style={{ fontFamily: 'var(--font-be-vietnam-pro)', fontWeight: 600, fontSize: 14, color: '#161d1a', margin: 0 }}>
+            {label}
+          </p>
+          <p style={{ fontFamily: 'var(--font-be-vietnam-pro)', fontSize: 11, color: '#3f4943', margin: '1px 0 0' }}>
+            {itemCount === 0 ? 'Chưa có món nào' : `${itemCount} món`}
+          </p>
+        </div>
+        <span style={{
+          fontFamily: 'var(--font-space-grotesk)', fontWeight: 600,
+          fontSize: 15, color: calories > 0 ? '#005239' : '#aab9b3',
+        }}>
+          {calories > 0 ? `${calories.toLocaleString()} kcal` : '—'}
+        </span>
+        <ChevronRight size={15} color="#aab9b3" />
+      </div>
+    </Link>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Water Tracker
+// ─────────────────────────────────────────────────────────────────────────────
+
+function WaterTracker({ glasses, onAdd, onRemove }: {
+  glasses: number; onAdd: () => void; onRemove: () => void;
+}) {
+  return (
+    <div style={{
+      background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(12px)',
+      border: '1px solid rgba(26,107,78,0.12)',
+      boxShadow: '0 10px 30px rgba(26,107,78,0.06)',
+      borderRadius: 20, padding: '20px 24px',
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <div>
+          <p style={{
+            fontFamily: 'var(--font-space-grotesk)', fontSize: 11,
+            letterSpacing: '0.08em', textTransform: 'uppercase', color: '#3f4943', margin: '0 0 2px',
+          }}>Nước uống hôm nay</p>
+          <p style={{
+            fontFamily: 'var(--font-space-grotesk)', fontWeight: 700,
+            fontSize: 22, color: '#005239', margin: 0, letterSpacing: '-0.02em',
+          }}>
+            {glasses}
+            <span style={{ fontWeight: 400, fontSize: 13, color: '#3f4943', marginLeft: 4 }}>
+              / {WATER_TARGET} ly
+            </span>
+          </p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <button
+            onClick={onRemove} disabled={glasses === 0}
+            style={{
+              width: 38, height: 38, borderRadius: '50%',
+              background: 'rgba(26,107,78,0.08)', border: 'none',
+              cursor: glasses === 0 ? 'not-allowed' : 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              opacity: glasses === 0 ? 0.4 : 1, transition: 'all 0.2s',
+            }}
+          >
+            <Minus size={16} color="#005239" />
+          </button>
+          <button
+            onClick={onAdd} disabled={glasses >= WATER_TARGET}
+            style={{
+              width: 38, height: 38, borderRadius: '50%',
+              background: glasses >= WATER_TARGET ? 'rgba(26,107,78,0.08)' : '#005239',
+              border: 'none', cursor: glasses >= WATER_TARGET ? 'not-allowed' : 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              opacity: glasses >= WATER_TARGET ? 0.4 : 1, transition: 'all 0.2s',
+            }}
+          >
+            <Plus size={16} color={glasses >= WATER_TARGET ? '#005239' : '#fff'} />
+          </button>
+        </div>
+      </div>
+
+      {/* Glass grid */}
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        {Array.from({ length: WATER_TARGET }).map((_, i) => (
+          <div
+            key={i}
+            onClick={() => (i < glasses ? onRemove() : onAdd())}
+            style={{
+              width: 32, height: 36, borderRadius: 6, cursor: 'pointer',
+              background: i < glasses ? '#005239' : 'rgba(26,107,78,0.1)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all 0.2s',
+            }}
+          >
+            <Droplets size={14} color={i < glasses ? '#caeadd' : 'rgba(26,107,78,0.3)'} />
+          </div>
+        ))}
+      </div>
+
+      {glasses >= WATER_TARGET && (
+        <p style={{
+          fontFamily: 'var(--font-be-vietnam-pro)', fontSize: 12,
+          color: '#005239', fontWeight: 600, margin: '10px 0 0', textAlign: 'center',
+        }}>
+          🎉 Đủ nước rồi! Tuyệt vời!
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Page
+// ─────────────────────────────────────────────────────────────────────────────
+
+export default function HomePage() {
+  const { currentLog, loadLog, updateWater } = useDiaryStore();
+  const { profile, loadProfile } = useProfileStore();
+  const today                    = getToday();
+  const [mounted, setMounted]    = useState(false);
+
+  const water = currentLog?.water ?? 0;
+
+  // ── Load everything from storage on mount ──
   useEffect(() => {
-    loadLog(getToday());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    loadProfile();
+    loadLog(today);
+    setMounted(true);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const totalCalories = currentLog?.totalCalories ?? 0;
-  const TARGET = profile?.macroTarget.calories ?? 2000; // ← SỬA: dùng TDEE thật
+  const addWater = useCallback(() => {
+    updateWater(Math.min(water + 1, WATER_TARGET));
+  }, [water, updateWater]);
 
-  const remaining = TARGET - totalCalories;
+  const removeWater = useCallback(() => {
+    updateWater(Math.max(water - 1, 0));
+  }, [water, updateWater]);
 
-  function getMeal(type: MealEntry['mealType']) {
-    return currentLog?.meals.find((m) => m.mealType === type);
+  // ── Derived calorie data ──
+  const target    = profile?.macroTarget?.calories ?? 2000;
+  const consumed  = currentLog?.totalCalories ?? 0;
+  const remaining = target - consumed;
+
+  // ── Macro totals from all ingredients ──
+  const macros = useMemo(() => {
+    const init = { protein: 0, carbs: 0, fat: 0 };
+    if (!currentLog) return init;
+    return currentLog.meals.reduce((acc, meal) => {
+      meal.ingredients.forEach((ing) => {
+        acc.protein += ing.protein;
+        acc.carbs   += ing.carbs;
+        acc.fat     += ing.fat;
+      });
+      return acc;
+    }, { ...init });
+  }, [currentLog]);
+
+  const macroTarget = {
+    protein: profile?.macroTarget?.protein ?? 150,
+    carbs:   profile?.macroTarget?.carbs   ?? 250,
+    fat:     profile?.macroTarget?.fat     ?? 65,
+  };
+
+  function mealInfo(type: keyof typeof MEAL_META) {
+    const meal = currentLog?.meals.find((m) => m.mealType === type);
+    return { calories: meal?.totalCalories ?? 0, itemCount: meal?.ingredients?.length ?? 0 };
   }
 
-  function handleAdd(mealType: MealEntry['mealType'], ingredient: Ingredient) {
-    const meal = getMeal(mealType);
-    if (meal) {
-      const ings = [...meal.ingredients, ingredient];
-      updateMeal(meal.id, { ...meal, ingredients: ings, totalCalories: ings.reduce((s, i) => s + i.calories, 0) });
-    } else {
-      addMeal({ id: crypto.randomUUID(), mealType, ingredients: [ingredient], totalCalories: ingredient.calories, time: new Date().toTimeString().slice(0, 5) });
-    }
-    setOpenModal(null);
-  }
+  const greeting = getGreeting();
 
-  function handleRemove(mealType: MealEntry['mealType'], ingId: string) {
-    const meal = getMeal(mealType);
-    if (!meal) return;
-    const ings = meal.ingredients.filter((i) => i.id !== ingId);
-    if (ings.length === 0) { removeMeal(meal.id); return; }
-    updateMeal(meal.id, { ...meal, ingredients: ings, totalCalories: ings.reduce((s, i) => s + i.calories, 0) });
-  }
+  // Prevent SSR hydration mismatch (localStorage only on client)
+  if (!mounted) return null;
 
   return (
     <div style={{ background: '#f4fbf6', minHeight: '100vh', paddingBottom: 120 }}>
 
-      {/* TopAppBar */}
-      <header style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(26,107,78,0.1)', boxShadow: '0 10px 30px rgba(26,107,78,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 20px', height: 64 }}>
+      {/* ── TopAppBar ── */}
+      <header style={{
+        position: 'sticky', top: 0, zIndex: 50,
+        background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(26,107,78,0.1)',
+        boxShadow: '0 10px 30px rgba(26,107,78,0.06)',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        padding: '0 20px', height: 64,
+      }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Flame size={24} color="#003d2b" />
-          <span style={{ fontFamily: 'var(--font-be-vietnam-pro)', fontWeight: 900, fontSize: 22, color: '#003d2b', letterSpacing: '-0.02em' }}>CaloMate</span>
+          <span style={{
+            fontFamily: 'var(--font-be-vietnam-pro)', fontWeight: 900,
+            fontSize: 22, color: '#003d2b', letterSpacing: '-0.02em',
+          }}>CaloMate</span>
         </div>
-        <button style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-          <Settings size={22} color="#003d2b" />
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {profile && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: 'rgba(26,107,78,0.08)', borderRadius: 9999, padding: '6px 12px',
+            }}>
+              <User size={14} color="#005239" />
+              <span style={{
+                fontFamily: 'var(--font-be-vietnam-pro)', fontSize: 13,
+                fontWeight: 600, color: '#005239',
+              }}>
+                {profile.name ?? 'Bạn'}
+              </span>
+            </div>
+          )}
+          <button style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+            <Settings size={22} color="#003d2b" />
+          </button>
+        </div>
       </header>
 
       <main style={{ maxWidth: 700, margin: '0 auto', padding: '24px 20px 0' }}>
 
-        {/* Page Header */}
-        <div style={{ marginBottom: 32 }}>
-          <h1 style={{ fontFamily: 'var(--font-be-vietnam-pro)', fontWeight: 700, fontSize: 32, letterSpacing: '-0.02em', color: '#005239', margin: '0 0 8px' }}>
-            Nhật ký ăn uống
+        {/* ── Greeting ── */}
+        <div style={{ marginBottom: 24 }}>
+          <h1 style={{
+            fontFamily: 'var(--font-be-vietnam-pro)', fontWeight: 700,
+            fontSize: 26, letterSpacing: '-0.02em', color: '#005239', margin: '0 0 4px',
+          }}>
+            {greeting.text}
           </h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#3f4943' }}>
-            <CalendarDays size={16} color="#3f4943" />
-            <span style={{ fontFamily: 'var(--font-space-grotesk)', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-              {getTodayLabel()}
-            </span>
-          </div>
+          <p style={{ fontFamily: 'var(--font-be-vietnam-pro)', fontSize: 14, color: '#3f4943', margin: 0 }}>
+            {greeting.sub}
+          </p>
         </div>
 
-        {/* Bento Summary */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 32 }}>
-          <div style={{ background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(12px)', border: '1px solid rgba(26,107,78,0.12)', boxShadow: '0 10px 30px rgba(26,107,78,0.06)', borderRadius: 12, padding: 24, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 120 }}>
-            <span style={{ fontFamily: 'var(--font-space-grotesk)', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#3f4943' }}>Còn lại</span>
-            <div style={{ marginTop: 8 }}>
-              <span style={{ fontFamily: 'var(--font-space-grotesk)', fontWeight: 700, fontSize: 40, letterSpacing: '-0.03em', color: remaining < 0 ? '#ba1a1a' : '#005239', lineHeight: 1 }}>
+        {/* ── No-profile warning ── */}
+        {!profile && (
+          <div style={{
+            background: 'rgba(255,237,213,0.8)', borderRadius: 14,
+            border: '1px solid rgba(194,120,3,0.2)',
+            padding: '14px 18px', marginBottom: 16,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+          }}>
+            <p style={{ fontFamily: 'var(--font-be-vietnam-pro)', fontSize: 13, color: '#7c4a00', margin: 0, fontWeight: 500 }}>
+              ⚠️ Chưa có hồ sơ — đang dùng mặc định 2000 kcal
+            </p>
+            <Link href="/onboarding" style={{
+              fontFamily: 'var(--font-be-vietnam-pro)', fontSize: 12,
+              fontWeight: 700, color: '#7c4a00', textDecoration: 'underline', whiteSpace: 'nowrap',
+            }}>
+              Thiết lập →
+            </Link>
+          </div>
+        )}
+
+        {/* ── Calorie Hero ── */}
+        <div style={{
+          background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(26,107,78,0.12)',
+          boxShadow: '0 10px 30px rgba(26,107,78,0.08)',
+          borderRadius: 20, padding: 24,
+          display: 'flex', alignItems: 'center', gap: 24,
+          marginBottom: 14, flexWrap: 'wrap',
+        }}>
+          <CalorieRing consumed={consumed} target={target} />
+
+          <div style={{ flex: 1, minWidth: 150, display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div>
+              <p style={{
+                fontFamily: 'var(--font-space-grotesk)', fontSize: 10,
+                letterSpacing: '0.08em', textTransform: 'uppercase', color: '#3f4943', margin: '0 0 4px',
+              }}>
+                {remaining >= 0 ? 'Còn lại hôm nay' : 'Đã vượt mục tiêu'}
+              </p>
+              <p style={{
+                fontFamily: 'var(--font-space-grotesk)', fontWeight: 700,
+                fontSize: 30, letterSpacing: '-0.03em', lineHeight: 1,
+                color: remaining < 0 ? '#ba1a1a' : '#161d1a', margin: 0,
+              }}>
                 {Math.abs(remaining).toLocaleString()}
-              </span>
-              <span style={{ fontFamily: 'var(--font-space-grotesk)', fontSize: 12, color: '#3f4943', marginLeft: 4 }}>
-                kcal {remaining < 0 ? '⚠️ vượt' : ''}
-              </span>
+                <span style={{ fontSize: 13, fontWeight: 400, color: '#3f4943', marginLeft: 6 }}>kcal</span>
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {[
+                { label: 'Đã ăn',    value: `${consumed.toLocaleString()} kcal` },
+                { label: 'Mục tiêu', value: `${target.toLocaleString()} kcal` },
+              ].map(({ label, value }) => (
+                <div key={label} style={{
+                  borderRadius: 10, padding: '7px 12px',
+                  background: 'rgba(26,107,78,0.06)', border: '1px solid rgba(26,107,78,0.1)',
+                }}>
+                  <p style={{
+                    fontFamily: 'var(--font-space-grotesk)', fontSize: 9,
+                    textTransform: 'uppercase', letterSpacing: '0.08em', color: '#3f4943', margin: '0 0 1px',
+                  }}>{label}</p>
+                  <p style={{
+                    fontFamily: 'var(--font-space-grotesk)', fontWeight: 600,
+                    fontSize: 13, color: '#005239', margin: 0,
+                  }}>{value}</p>
+                </div>
+              ))}
             </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateRows: '1fr 1fr', gap: 16 }}>
-            {[{ label: 'Đã ăn', value: totalCalories }, { label: 'Mục tiêu', value: TARGET }].map(({ label, value }) => (
-              <div key={label} style={{ background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(12px)', border: '1px solid rgba(26,107,78,0.12)', boxShadow: '0 10px 30px rgba(26,107,78,0.06)', borderRadius: 12, padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontFamily: 'var(--font-space-grotesk)', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#3f4943' }}>{label}</span>
-                <span style={{ fontFamily: 'var(--font-space-grotesk)', fontWeight: 600, fontSize: 20, color: '#48645a' }}>{value.toLocaleString()}</span>
-              </div>
-            ))}
+        </div>
+
+        {/* ── Macro Card ── */}
+        <div style={{
+          background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(26,107,78,0.12)',
+          boxShadow: '0 10px 30px rgba(26,107,78,0.06)',
+          borderRadius: 20, padding: '20px 24px', marginBottom: 14,
+        }}>
+          <p style={{
+            fontFamily: 'var(--font-space-grotesk)', fontSize: 11,
+            letterSpacing: '0.08em', textTransform: 'uppercase', color: '#3f4943', margin: '0 0 16px',
+          }}>Macro hôm nay</p>
+          <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap' }}>
+            <MacroBar label="Protein" value={macros.protein} target={macroTarget.protein} color="#005239" />
+            <MacroBar label="Carbs"   value={macros.carbs}   target={macroTarget.carbs}   color="#3d8a68" />
+            <MacroBar label="Fat"     value={macros.fat}     target={macroTarget.fat}      color="#7fbfa3" />
           </div>
         </div>
 
-        {/* Meals */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {MEAL_CONFIG.map((cfg) => (
-            <MealSection
-              key={cfg.type}
-              config={cfg}
-              meal={getMeal(cfg.type)}
-              onOpenModal={() => setOpenModal(cfg.type)}
-              onRemove={(id) => handleRemove(cfg.type, id)}
-            />
-          ))}
+        {/* ── Water Tracker ── */}
+        <div style={{ marginBottom: 14 }}>
+          <WaterTracker glasses={water} onAdd={addWater} onRemove={removeWater} />
         </div>
 
-        {/* CTA */}
-        <div style={{ marginTop: 32, display: 'flex', justifyContent: 'center' }}>
-          <button
-            onClick={() => setOpenModal('breakfast')}
-            style={{ background: '#005239', color: '#fff', padding: '16px 48px', borderRadius: 9999, fontFamily: 'var(--font-be-vietnam-pro)', fontWeight: 600, fontSize: 18, display: 'flex', alignItems: 'center', gap: 10, boxShadow: '0 8px 32px rgba(26,107,78,0.25)', border: 'none', cursor: 'pointer' }}
-          >
-            <Plus size={22} />
-            Thêm món ăn
-          </button>
+        {/* ── Meals Today ── */}
+        <div style={{
+          background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(26,107,78,0.12)',
+          boxShadow: '0 10px 30px rgba(26,107,78,0.06)',
+          borderRadius: 20, padding: '20px 24px', marginBottom: 28,
+        }}>
+          <div style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4,
+          }}>
+            <p style={{
+              fontFamily: 'var(--font-space-grotesk)', fontSize: 11,
+              letterSpacing: '0.08em', textTransform: 'uppercase', color: '#3f4943', margin: 0,
+            }}>Bữa ăn hôm nay</p>
+            <Link href="/diary" style={{
+              fontFamily: 'var(--font-be-vietnam-pro)', fontSize: 13,
+              color: '#005239', textDecoration: 'none', fontWeight: 600,
+              display: 'flex', alignItems: 'center', gap: 4,
+            }}>
+              Xem chi tiết <ChevronRight size={14} />
+            </Link>
+          </div>
+
+          {(['breakfast', 'lunch', 'dinner', 'snack'] as const).map((type, i, arr) => {
+            const { calories, itemCount } = mealInfo(type);
+            return (
+              <div key={type} style={i === arr.length - 1 ? { borderBottom: 'none' } : undefined}>
+                <MealRow mealType={type} calories={calories} itemCount={itemCount} />
+              </div>
+            );
+          })}
+
+          {/* Empty state */}
+          {(currentLog?.meals.length ?? 0) === 0 && (
+            <p style={{
+              fontFamily: 'var(--font-be-vietnam-pro)', fontSize: 13,
+              color: '#3f4943', textAlign: 'center', padding: '8px 0 0', margin: 0,
+            }}>
+              Chưa có gì — hãy ghi lại bữa ăn đầu tiên! 🍽️
+            </p>
+          )}
         </div>
+
+        {/* ── CTA ── */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
+          <Link href="/diary" style={{ textDecoration: 'none' }}>
+            <button style={{
+              background: '#005239', color: '#fff',
+              padding: '15px 44px', borderRadius: 9999,
+              fontFamily: 'var(--font-be-vietnam-pro)', fontWeight: 600, fontSize: 17,
+              display: 'flex', alignItems: 'center', gap: 10,
+              boxShadow: '0 8px 32px rgba(26,107,78,0.25)',
+              border: 'none', cursor: 'pointer',
+            }}>
+              <Plus size={21} />
+              Ghi nhật ký
+            </button>
+          </Link>
+        </div>
+
       </main>
 
-      {/* BottomNav */}
-      <nav style={{ position: 'fixed', bottom: 0, left: 0, width: '100%', zIndex: 50, background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(20px)', borderTop: '1px solid rgba(26,107,78,0.1)', boxShadow: '0 -10px 30px rgba(26,107,78,0.06)', display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '16px 24px 32px' }}>
+      {/* ── BottomNav ── */}
+      <nav style={{
+        position: 'fixed', bottom: 0, left: 0, width: '100%', zIndex: 50,
+        background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(20px)',
+        borderTop: '1px solid rgba(26,107,78,0.1)',
+        boxShadow: '0 -10px 30px rgba(26,107,78,0.06)',
+        display: 'flex', justifyContent: 'space-around', alignItems: 'center',
+        padding: '16px 24px 32px',
+      }}>
         {[
-          { Icon: Home,      label: 'Tổng quan', href: '/',      active: false },
-          { Icon: BookOpen,  label: 'Nhật ký',   href: '/diary', active: true  },
+          { Icon: Home,      label: 'Tổng quan', href: '/',      active: true  },
+          { Icon: BookOpen,  label: 'Nhật ký',   href: '/diary', active: false },
           { Icon: BarChart2, label: 'Thống kê',  href: '/stats', active: false },
         ].map(({ Icon: NavIcon, label, href, active }) => (
-          <Link key={label} href={href} style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-            <div style={{ padding: 12, borderRadius: 9999, background: active ? 'rgba(26,107,78,0.12)' : 'transparent', transform: active ? 'scale(1.1)' : 'scale(1)', transition: 'all 0.2s' }}>
+          <Link key={label} href={href} style={{
+            textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+          }}>
+            <div style={{
+              padding: 12, borderRadius: 9999,
+              background: active ? 'rgba(26,107,78,0.12)' : 'transparent',
+              transform: active ? 'scale(1.1)' : 'scale(1)', transition: 'all 0.2s',
+            }}>
               <NavIcon size={22} color={active ? '#005239' : 'rgba(26,58,42,0.4)'} />
             </div>
-            <span style={{ fontFamily: 'var(--font-space-grotesk)', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: active ? '#005239' : 'rgba(26,58,42,0.4)', fontWeight: active ? 700 : 400 }}>
+            <span style={{
+              fontFamily: 'var(--font-space-grotesk)', fontSize: 10,
+              letterSpacing: '0.08em', textTransform: 'uppercase',
+              color: active ? '#005239' : 'rgba(26,58,42,0.4)',
+              fontWeight: active ? 700 : 400,
+            }}>
               {label}
             </span>
           </Link>
         ))}
       </nav>
-
-      {/* Modal */}
-      {openModal && (
-        <AddModal
-          mealLabel={MEAL_CONFIG.find((c) => c.type === openModal)!.label}
-          onClose={() => setOpenModal(null)}
-          onAdd={(ing) => handleAdd(openModal, ing)}
-        />
-      )}
     </div>
   );
 }

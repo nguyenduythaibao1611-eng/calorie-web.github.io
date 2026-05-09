@@ -97,4 +97,6 @@ export interface DailyLog {
   meals: MealEntry[]
   /** Tổng calo tiêu thụ trong ngày (tính từ các bữa ăn) */
   totalCalories: number
+  /** Lượng nước uống trong ngày (đơn vị: ly) */
+  water?: number
 }
