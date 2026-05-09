@@ -58,6 +58,8 @@ Chào mừng đến với tài liệu dự án **Calorie Web**. Đây là ứng 
 
 - [x] **Diary UI**: Giao diện nhập nhật ký calo, 4 section bữa ăn, modal thêm nguyên liệu, xóa nguyên liệu, tổng calories từng bữa và cả ngày
 - [x] **Tìm kiếm món ăn**: Modal tìm kiếm 15+ món Việt, nhập gram, tự động tính calories
+- [x] **Hồ sơ người dùng**: Tạo và quản lý hồ sơ, chọn mục tiêu (giảm/duy trì/tăng cân)
+- [x] **Tính toán dinh dưỡng**: Tính BMR, TDEE, macros (Protein, Carbs, Fat) chuẩn theo công thức Mifflin-St Jeor
 - [x] **Lưu trữ tự động**: Dùng Zustand + localStorage, không mất dữ liệu khi reload
 - [x] **Responsive**: Mobile-first, tối ưu cho điện thoại
 - [x] **Sửa toàn bộ lỗi**: Đã fix lỗi typescript, props, import/export, duplicate export, v.v.
@@ -66,12 +68,13 @@ Chào mừng đến với tài liệu dự án **Calorie Web**. Đây là ứng 
 
 ### Đã xong
 - Diary UI (4 bữa, modal thêm/xóa món, tổng calo)
+- Giao diện thiết lập hồ sơ người dùng (ProfileForm)
+- Core tính toán dinh dưỡng (calc.ts)
 - State management với Zustand, auto-persist
 - Sửa toàn bộ lỗi typescript, props, import/export
 
 ### Đang phát triển
 - Dashboard tổng hợp, biểu đồ thống kê
-- Trang profile người dùng
 
 ### Sắp làm
 - Biểu đồ calories, protein, carbs, fat theo ngày/tuần
@@ -422,7 +425,7 @@ type AppState = {
 
 ### 🔄 Đang Phát Triển
 - [ ] Main dashboard page
-- [ ] User profile page
+- [x] User profile page
 - [ ] Daily log page
 - [ ] Form components
 - [ ] Ingredient selector
