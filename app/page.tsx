@@ -1,17 +1,13 @@
-'use client';
+import StatsBoard from "@/components/StatsUI";
+// import ProfileForm from "@/components/ProfileForm"; // Comment tạm cái form hôm qua lại
 
-import DashboardPage from "@/components/dashboard/DashboardPage";
-// Nếu mày có BottomNav dùng chung thì import vào đây, 
-// nhưng tốt nhất nên để BottomNav ở file layout.tsx
-
-export default function Page() {
+export default function Home() {
   return (
-    <main>
-      <DashboardPage />
-      {/* 
-         Nếu chưa có BottomNav ở layout.tsx thì có thể tạm thời 
-         gọi component BottomNav ở đây 
-      */}
+    <main className="min-h-screen bg-[#F4FAF7]">
+      <div className="py-10 flex justify-center items-center">
+        {/* Gọi UI Thống Kê ra đây để test */}
+        <StatsBoard />
+      </div>
     </main>
   );
 }
