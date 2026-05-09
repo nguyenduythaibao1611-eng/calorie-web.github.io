@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Be_Vietnam_Pro, Space_Grotesk } from "next/font/google";
+import { BottomNav } from "@/components/nav/BottomNav";
 import "./globals.css";
 
 const beVietnamPro = Be_Vietnam_Pro({
@@ -33,6 +34,7 @@ export default function RootLayout({
     >
       <body className="h-full flex flex-col bg-[#f4fbf6] text-[#161d1a]">
         <div className="flex-1 flex flex-col">{children}</div>
+        <BottomNav />
       </body>
     </html>
   );
