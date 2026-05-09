@@ -1,17 +1,6 @@
-import { Home } from "lucide-react";
-import { BottomNav } from "@/components/ui";
+// app/page.tsx
+import { redirect } from 'next/navigation'
 
 export default function Page() {
-  return (
-    <div>
-      <div>
-        <Home />
-        App Ready
-      </div>
-
-      <h1>Home</h1>
-
-      <BottomNav />
-    </div>
-  );
+  redirect('/diary')
 }
