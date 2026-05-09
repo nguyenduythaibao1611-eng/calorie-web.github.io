@@ -281,12 +281,11 @@ git push origin feature/feature-name
 ---
 
 ## 📝 Ghi Chú Khác
-
 - Code được viết bằng **TypeScript strict mode** - đảm bảo type safety
 - Storage layer được thiết kế để dễ dàng migrate sang backend sau
 - Sử dụng **Zustand** thay vì Redux để code gọn gàng và dễ hiểu
 
 ---
 
-**Cập nhật lần cuối:** 08/05/2026  
-**Version:** 0.1.0
+test
+

@@ -1,17 +1,30 @@
 'use client';
 
+import { useEffect, useState } from "react";
 import DashboardPage from "@/components/dashboard/DashboardPage";
-// Nếu mày có BottomNav dùng chung thì import vào đây, 
-// nhưng tốt nhất nên để BottomNav ở file layout.tsx
+import ProfileForm from "@/components/ProfileForm";
+import { useProfileStore } from "@/store/profileStore";
 
-export default function Page() {
+export default function Home() {
+  const profile = useProfileStore((state) => state.profile);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Hydration fix: Đảm bảo Client đã sẵn sàng
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return <div className="min-h-screen bg-[#f4fbf6]" />;
+  }
+
+  // Kiểm tra nếu đã có profile hợp lệ
+  const hasProfile = profile && profile.name && profile.name.trim() !== "";
+
   return (
     <main>
-      <DashboardPage />
-      {/* 
-         Nếu chưa có BottomNav ở layout.tsx thì có thể tạm thời 
-         gọi component BottomNav ở đây 
-      */}
+      {/* Nếu có profile thì vào Dashboard, nếu không thì bắt nhập Profile */}
+      {hasProfile ? <DashboardPage /> : <ProfileForm />}
     </main>
   );
 }
