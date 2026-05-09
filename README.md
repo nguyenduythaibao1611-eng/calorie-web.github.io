@@ -156,6 +156,8 @@ npm run docs      # Generate documentation
 |-----------|-------|
 | **Diary UI** | Giao diện nhập nhật ký calo, 4 section bữa ăn, modal thêm/xóa nguyên liệu, tổng calories từng bữa và cả ngày |
 | **Tìm kiếm món ăn** | Modal tìm kiếm 15+ món Việt, nhập gram, tự động tính calories |
+| **Hồ sơ người dùng** | Giao diện thiết lập thông tin (tuổi, giới tính, chiều cao, cân nặng, hoạt động) và chọn mục tiêu |
+| **Tính toán dinh dưỡng** | Tự động tính BMR (Mifflin-St Jeor), TDEE và Macro Target (protein, carbs, fat) thời gian thực |
 | **Lưu trữ tự động** | Dùng Zustand + localStorage, không mất dữ liệu khi reload |
 | **Responsive** | Mobile-first, tối ưu cho điện thoại |
 | **TypeScript Setup** | Strict mode, full type safety |
@@ -171,7 +173,6 @@ npm run docs      # Generate documentation
 ### 🔄 Đang Phát Triển
 
 - Dashboard tổng hợp, biểu đồ thống kê
-- Trang profile người dùng
 
 ### 📋 Planned (Sắp Làm)
 
@@ -260,7 +261,7 @@ git push origin feature/feature-name
 
 ### Priority 1: Core Pages
 - [ ] Dashboard/Home page
-- [ ] User profile page
+- [x] User profile page
 - [ ] Daily log page
 
 ### Priority 2: Components
@@ -271,7 +272,7 @@ git push origin feature/feature-name
 ### Priority 3: Features
 - [ ] Meal logging form
 - [ ] Ingredient selector
-- [ ] Data calculation
+- [x] Data calculation
 
 ### Priority 4: Visualization
 - [ ] Integrate Recharts
@@ -281,11 +282,12 @@ git push origin feature/feature-name
 ---
 
 ## 📝 Ghi Chú Khác
+
 - Code được viết bằng **TypeScript strict mode** - đảm bảo type safety
 - Storage layer được thiết kế để dễ dàng migrate sang backend sau
 - Sử dụng **Zustand** thay vì Redux để code gọn gàng và dễ hiểu
 
 ---
 
-test
-
+**Cập nhật lần cuối:** 08/05/2026  
+**Version:** 0.1.0
