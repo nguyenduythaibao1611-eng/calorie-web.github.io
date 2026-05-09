@@ -7,7 +7,7 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
 
 # 🍽️ Calorie Web - Tài Liệu Hoàn Chỉnh
 
-**Cập nhật lần cuối:** 08/05/2026  
+**Cập nhật lần cuối:** 10/05/2026  
 **Version:** 0.1.0
 
 Chào mừng đến với tài liệu dự án **Calorie Web**. Đây là ứng dụng web hiện đại được xây dựng bằng **Next.js 16** và **React 19**, được thiết kế để giúp người dùng theo dõi và quản lý lượng calo tiêu thụ hàng ngày.
@@ -54,32 +54,199 @@ Chào mừng đến với tài liệu dự án **Calorie Web**. Đây là ứng 
 
 ---
 
-## 🚀 Tính Năng Đã Hoàn Thiện
+## � Pages Hiện Có
 
-- [x] **Diary UI**: Giao diện nhập nhật ký calo, 4 section bữa ăn, modal thêm nguyên liệu, xóa nguyên liệu, tổng calories từng bữa và cả ngày
-- [x] **Tìm kiếm món ăn**: Modal tìm kiếm 15+ món Việt, nhập gram, tự động tính calories
-- [x] **Hồ sơ người dùng**: Tạo và quản lý hồ sơ, chọn mục tiêu (giảm/duy trì/tăng cân)
-- [x] **Tính toán dinh dưỡng**: Tính BMR, TDEE, macros (Protein, Carbs, Fat) chuẩn theo công thức Mifflin-St Jeor
-- [x] **Lưu trữ tự động**: Dùng Zustand + localStorage, không mất dữ liệu khi reload
-- [x] **Responsive**: Mobile-first, tối ưu cho điện thoại
-- [x] **Sửa toàn bộ lỗi**: Đã fix lỗi typescript, props, import/export, duplicate export, v.v.
+| URL | Component | Mô Tả | Status |
+|-----|-----------|-------|--------|
+| `/` | `app/page.tsx` + `DashboardPage.tsx` | Home page - hiển thị ProfileForm nếu chưa setup, hoặc Dashboard | ✅ Active |
+| `/diary` | `app/diary/page.tsx` | Giao diện nhập nhật ký calo hàng ngày, 4 bữa ăn | ✅ Active |
+| `/settings` | `app/settings/page.tsx` | Cài đặt ứng dụng | 📋 Planned |
+| `/stats` | `app/stats/page.tsx` | Thống kê, biểu đồ, analytics | 🔄 In Progress |
+
+### Chi Tiết từng Page
+
+#### **Home Page** (`/`)
+- **Component chính:** `DashboardPage.tsx`
+- **Chức năng:**
+  - Hiển thị ProfileForm nếu người dùng chưa setup hồ sơ
+  - Hiển thị Dashboard nếu đã có profile
+  - Tracking calorie hôm nay
+  - Hiển thị thông tin dinh dưỡng (Macros)
+  - Navigation giữa các ngày
+- **Dependencies:** `useProfileStore`, `useDiaryStore`
+
+#### **Diary Page** (`/diary`)
+- **Chức năng:**
+  - Nhập nhật ký calo cho ngày cụ thể
+  - 4 bữa ăn: Breakfast, Lunch, Dinner, Snack
+  - Modal thêm/xóa nguyên liệu
+  - Tìm kiếm món ăn Việt Nam
+  - Hiển thị tổng calories từng bữa và cả ngày
+- **Dependencies:** `useDiaryStore`
+
+#### **Settings Page** (`/settings`) [Planning]
+- **Dự kiến chức năng:**
+  - Chỉnh sửa hồ sơ người dùng
+  - Thay đổi mục tiêu calo
+  - Cài đặt thông báo
+  - Quản lý dữ liệu
+
+#### **Stats Page** (`/stats`) [In Progress]
+- **Dự kiến chức năng:**
+  - Biểu đồ calories theo ngày/tuần/tháng
+  - Macro distribution charts
+  - Progress towards goals
+  - Streak tracking
+- **Dependencies:** `Recharts`, `useDiaryStore`, `useProfileStore`
+
+---
+
+## 📦 Components Chính
+
+### Dashboard Components
+
+| Component | File | Mô Tả |
+|-----------|------|-------|
+| **DashboardPage** | `components/dashboard/DashboardPage.tsx` | Main dashboard layout + calorie tracker |
+| **CalorieCard** | `components/CalorieCard.tsx` | Hiển thị calorie information |
+| **MacroBar** | `components/MacroBar.tsx` | Progress bar cho macros |
+| **ProfileForm** | `components/ProfileForm.tsx` | Form setup hồ sơ người dùng |
+
+### Navigation Components
+
+| Component | File | Mô Tả |
+|-----------|------|-------|
+| **BottomNav** | `components/nav/BottomNav.tsx` | Bottom navigation bar |
+| **BottomNav (UI)** | `components/ui/BottomNav.tsx` | Base UI component |
+
+### Stats Components
+
+| Component | File | Mô Tả |
+|-----------|------|-------|
+| **MacroSection** | `components/stats/MacroSection.tsx` | Macro nutrients section |
+| **StatCard** | `components/stats/StatCard.tsx` | Single stat display |
+| **StreakCard** | `components/stats/StreakCard.tsx` | Streak counter |
+| **WeeklyChart** | `components/stats/WeeklyChart.tsx` | Weekly calorie/macro chart |
+
+### Base UI Components
+
+| Component | File | Mục Đích |
+|-----------|------|---------|
+| **Button** | `components/ui/Button.tsx` | Reusable button component |
+| **Card** | `components/ui/Card.tsx` | Card container |
+| **Input** | `components/ui/Input.tsx` | Input field |
+| **Modal** | `components/ui/Modal.tsx` | Modal dialog |
+| **Badge** | `components/ui/Badge.tsx` | Badge/tag display |
+| **ProgressBar** | `components/ui/ProgressBar.tsx` | Progress indicator |
+
+---
+
+## 🏢 State Management
+
+### Stores Overview
+
+```
+┌─────────────────────────────────────────────────────┐
+│  Zustand Store Architecture                         │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│  useProfileStore (profileStore.ts)                 │
+│  ├─ profile: UserProfile | null                    │
+│  ├─ setProfile()                                   │
+│  ├─ calcBMR()                                      │
+│  └─ calcMacros()                                   │
+│                                                     │
+│  useDiaryStore (diaryStore.ts)                     │
+│  ├─ currentLog: DailyLog | null                    │
+│  ├─ currentDate: string                            │
+│  ├─ loadLog(date)                                  │
+│  ├─ addMeal(meal)                                  │
+│  ├─ removeMeal(mealId)                             │
+│  ├─ updateMeal(mealId, updated)                    │
+│  └─ updateWater(water)                             │
+│                                                     │
+│  useAppStore (useAppStore.ts)                      │
+│  ├─ test: string                                   │
+│  └─ setTest(value)                                 │
+│                                                     │
+└─────────────────────────────────────────────────────┘
+```
+
+### useProfileStore
+
+**Tập tin:** `store/profileStore.ts`
+
+**Mục đích:** Quản lý thông tin profile người dùng toàn cục
+
+**State:**
+- `profile: UserProfile | null` - Thông tin người dùng hiện tại
+- `setProfile(profile)` - Cập nhật profile
+
+**Integration:**
+- Persist tự động sang localStorage (via `lib/storage.ts`)
+- Được sử dụng trong `ProfileForm.tsx`, `DashboardPage.tsx`
+
+### useDiaryStore
+
+**Tập tin:** `store/diaryStore.ts`
+
+**Mục đích:** Quản lý nhật ký calo hàng ngày
+
+**State:**
+- `currentLog: DailyLog | null` - Nhật ký hiện tại
+- `currentDate: string` - Ngày đang xem (YYYY-MM-DD)
+- `loadLog(date)` - Load nhật ký cho ngày cụ thể
+- `addMeal(meal)` - Thêm bữa ăn mới
+- `removeMeal(mealId)` - Xóa bữa ăn
+- `updateMeal(mealId, updated)` - Cập nhật bữa ăn
+- `updateWater(water)` - Cập nhật lượng nước
+
+**Features:**
+- Tự động tính `totalCalories` từ tất cả meals
+- Persist tự động sang localStorage
+- Support multiple meals per day
+
+---
+
+## ✨ Tính Năng Đã Hoàn Thiện
+
+✅ **Diary UI**: Giao diện nhập nhật ký calo, 4 section bữa ăn, modal thêm nguyên liệu, xóa nguyên liệu, tổng calories từng bữa và cả ngày
+✅ **Tìm kiếm món ăn**: Modal tìm kiếm 15+ món Việt, nhập gram, tự động tính calories
+✅ **Hồ sơ người dùng**: Tạo và quản lý hồ sơ, chọn mục tiêu (giảm/duy trì/tăng cân)
+✅ **Tính toán dinh dưỡng**: Tính BMR, TDEE, macros (Protein, Carbs, Fat) chuẩn theo công thức Mifflin-St Jeor
+✅ **Lưu trữ tự động**: Dùng Zustand + localStorage, không mất dữ liệu khi reload
+✅ **Responsive**: Mobile-first, tối ưu cho điện thoại
+✅ **Sửa toàn bộ lỗi**: Đã fix lỗi typescript, props, import/export, duplicate export, v.v.
+✅ **Dashboard**: Hiển thị thông tin dinh dưỡng hôm nay
+✅ **Components**: Hoàn tất UI component library (Button, Card, Input, Modal, Badge, ProgressBar)
+
+---
 
 ## 📈 Tiến Độ & Kế Hoạch
 
-### Đã xong
+### ✅ Hoàn Thành
 - Diary UI (4 bữa, modal thêm/xóa món, tổng calo)
 - Giao diện thiết lập hồ sơ người dùng (ProfileForm)
 - Core tính toán dinh dưỡng (calc.ts)
 - State management với Zustand, auto-persist
+- Dashboard layout + calorie tracker
+- Base UI components library
 - Sửa toàn bộ lỗi typescript, props, import/export
 
-### Đang phát triển
-- Dashboard tổng hợp, biểu đồ thống kê
+### 🔄 Đang phát triển
+- Stats page với biểu đồ
+- Advanced analytics
 
-### Sắp làm
+### 📋 Sắp làm
+- Settings page
 - Biểu đồ calories, protein, carbs, fat theo ngày/tuần
 - Tối ưu UX cho mobile/tablet
 - Thêm hướng dẫn sử dụng chi tiết
+- Backend API integration
+- User authentication
+- PWA support
+
+---
 
 ## 📝 Hướng Dẫn Sử Dụng Diary UI
 
@@ -95,28 +262,40 @@ Chào mừng đến với tài liệu dự án **Calorie Web**. Đây là ứng 
 - State quản lý qua Zustand, persist tự động
 - UI thuần Tailwind CSS v4, không dùng inline style
 - Tất cả lỗi typescript, props, import/export đã được fix sạch
+- Storage layer được thiết kế để dễ migrate sang backend sau
 
 ## 📁 Cấu Trúc Dự Án Chi Tiết
 
 ```
 calorie-web/
-├── app/
-│   ├── globals.css
-│   ├── layout.tsx
-│   ├── page.tsx
-│   └── diary/
-│       └── page.tsx
 │
-├── components/
-│   ├── button.tsx
-│   ├── CalorieCard.tsx
-│   ├── MacroBar.tsx
-│   ├── ProfileForm.tsx
-│   ├── dashboard/
-│   │   └── DashboardPage.tsx
-│   ├── nav/
-│   │   └── BottomNav.tsx
-│   └── ui/
+├── 📂 app/                              # Next.js App Router
+│   ├── globals.css                     # Global styles
+│   ├── layout.tsx                      # Root layout
+│   ├── page.tsx                        # Home/Dashboard page
+│   ├── 📂 diary/
+│   │   └── page.tsx                   # Daily food logging page
+│   ├── 📂 settings/
+│   │   └── page.tsx                   # Settings page
+│   └── 📂 stats/
+│       └── page.tsx                   # Statistics/Analytics page
+│
+├── 📂 components/                       # Reusable UI Components
+│   ├── button.tsx                      # Button component
+│   ├── CalorieCard.tsx                 # Calorie display card
+│   ├── MacroBar.tsx                    # Macro nutrients bar
+│   ├── ProfileForm.tsx                 # User profile form
+│   ├── 📂 dashboard/
+│   │   └── DashboardPage.tsx          # Main dashboard layout
+│   ├── 📂 nav/
+│   │   └── BottomNav.tsx              # Bottom navigation
+│   ├── 📂 stats/                       # Statistics display components
+│   │   ├── index.ts                   # Exports
+│   │   ├── MacroSection.tsx           # Macro nutrients section
+│   │   ├── StatCard.tsx               # Single stat display
+│   │   ├── StreakCard.tsx             # Streak counter
+│   │   └── WeeklyChart.tsx            # Weekly calorie/macro chart
+│   └── 📂 ui/                          # Base UI components
 │       ├── Badge.tsx
 │       ├── BottomNav.tsx
 │       ├── Button.tsx
@@ -124,42 +303,72 @@ calorie-web/
 │       ├── Input.tsx
 │       ├── Modal.tsx
 │       ├── ProgressBar.tsx
-│       └── index.ts
-
-├── lib/
-│   ├── calc.ts
-│   ├── ingredients.json
-│   ├── search.ts
-│   └── storage.ts
-
-├── hooks/
-
-├── store/
-│   ├── diaryStore.ts
-│   ├── profileStore.ts
-│   └── useAppStore.ts
-
-├── types/
-│   ├── index.ts
-│   └── user.ts
-
-├── public/
-
-├── docs/
+│       └── index.ts                   # Barrel exports
+│
+├── 📂 lib/                              # Utilities & Helpers
+│   ├── calc.ts                         # Calculation logic (BMR, TDEE, macros)
+│   ├── ingredients.json                # Food database (15+ Vietnamese dishes)
+│   ├── search.ts                       # Food search logic
+│   └── storage.ts                      # localStorage abstraction layer
+│
+├── 📂 store/                            # Zustand State Management
+│   ├── diaryStore.ts                   # Daily food log state + actions
+│   ├── profileStore.ts                 # User profile state + actions
+│   └── useAppStore.ts                  # Global app state
+│
+├── 📂 types/                            # TypeScript Type Definitions
+│   ├── index.ts                        # Main interfaces:
+│   │                                   #   - MacroTarget
+│   │                                   #   - UserProfile
+│   │                                   #   - Ingredient
+│   │                                   #   - MealEntry
+│   │                                   #   - DailyLog
+│   └── user.ts                         # User type definitions
+│
+├── 📂 public/                           # Static assets
+│   └── (favicon, images, etc.)
+│
+├── 📂 docs/                             # Documentation (Astro Starlight)
 │   ├── astro.config.mjs
-   ├── package.json
-   └── src/
-      └── content/
-         └── docs/
-            └── index.mdx
-
-├── README.md
-├── package.json
-├── next.config.ts
-├── tsconfig.json
-├── tailwind.config.mjs
-└── eslint.config.mjs
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── 📂 src/
+│   │   ├── content.config.ts
+│   │   ├── 📂 assets/
+│   │   ├── 📂 content/
+│   │   │   └── 📂 docs/
+│   │   │       ├── index.mdx          # Main documentation
+│   │   │       ├── 📂 guides/         # How-to guides
+│   │   │       │   └── example.md
+│   │   │       └── 📂 reference/      # Technical reference
+│   │   │           └── example.md
+│   │   └── styles/
+│   └── 📂 public/
+│
+├── 📋 Config Files
+│   ├── package.json                    # Dependencies, scripts
+│   ├── tsconfig.json                   # TypeScript config
+│   ├── next.config.ts                  # Next.js config
+│   ├── tailwind.config.mjs             # Tailwind CSS config
+│   ├── postcss.config.mjs              # PostCSS config
+│   ├── eslint.config.mjs               # ESLint rules
+│   ├── next-env.d.ts                   # Next.js type definitions
+│   ├── AGENTS.md                       # AI coding guidelines
+│   ├── CLAUDE.md                       # Claude-specific instructions
+│   └── README.md                       # Project documentation
 ```
+
+### File Quan Trọng
+
+| File | Mục Đích | Ghi Chú |
+|------|----------|--------|
+| `app/layout.tsx` | Root layout với global CSS | Áp dụng cho tất cả pages |
+| `store/diaryStore.ts` | Quản lý nhật ký calo | Persist tự động |
+| `store/profileStore.ts` | Quản lý hồ sơ người dùng | Persist tự động |
+| `lib/storage.ts` | Abstraction localStorage | Type-safe, safe JSON parsing |
+| `lib/calc.ts` | Công thức tính toán dinh dưỡng | BMR, TDEE, macros |
+| `types/index.ts` | Tất cả TypeScript interfaces | Source of truth cho types |
+| `components/dashboard/DashboardPage.tsx` | Main dashboard | Phức tạp nhất |
 
 ---
 
@@ -417,50 +626,67 @@ type AppState = {
 - [x] Tailwind CSS v4 integration
 - [x] Type definitions (MacroTarget, UserProfile, MealEntry, DailyLog, Ingredient)
 - [x] Storage layer (localStorage abstraction)
-- [x] Zustand store initialization
-- [x] Button component
+- [x] Zustand store initialization (diaryStore, profileStore, useAppStore)
+- [x] Button, Card, Input, Modal, Badge, ProgressBar components
 - [x] ESLint configuration
 - [x] Global styles
-- [x] Font setup (Geist Sans/Mono)
+- [x] Font setup (Be Vietnam Pro, Space Grotesk, Material Symbols)
+- [x] **Diary page** - Nhật ký calo với 4 bữa ăn
+- [x] **Dashboard** - Hiển thị calorie tracker với progress circle
+- [x] **ProfileForm** - Setup hồ sơ người dùng
+- [x] **Stats components** - MacroSection, StatCard, StreakCard, WeeklyChart
+- [x] **Food database** - 15+ món ăn Việt Nam
+- [x] **All TypeScript errors fixed** - Type safety đầy đủ
 
 ### 🔄 Đang Phát Triển
-- [ ] Main dashboard page
-- [x] User profile page
-- [ ] Daily log page
-- [ ] Form components
-- [ ] Ingredient selector
+- [ ] Stats page - Chi tiết biểu đồ thống kê
+- [ ] Advanced chart integration - Weekly/monthly analytics
+- [ ] Settings page - Thay đổi cài đặt
 
 ### 📋 Planned (Sắp Làm)
-- [ ] Calorie tracking interface
-- [ ] Recharts integration
-- [ ] Analytics page
-- [ ] Settings page
-- [ ] Backend integration (future)
+- [ ] Streak system - Theo dõi ngày liên tiếp
+- [ ] Goal tracking - Hiển thị mục tiêu đạt được
+- [ ] Weekly trends - Biểu đồ xu hướng
+- [ ] Notifications - Thông báo nhắc nhở
+- [ ] Backend integration - API endpoints
+- [ ] User authentication - Đăng nhập/đăng ký
+- [ ] Mobile optimization - Gesture support, offline mode
+- [ ] PWA features - Install app, offline support
+- [ ] Testing - Unit tests, E2E tests
 
 ---
 
-## 📋 Tiến Độ Team
+## 📊 Tiến Độ Team
 
 ### Phase 1: Foundation ✅ (Hoàn thành)
 - Project setup
 - Type definitions
 - Storage layer
-- Zustand store
+- Zustand stores
+- UI component library
 
-### Phase 2: Core UI 🔄 (Đang làm)
-- Main pages
-- Form components
-- UI components
+### Phase 2: Core UI ✅ (Hoàn thành)
+- Home/Dashboard page
+- Diary page
+- ProfileForm
+- All base components
 
-### Phase 3: Features 📋 (Sắp làm)
-- Meal logging
-- Data visualization
+### Phase 3: Features 🔄 (Đang làm)
+- Stats page + charts
+- Advanced data visualization
 - Analytics
 
 ### Phase 4: Polish 📋 (Sắp làm)
+- Settings page
+- Notifications
 - Testing
 - Optimization
-- Documentation
+- Documentation refinement
+
+### Phase 5: Backend 📋 (Sắp làm)
+- API endpoints
+- Database integration
+- User authentication
 
 ---
 

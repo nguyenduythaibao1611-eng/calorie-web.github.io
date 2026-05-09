@@ -57,36 +57,82 @@ Dự án tập trung vào tính đơn giản, dễ sử dụng và phù hợp v�
 
 ```
 calorie-web/
-├── app/                 # Next.js App Router
-│   ├── layout.tsx      # Root layout
-│   ├── page.tsx        # Home page
-│   ├── globals.css     # Global styles
-│   └── favicon.ico
+├── app/                      # Next.js App Router (App Directory)
+│   ├── layout.tsx           # Root layout
+│   ├── page.tsx             # Home/Dashboard page
+│   ├── globals.css          # Global styles
+│   ├── favicon.ico
+│   ├── diary/
+│   │   └── page.tsx         # Daily food logging page
+│   ├── settings/
+│   │   └── page.tsx         # Settings page
+│   └── stats/
+│       └── page.tsx         # Statistics/Analytics page
 │
-├── components/          # UI Components
-│   └── button.tsx      # Button component
+├── components/              # Reusable UI Components
+│   ├── button.tsx           # Button component
+│   ├── CalorieCard.tsx      # Calorie display card
+│   ├── MacroBar.tsx         # Macro nutrients bar
+│   ├── ProfileForm.tsx      # User profile form
+│   ├── dashboard/
+│   │   └── DashboardPage.tsx # Dashboard layout
+│   ├── nav/
+│   │   └── BottomNav.tsx    # Bottom navigation
+│   ├── stats/               # Statistics components
+│   │   ├── index.ts
+│   │   ├── MacroSection.tsx
+│   │   ├── StatCard.tsx
+│   │   ├── StreakCard.tsx
+│   │   └── WeeklyChart.tsx
+│   └── ui/                  # Base UI components
+│       ├── Badge.tsx
+│       ├── BottomNav.tsx
+│       ├── Button.tsx
+│       ├── Card.tsx
+│       ├── Input.tsx
+│       ├── Modal.tsx
+│       ├── ProgressBar.tsx
+│       └── index.ts
 │
-├── lib/                 # Utilities & Logic
-│   └── storage.ts      # localStorage abstraction layer
+├── lib/                     # Utilities & Helpers
+│   ├── calc.ts              # Calculation logic (BMR, TDEE, macros)
+│   ├── ingredients.json     # Food database
+│   ├── search.ts            # Food search logic
+│   └── storage.ts           # localStorage abstraction layer
 │
-├── store/              # State Management
-│   └── useAppStore.ts  # Zustand store
+├── store/                   # Zustand State Management
+│   ├── diaryStore.ts        # Daily food log state
+│   ├── profileStore.ts      # User profile state
+│   └── useAppStore.ts       # Global app state
 │
-├── types/              # TypeScript Definitions
-│   ├── index.ts        # Main interfaces
-│   └── user.ts         # User types
+├── types/                   # TypeScript Definitions
+│   ├── index.ts             # Main interfaces (MacroTarget, UserProfile, Ingredient, MealEntry, DailyLog)
+│   └── user.ts              # User type definitions
 │
-├── public/             # Static assets
+├── public/                  # Static assets (favicon, images, etc.)
 │
-├── docs/               # Documentation (Astro Starlight)
-│   └── src/content/docs/
+├── docs/                    # Documentation (Astro Starlight)
+│   ├── astro.config.mjs
+│   ├── package.json
+│   ├── src/
+│   │   ├── content.config.ts
+│   │   ├── assets/
+│   │   └── content/
+│   │       └── docs/
+│   │           ├── index.mdx
+│   │           ├── guides/
+│   │           └── reference/
+│   └── public/
 │
 └── Config Files
     ├── package.json
     ├── tsconfig.json
     ├── next.config.ts
-    ├── tailwind.config.js
-    └── eslint.config.mjs
+    ├── tailwind.config.mjs
+    ├── postcss.config.mjs
+    ├── eslint.config.mjs
+    ├── next-env.d.ts
+    └── AGENTS.md (Coding conventions)
 ```
 
 ---
@@ -144,6 +190,17 @@ npm run start     # Start production server
 npm run lint      # Run ESLint checks
 npm run docs      # Generate documentation
 ```
+
+---
+
+## 📄 Pages Hiện Có
+
+| URL | Tên Component | Mô Tả |
+|-----|---------------|-------|
+| `/` | `app/page.tsx` | Dashboard/Home - hiển thị ProfileForm nếu chưa setup, hoặc DashboardPage |
+| `/diary` | `app/diary/page.tsx` | Giao diện nhập nhật ký calo hàng ngày |
+| `/settings` | `app/settings/page.tsx` | Cài đặt ứng dụng |
+| `/stats` | `app/stats/page.tsx` | Thống kê và biểu đồ |
 
 ---
 
@@ -259,25 +316,45 @@ git push origin feature/feature-name
 
 ## 📌 Công Việc Sắp Tới
 
-### Priority 1: Core Pages
-- [ ] Dashboard/Home page
-- [x] User profile page
-- [ ] Daily log page
+### Priority 1: Hoàn Thiện Core Features
+- [x] Dashboard/Home page với calorie tracking
+- [x] User profile setup page
+- [x] Daily log page (/diary)
+- [ ] Advanced statistics/analytics (/stats)
+- [ ] Settings page (/settings)
 
-### Priority 2: Components
-- [ ] Form inputs
-- [ ] Card component
-- [ ] Meal entry component
+### Priority 2: Component Enhancements
+- [x] Form inputs
+- [x] Card component
+- [x] Meal entry component
+- [ ] Refine UI components based on testing
 
 ### Priority 3: Features
-- [ ] Meal logging form
-- [ ] Ingredient selector
-- [x] Data calculation
+- [x] Meal logging form
+- [x] Ingredient selector
+- [x] Data calculation (BMR, TDEE, macros)
+- [ ] Weekly/monthly statistics
+- [ ] Goals tracking
+- [ ] Streak system
 
-### Priority 4: Visualization
-- [ ] Integrate Recharts
-- [ ] Charts display
-- [ ] Analytics page
+### Priority 4: Visualization & Analytics
+- [x] Integrate Recharts library
+- [ ] Weekly calorie chart
+- [ ] Macro distribution chart
+- [ ] Progress towards goals visualization
+- [ ] Weight trend graph
+
+### Priority 5: Mobile & UX Optimization
+- [ ] Mobile-first refinement
+- [ ] Gesture support (swipe for date navigation)
+- [ ] Offline support
+- [ ] PWA features
+
+### Priority 6: Backend & Deployment
+- [ ] Server-side API endpoints
+- [ ] Database integration
+- [ ] User authentication
+- [ ] Deployment to production
 
 ---
 
@@ -289,5 +366,5 @@ git push origin feature/feature-name
 
 ---
 
-**Cập nhật lần cuối:** 08/05/2026  
+**Cập nhật lần cuối:** 10/05/2026  
 **Version:** 0.1.0
