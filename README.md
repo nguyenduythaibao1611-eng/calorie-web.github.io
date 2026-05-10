@@ -226,7 +226,7 @@ npm run docs      # Generate documentation
 | **ESLint** | Code quality checking |
 | **Next.js Layout** | Root layout with global styles |
 | **Sửa toàn bộ lỗi** | Đã fix lỗi typescript, props, import/export, duplicate export, v.v. |
-
+| **Tối ưu hiệu năng (Task 25)** | Đạt điểm Lighthouse > 75. Áp dụng Lazy loading (next/dynamic) cho Modal và Biểu đồ. Cải thiện Accessibility (thêm aria-label). Tối ưu re-render (useMemo, useCallback) và cấu hình Cache Headers. |
 ### 🔄 Đang Phát Triển
 
 - Dashboard tổng hợp, biểu đồ thống kê
