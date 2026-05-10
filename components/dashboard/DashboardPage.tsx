@@ -1,0 +1,302 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { useDiaryStore } from '@/store/diaryStore';
+import { useProfileStore } from '@/store/profileStore';
+import Link from 'next/link';
+
+const MEAL_LABELS: Record<string, string> = {
+  breakfast: 'Bữa sáng',
+  lunch: 'Bữa trưa',
+  dinner: 'Bữa tối',
+  snack: 'Ăn vặt',
+};
+
+const MEAL_ORDER = ['breakfast', 'lunch', 'dinner', 'snack'];
+
+const MEAL_SUBTITLES: Record<string, string> = {
+  breakfast: 'Ghi nhận bữa sáng của bạn',
+  lunch: 'Ghi nhận bữa trưa của bạn',
+  dinner: 'Ghi nhận bữa tối của bạn',
+  snack: 'Ghi nhận bữa phụ của bạn',
+};
+
+const MEAL_ICONS: Record<string, string> = {
+  breakfast: 'egg_alt',
+  lunch: 'lunch_dining',
+  dinner: 'dinner_dining',
+  snack: 'bakery_dining',
+};
+
+function offsetDate(dateStr: string, days: number): string {
+  const d = new Date(dateStr);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+export default function DashboardPage() {
+  const [mounted, setMounted] = useState(false);
+  const { currentLog, currentDate, loadLog, updateWater } = useDiaryStore();
+  const { profile } = useProfileStore();
+
+  useEffect(() => {
+    setMounted(true);
+    loadLog(new Date().toISOString().slice(0, 10));
+  }, [loadLog]);
+
+  if (!mounted) return null;
+
+  // ── CALORIES ─────────────────────────────────────────────────────────
+  const TARGET = profile?.macroTarget?.calories ?? 2480;
+  const consumed = currentLog?.totalCalories || 0;
+  const remaining = Math.max(TARGET - consumed, 0);
+  const CIRC = 930;
+  const dashOffset = CIRC - (CIRC * Math.min((consumed / TARGET) * 100, 100)) / 100;
+
+  // ── MACROS ───────────────────────────────────────────────────────────
+  const macros = currentLog?.meals.reduce(
+    (acc, meal) => {
+      meal.ingredients.forEach((ing) => {
+        acc.p += ing.protein || 0;
+        acc.c += ing.carbs || 0;
+        acc.f += ing.fat || 0;
+      });
+      return acc;
+    },
+    { p: 0, c: 0, f: 0 }
+  ) || { p: 0, c: 0, f: 0 };
+
+  const macroTargets = {
+    p: profile?.macroTarget?.protein ?? 120,
+    c: profile?.macroTarget?.carbs ?? 250,
+    f: profile?.macroTarget?.fat ?? 65,
+  };
+
+  // ── WATER ────────────────────────────────────────────────────────────
+  const waterGlasses = currentLog?.water || 0;
+  const waterMl = waterGlasses * 250;
+
+  const handleWaterClick = (i: number) => {
+    updateWater(i < waterGlasses ? i : i + 1);
+  };
+
+  // ── DATE ─────────────────────────────────────────────────────────────
+  const dateObj = new Date(currentDate);
+  const day = dateObj.getDate();
+  const month = dateObj.getMonth() + 1;
+  const isToday = currentDate === new Date().toISOString().slice(0, 10);
+  const isAfterToday = currentDate > new Date().toISOString().slice(0, 10);
+
+  // ── MEALS ─────────────────────────────────────────────────────────────
+  const mealMap = Object.fromEntries(
+    (currentLog?.meals || []).map((m) => [m.mealType, m])
+  );
+
+  return (
+    <div className="bg-background text-on-background font-body-md min-h-screen">
+
+      {/* ── TOP NAV ─────────────────────────────────────────────────── */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-b border-emerald-900/10 h-14 flex justify-center items-center px-6">
+        <div className="w-full max-w-[1100px] flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined filled-icon text-primary text-2xl">local_fire_department</span>
+            <h1 className="font-h1 text-2xl text-primary font-black tracking-tight">CaloMate</h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 bg-primary-fixed-dim/30 px-4 py-1.5 rounded-full">
+              <span className="material-symbols-outlined filled-icon text-primary text-base">local_fire_department</span>
+              <span className="font-label-caps text-xs font-bold uppercase tracking-wider text-primary">
+                Chuỗi <span className="font-numbers">5</span> ngày
+              </span>
+            </div>
+            <Link href="/settings">
+              <button className="hover:bg-surface-container transition-all active:scale-95 p-2 rounded-full">
+                <span className="material-symbols-outlined text-primary text-xl">settings</span>
+              </button>
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* ── MAIN ────────────────────────────────────────────────────── */}
+      <main className="pt-20 pb-24 px-6 max-w-[1100px] mx-auto">
+
+        {/* Date Navigation */}
+        <nav className="flex items-center justify-center gap-8 my-5">
+          <button
+            onClick={() => loadLog(offsetDate(currentDate, -1))}
+            className="p-2 hover:bg-surface-container rounded-full transition-colors group"
+          >
+            <span className="material-symbols-outlined text-2xl text-outline group-hover:text-primary">chevron_left</span>
+          </button>
+          <h2 className="font-h1 text-3xl text-primary font-bold">
+            {isToday ? 'Hôm nay' : 'Ngày'},{' '}
+            <span className="font-numbers">{day}</span> tháng{' '}
+            <span className="font-numbers">{month}</span>
+          </h2>
+          <button
+            onClick={() => loadLog(offsetDate(currentDate, 1))}
+            disabled={isAfterToday}
+            className="p-2 hover:bg-surface-container rounded-full transition-colors group disabled:opacity-30"
+          >
+            <span className="material-symbols-outlined text-2xl text-outline group-hover:text-primary">chevron_right</span>
+          </button>
+        </nav>
+
+        {/* ── 2-COLUMN GRID ───────────────────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+          {/* ── LEFT: Calories + Water ─────────────────────────────── */}
+          <div className="lg:col-span-7 space-y-5">
+
+            {/* Calories Card */}
+            <section className="glass-card rounded-3xl p-6 flex flex-col items-center">
+              <div className="relative w-56 h-56 flex items-center justify-center mb-5">
+                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 320 320">
+                  <circle cx="160" cy="160" r="148" fill="transparent" stroke="currentColor" strokeWidth="16" className="text-surface-container-highest" />
+                  <circle
+                    cx="160" cy="160" r="148" fill="transparent" stroke="currentColor" strokeWidth="16"
+                    strokeLinecap="round" strokeDasharray={CIRC} strokeDashoffset={dashOffset}
+                    className="text-primary transition-all duration-700 ease-out"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="font-stat-display text-5xl text-primary font-numbers">{remaining.toLocaleString()}</span>
+                  <span className="font-label-caps text-xs text-outline uppercase tracking-[0.2em] mt-1 font-bold">kcal còn lại</span>
+                </div>
+              </div>
+
+              {/* Macro Bars */}
+              <div className="w-full max-w-sm grid grid-cols-3 gap-6">
+                {[
+                  { label: 'Carbs',   current: macros.c, target: macroTargets.c },
+                  { label: 'Protein', current: macros.p, target: macroTargets.p },
+                  { label: 'Fat',     current: macros.f, target: macroTargets.f },
+                ].map((m) => (
+                  <div key={m.label} className="space-y-2">
+                    <div className="flex justify-between items-end">
+                      <span className="font-label-caps text-[10px] font-bold text-primary uppercase">{m.label}</span>
+                      <span className="font-stat-value text-xs font-numbers">{Math.round(m.current)}/{m.target}g</span>
+                    </div>
+                    <div className="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded-full transition-all duration-700"
+                        style={{ width: `${Math.min((m.current / m.target) * 100, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Water Tracker */}
+            <section className="glass-card rounded-3xl p-5">
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <h3 className="font-h2 text-lg text-primary font-bold">Uống nước</h3>
+                  <p className="text-xs text-outline">Mục tiêu: <span className="font-numbers">2,000</span> ml</p>
+                </div>
+                <div className="text-right">
+                  <span className="font-stat-display text-3xl text-primary leading-none font-numbers">{waterMl.toLocaleString()}</span>
+                  <span className="font-label-caps text-sm text-primary/60 ml-1 uppercase font-bold">ml</span>
+                </div>
+              </div>
+              <div className="flex justify-between items-center px-2">
+                {Array.from({ length: 8 }, (_, i) => (
+                  <button key={i} onClick={() => handleWaterClick(i)} className="transition-transform hover:scale-110 active:scale-90">
+                    <span className={`material-symbols-outlined text-4xl ${i < waterGlasses ? 'filled-icon text-primary' : 'text-outline/20'}`}>
+                      water_full
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          </div>
+
+          {/* ── RIGHT: Meal Log ────────────────────────────────────── */}
+          <div className="lg:col-span-5 space-y-3">
+            <div className="flex justify-between items-center px-1 mb-1">
+              <h3 className="font-h2 text-lg text-primary font-bold">Bữa ăn hôm nay</h3>
+              <Link href="/diary" className="text-primary hover:underline font-label-caps text-xs font-bold uppercase tracking-widest">
+                Xem tất cả
+              </Link>
+            </div>
+
+            <div className="space-y-3">
+              {MEAL_ORDER.map((mealType) => {
+                const meal = mealMap[mealType];
+                const label = MEAL_LABELS[mealType];
+
+                if (meal) {
+                  const subtitle = meal.ingredients.map((i) => i.name).slice(0, 2).join(', ') || `${meal.ingredients.length} món`;
+                  return (
+                    <Link key={mealType} href="/diary">
+                      <div className="glass-card rounded-2xl p-4 flex items-center gap-3 hover:bg-white transition-all cursor-pointer group hover:shadow-md">
+                        <div className="w-14 h-14 rounded-xl flex-shrink-0 bg-surface-container group-hover:scale-105 transition-transform duration-300 flex items-center justify-center">
+                          <span className="material-symbols-outlined filled-icon text-primary text-2xl">{MEAL_ICONS[mealType]}</span>
+                        </div>
+                        <div className="flex-grow min-w-0">
+                          <div className="flex justify-between items-center gap-2">
+                            <div className="min-w-0">
+                              <h4 className="font-body-md font-bold text-primary">{label}</h4>
+                              <p className="text-xs text-outline truncate">{subtitle}</p>
+                            </div>
+                            <span className="font-stat-value text-base text-primary font-numbers whitespace-nowrap">{meal.totalCalories} kcal</span>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                }
+
+                return (
+                  <Link key={mealType} href="/diary">
+                    <div className="rounded-2xl p-4 flex items-center gap-3 border-2 border-dashed border-outline-variant opacity-60 hover:opacity-100 transition-all cursor-pointer group">
+                      <div className="w-14 h-14 rounded-xl border-2 border-dashed border-outline-variant flex items-center justify-center flex-shrink-0 group-hover:bg-primary/5 transition-colors">
+                        <span className="material-symbols-outlined text-outline-variant text-2xl">add</span>
+                      </div>
+                      <div className="flex-grow min-w-0">
+                        <div className="flex justify-between items-center gap-2">
+                          <div>
+                            <h4 className="font-body-md font-bold text-primary/60">{label}</h4>
+                            <p className="text-xs text-outline/60">{MEAL_SUBTITLES[mealType]}</p>
+                          </div>
+                          <span className="font-stat-value text-base text-primary/60 font-numbers">0 kcal</span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
+        </div>
+      </main>
+
+      {/* ── FAB ─────────────────────────────────────────────────────── */}
+      <Link href="/diary" className="fixed bottom-20 right-8 w-14 h-14 bg-primary text-white rounded-2xl shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-40">
+        <span className="material-symbols-outlined text-3xl">add</span>
+      </Link>
+
+      {/* ── BOTTOM NAV ──────────────────────────────────────────────── */}
+      <footer className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-t border-primary/10 h-16 flex justify-center items-center">
+        <nav className="w-full max-w-[1100px] flex justify-around items-center px-8">
+          <Link href="/" className="flex flex-col items-center gap-1 py-2 px-8 rounded-2xl bg-secondary-container text-primary transition-all">
+            <span className="material-symbols-outlined filled-icon text-2xl">home</span>
+            <span className="font-label-caps text-[10px] font-bold uppercase tracking-[0.1em]">Tổng quan</span>
+          </Link>
+          <Link href="/diary" className="flex flex-col items-center gap-1 text-outline hover:text-primary transition-colors py-2 px-8">
+            <span className="material-symbols-outlined text-2xl">menu_book</span>
+            <span className="font-label-caps text-[10px] font-bold uppercase tracking-[0.1em]">Nhật ký</span>
+          </Link>
+          <Link href="/stats" className="flex flex-col items-center gap-1 text-outline hover:text-primary transition-colors py-2 px-8">
+            <span className="material-symbols-outlined text-2xl">bar_chart</span>
+            <span className="font-label-caps text-[10px] font-bold uppercase tracking-[0.1em]">Thống kê</span>
+          </Link>
+        </nav>
+      </footer>
+
+    </div>
+  );
+}
