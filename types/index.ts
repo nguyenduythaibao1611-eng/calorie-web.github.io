@@ -13,13 +13,13 @@
  */
 export interface MacroTarget {
   /** Mục tiêu calo hàng ngày (kcal) */
-  calories: number;
+  calories: number
   /** Mục tiêu protein hàng ngày (gram) */
-  protein: number;
+  protein: number
   /** Mục tiêu carbs hàng ngày (gram) */
-  carbs: number;
+  carbs: number
   /** Mục tiêu fat hàng ngày (gram) */
-  fat: number;
+  fat: number
 }
 
 /**
@@ -30,21 +30,21 @@ export interface MacroTarget {
  */
 export interface UserProfile {
   /** Tên đầy đủ của người dùng */
-  name: string;
+  name: string
   /** Tuổi của người dùng (năm) */
-  age: number;
+  age: number
   /** Cân nặng hiện tại (kg) */
-  weight: number;
+  weight: number
   /** Chiều cao (cm) */
-  height: number;
+  height: number
   /** Mục tiêu sức khỏe: giảm cân, duy trì, hoặc tăng cân */
-  goal: "lose" | "maintain" | "gain";
+  goal: 'lose' | 'maintain' | 'gain'
   /** Mục tiêu dinh dưỡng hàng ngày (chứa MacroTarget) */
-  macroTarget: MacroTarget;
-  /** Chuỗi liên tục hiện tại (ngày) - chỉ khi đủ 3 bữa chính */
-  currentStreak: number;
-  /** Kỷ lục chuỗi liên tục (ngày) */
-  bestStreak: number;
+  macroTarget: MacroTarget
+  /** Chuỗi ngày hiện tại (số ngày liên tiếp đáp ứng mục tiêu) */
+  currentStreak: number
+  /** Chuỗi ngày tốt nhất ghi được */
+  bestStreak: number
 }
 
 /**
@@ -54,19 +54,19 @@ export interface UserProfile {
  * Lưu trữ thông tin về tên, calo, macros (protein, carbs, fat) và số lượng.
  */
 export interface Ingredient {
-  id: string;
+  id: string
   /** Tên nguyên liệu (ví dụ: "Gạo trắng", "Cá hồi") */
-  name: string;
+  name: string
   /** Lượng calo trong 100g hoặc 1 đơn vị */
-  calories: number;
+  calories: number
   /** Lượng protein (gram) */
-  protein: number;
+  protein: number
   /** Lượng carbs (gram) */
-  carbs: number;
+  carbs: number
   /** Lượng fat (gram) */
-  fat: number;
+  fat: number
   /** Số lượng (100g, 1 cốc, 1 miếng, v.v.) */
-  amount?: number;
+  amount?: number
 }
 
 /**
@@ -77,15 +77,15 @@ export interface Ingredient {
  */
 export interface MealEntry {
   /** ID duy nhất của bữa ăn */
-  id: string;
+  id: string
   /** Loại bữa ăn: sáng, trưa, chiều, ăn nhẹ */
-  mealType: "breakfast" | "lunch" | "dinner" | "snack";
+  mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack'
   /** Danh sách các nguyên liệu trong bữa ăn (chứa Ingredient[]) */
-  ingredients: Ingredient[];
+  ingredients: Ingredient[]
   /** Tổng calo của bữa ăn (tính từ các nguyên liệu) */
-  totalCalories: number;
+  totalCalories: number
   /** Thời gian bữa ăn (định dạng HH:mm, ví dụ: "12:30") */
-  time: string;
+  time: string
 }
 
 /**
@@ -96,11 +96,11 @@ export interface MealEntry {
  */
 export interface DailyLog {
   /** Ngày ghi nhật ký (định dạng YYYY-MM-DD, ví dụ: "2024-05-08") */
-  date: string;
+  date: string
   /** Danh sách các bữa ăn trong ngày (chứa MealEntry[]) */
-  meals: MealEntry[];
+  meals: MealEntry[]
   /** Tổng calo tiêu thụ trong ngày (tính từ các bữa ăn) */
-  totalCalories: number;
-  /** Lượng nước uống trong ngày (đơn vị: ly) */
-  water: number;
+  totalCalories: number
+  /** Lượng nước đã uống trong ngày (ml) */
+  water: number
 }
