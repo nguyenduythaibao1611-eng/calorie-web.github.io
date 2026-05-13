@@ -9,57 +9,63 @@ import type { MealEntry, Ingredient } from "@/types";
 import FOOD_DB from "@/lib/ingredients.json";
 import { BottomNav } from "@/components/nav/BottomNav";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Lazy load modal — không load JS cho đến khi user bấm "+"
-// ─────────────────────────────────────────────────────────────────────────────
-
 const AddMealModal = dynamic(() => import("@/components/diary/AddMealModal"), {
-  loading: () => null, // modal chưa mở → không render gì
-  ssr: false, // modal dùng DOM API, không cần SSR
+  loading: () => null,
+  ssr: false,
 });
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Types & Constants
-// ─────────────────────────────────────────────────────────────────────────────
 
 type FoodItem = (typeof FOOD_DB)[number];
 type MealType = "breakfast" | "lunch" | "dinner" | "snack";
 
 const MEAL_META: Record<MealType, { label: string; icon: string }> = {
   breakfast: { label: "Bữa sáng", icon: "wb_sunny" },
-  lunch: { label: "Bữa trưa", icon: "restaurant" },
-  dinner: { label: "Bữa tối", icon: "bedtime" },
-  snack: { label: "Ăn vặt", icon: "cookie" },
+  lunch:     { label: "Bữa trưa", icon: "restaurant" },
+  dinner:    { label: "Bữa tối",  icon: "bedtime" },
+  snack:     { label: "Ăn vặt",   icon: "cookie" },
 };
 
 const MEAL_ORDER: MealType[] = ["breakfast", "lunch", "dinner", "snack"];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Helpers
+// Helpers — dùng local timezone, KHÔNG dùng toISOString() để tránh UTC offset
 // ─────────────────────────────────────────────────────────────────────────────
 
+/** Format Date object → "YYYY-MM-DD" theo local timezone */
+function toLocalDateStr(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+/** Ngày hôm nay theo local timezone (KHÔNG dùng toISOString) */
+function getToday(): string {
+  return toLocalDateStr(new Date());
+}
+
+/**
+ * Dịch chuyển ngày ±days theo local timezone
+ * Fix: parse "YYYY-MM-DD" → new Date(y, m-1, d) = local midnight,
+ * tránh UTC parse gây lệch múi giờ UTC+7
+ */
+function offsetDate(dateStr: string, days: number): string {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const date = new Date(y, m - 1, d + days); // local arithmetic
+  return toLocalDateStr(date);
+}
+
+/** Parse "YYYY-MM-DD" → { day, month, isToday } theo local */
 function formatDate(dateStr: string) {
-  const date = new Date(dateStr + "T00:00:00");
-  const today = new Date().toISOString().slice(0, 10);
+  const [y, m, d] = dateStr.split("-").map(Number);
   return {
-    day: date.getDate(),
-    month: date.getMonth() + 1,
-    isToday: dateStr === today,
+    day: d,
+    month: m,
+    isToday: dateStr === getToday(),
   };
 }
 
-function offsetDate(dateStr: string, days: number): string {
-  const d = new Date(dateStr + "T00:00:00");
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
-}
-
-function getToday(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
-// MealSection — wrapped in memo để tránh re-render khi parent state thay đổi
+// MealSection
 // ─────────────────────────────────────────────────────────────────────────────
 
 const MealSection = memo(function MealSection({
@@ -79,10 +85,14 @@ const MealSection = memo(function MealSection({
       <div className="flex justify-between items-center px-4 py-3.5">
         <div className="flex items-center gap-3">
           <div
-            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${hasItems ? "bg-primary/12" : "bg-primary/6"}`}
+            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+              hasItems ? "bg-primary/12" : "bg-primary/6"
+            }`}
           >
             <span
-              className={`material-symbols-outlined text-xl ${hasItems ? "filled-icon text-primary" : "text-primary/50"}`}
+              className={`material-symbols-outlined text-xl ${
+                hasItems ? "filled-icon text-primary" : "text-primary/50"
+              }`}
             >
               {icon}
             </span>
@@ -151,9 +161,9 @@ const MealSection = memo(function MealSection({
 export default function DiaryPage() {
   const { currentLog, loadLog, addMeal, updateMeal } = useDiaryStore();
   const { profile, loadProfile, updateProfile } = useProfileStore();
-  const [mounted, setMounted] = useState(false);
-  const [currentDate, setCurrentDate] = useState(getToday);
-  const [modalMeal, setModalMeal] = useState<MealType | null>(null);
+  const [mounted, setMounted]         = useState(false);
+  const [currentDate, setCurrentDate] = useState(getToday); // local today
+  const [modalMeal, setModalMeal]     = useState<MealType | null>(null);
 
   useEffect(() => {
     loadProfile();
@@ -167,33 +177,36 @@ export default function DiaryPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDate]);
 
-  // ── Stable callbacks — không recreate mỗi render ──
-  const isToday = currentDate === getToday();
+  const today   = getToday();
+  const isToday = currentDate === today;
+
+  // ── Navigation — dùng offsetDate đã fix ──
   const goBack = useCallback(
     () => setCurrentDate((d) => offsetDate(d, -1)),
     [],
   );
   const goNext = useCallback(() => {
-    if (currentDate !== getToday()) setCurrentDate((d) => offsetDate(d, 1));
-  }, [currentDate]);
-  const openModal = useCallback((type: MealType) => setModalMeal(type), []);
+    setCurrentDate((d) => {
+      const next = offsetDate(d, 1);
+      // Không cho phép vượt quá hôm nay
+      return next > getToday() ? d : next;
+    });
+  }, []);
+
+  const openModal  = useCallback((type: MealType) => setModalMeal(type), []);
   const closeModal = useCallback(() => setModalMeal(null), []);
 
-  // Callback để update profile khi streak thay đổi
   const handleStreakUpdate = useCallback(
     (streak: { currentStreak: number; bestStreak: number }) => {
-      if (profile) {
-        updateProfile(streak);
-      }
+      if (profile) updateProfile(streak);
     },
     [profile, updateProfile],
   );
 
-  const target = profile?.macroTarget?.calories ?? 2000;
-  const consumed = currentLog?.totalCalories ?? 0;
+  const target    = profile?.macroTarget?.calories ?? 2000;
+  const consumed  = currentLog?.totalCalories ?? 0;
   const remaining = target - consumed;
 
-  // getMeal: không cần useCallback vì currentLog thay đổi theo date
   function getMeal(type: MealType): MealEntry | undefined {
     return currentLog?.meals.find((m) => m.mealType === type);
   }
@@ -207,45 +220,42 @@ export default function DiaryPage() {
           existing.id,
           {
             ...existing,
-            ingredients: updatedIngredients,
-            totalCalories: updatedIngredients.reduce(
-              (s, i) => s + i.calories,
-              0,
-            ),
+            ingredients:   updatedIngredients,
+            totalCalories: updatedIngredients.reduce((s, i) => s + i.calories, 0),
           },
           handleStreakUpdate,
         );
       } else {
-        const now = new Date();
+        const now  = new Date();
         const time = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
         addMeal(
           {
-            id: `${mealType}-${Date.now()}`,
+            id:            `${mealType}-${Date.now()}`,
             mealType,
-            ingredients: [ingredient],
+            ingredients:   [ingredient],
             totalCalories: ingredient.calories,
             time,
           },
           handleStreakUpdate,
         );
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentLog, addMeal, updateMeal, handleStreakUpdate],
   );
 
   if (!mounted) return null;
 
   const { day, month, isToday: todayFlag } = formatDate(currentDate);
-  const isAfterToday = currentDate > getToday();
+  // isAfterToday: string compare "YYYY-MM-DD" là đúng vì format cố định
+  const isAfterToday = currentDate >= today;
 
-  // Macro totals
   const macros = currentLog?.meals.reduce(
     (acc, meal) => {
       meal.ingredients.forEach((ing) => {
         acc.p += ing.protein || 0;
-        acc.c += ing.carbs || 0;
-        acc.f += ing.fat || 0;
+        acc.c += ing.carbs   || 0;
+        acc.f += ing.fat     || 0;
       });
       return acc;
     },
@@ -254,8 +264,8 @@ export default function DiaryPage() {
 
   const macroTargets = {
     p: profile?.macroTarget?.protein ?? 120,
-    c: profile?.macroTarget?.carbs ?? 250,
-    f: profile?.macroTarget?.fat ?? 65,
+    c: profile?.macroTarget?.carbs   ?? 250,
+    f: profile?.macroTarget?.fat     ?? 65,
   };
 
   return (
@@ -306,11 +316,14 @@ export default function DiaryPage() {
               chevron_left
             </span>
           </button>
+
           <h2 className="font-h1 text-xl sm:text-3xl text-primary font-bold text-center leading-tight">
             {todayFlag ? "Hôm nay" : "Ngày"},{" "}
             <span className="font-numbers">{day}</span> tháng{" "}
             <span className="font-numbers">{month}</span>
           </h2>
+
+          {/* isAfterToday: disable khi đang ở hôm nay hoặc sau hôm nay */}
           <button
             onClick={goNext}
             disabled={isAfterToday}
@@ -325,14 +338,15 @@ export default function DiaryPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-start">
           {/* LEFT: Summary */}
           <div className="lg:col-span-7 space-y-4 sm:space-y-5">
-            {/* Calorie summary */}
             <section className="glass-card rounded-3xl p-4 sm:p-6">
               <p className="font-label-caps text-[10px] uppercase tracking-widest text-outline mb-3">
                 Tổng kết hôm nay
               </p>
               <div className="flex items-end gap-3 mb-5">
                 <span
-                  className={`font-numbers font-bold text-5xl sm:text-6xl leading-none tracking-tight ${remaining < 0 ? "text-error" : "text-primary"}`}
+                  className={`font-numbers font-bold text-5xl sm:text-6xl leading-none tracking-tight ${
+                    remaining < 0 ? "text-error" : "text-primary"
+                  }`}
                 >
                   {Math.abs(remaining).toLocaleString()}
                 </span>
@@ -343,9 +357,9 @@ export default function DiaryPage() {
               <div className="space-y-3">
                 {[
                   {
-                    label: "Đã nạp",
-                    value: consumed,
-                    pct: Math.min((consumed / (target || 1)) * 100, 100),
+                    label:  "Đã nạp",
+                    value:  consumed,
+                    pct:    Math.min((consumed / (target || 1)) * 100, 100),
                     opaque: false,
                   },
                   { label: "Mục tiêu", value: target, pct: 100, opaque: true },
@@ -365,10 +379,7 @@ export default function DiaryPage() {
                     <div className="h-2 rounded-full bg-primary/10 overflow-hidden">
                       <div
                         className="h-full rounded-full bg-primary transition-all duration-700"
-                        style={{
-                          width: `${row.pct}%`,
-                          opacity: row.opaque ? 0.25 : 1,
-                        }}
+                        style={{ width: `${row.pct}%`, opacity: row.opaque ? 0.25 : 1 }}
                       />
                     </div>
                   </div>
@@ -376,25 +387,17 @@ export default function DiaryPage() {
               </div>
             </section>
 
-            {/* Macro summary */}
             <section className="glass-card rounded-3xl p-4 sm:p-6">
               <p className="font-label-caps text-[10px] uppercase tracking-widest text-outline mb-4">
                 Dinh dưỡng
               </p>
               <div className="grid grid-cols-3 gap-3 sm:gap-6">
                 {[
-                  { label: "Carbs", current: macros.c, target: macroTargets.c },
-                  {
-                    label: "Protein",
-                    current: macros.p,
-                    target: macroTargets.p,
-                  },
-                  { label: "Fat", current: macros.f, target: macroTargets.f },
+                  { label: "Carbs",   current: macros.c, target: macroTargets.c },
+                  { label: "Protein", current: macros.p, target: macroTargets.p },
+                  { label: "Fat",     current: macros.f, target: macroTargets.f },
                 ].map((m) => (
-                  <div
-                    key={m.label}
-                    className="space-y-1.5 sm:space-y-2 min-w-0"
-                  >
+                  <div key={m.label} className="space-y-1.5 sm:space-y-2 min-w-0">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-0.5">
                       <span className="font-label-caps text-[9px] sm:text-[10px] font-bold text-primary uppercase">
                         {m.label}
@@ -436,19 +439,15 @@ export default function DiaryPage() {
         </div>
       </main>
 
-      {/* ── FAB ── */}
       <button
         onClick={() => openModal("breakfast")}
         className="fixed bottom-20 right-4 sm:right-8 w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-primary text-white flex items-center justify-center shadow-2xl shadow-primary/35 hover:scale-105 active:scale-95 transition-transform z-40"
       >
-        <span className="material-symbols-outlined text-2xl sm:text-3xl">
-          add
-        </span>
+        <span className="material-symbols-outlined text-2xl sm:text-3xl">add</span>
       </button>
 
       <BottomNav />
 
-      {/* ── MODAL (lazy) ── */}
       {modalMeal && (
         <AddMealModal
           mealType={modalMeal}
