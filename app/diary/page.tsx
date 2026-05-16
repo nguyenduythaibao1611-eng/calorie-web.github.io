@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useEffect, useState, useCallback, memo } from "react";
 import dynamic from "next/dynamic";
+import { motion, AnimatePresence } from "framer-motion";
 import { useDiaryStore } from "@/store/diaryStore";
 import { useProfileStore } from "@/store/profileStore";
 import type { MealEntry, Ingredient } from "@/types";
 import { BottomNav } from "@/components/nav/BottomNav";
 
-const AddMealModal = dynamic(() => import("@/components/diary/AddMealModalV2"), {
+const AddMealModal = dynamic(() => import("@/components/diary/AddMealModal"), {
   loading: () => null,
   ssr: false,
 });
@@ -25,10 +26,9 @@ const MEAL_META: Record<MealType, { label: string; icon: string }> = {
 const MEAL_ORDER: MealType[] = ["breakfast", "lunch", "dinner", "snack"];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Helpers — dùng local timezone, KHÔNG dùng toISOString() để tránh UTC offset
+// Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Format Date object → "YYYY-MM-DD" theo local timezone */
 function toLocalDateStr(date: Date): string {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -36,25 +36,18 @@ function toLocalDateStr(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
-/** Ngày hôm nay theo local timezone (KHÔNG dùng toISOString) */
 function getToday(): string {
   return toLocalDateStr(new Date());
 }
 
-/**
- * Dịch chuyển ngày ±days theo local timezone
- * Fix: parse "YYYY-MM-DD" → new Date(y, m-1, d) = local midnight,
- * tránh UTC parse gây lệch múi giờ UTC+7
- */
 function offsetDate(dateStr: string, days: number): string {
   const [y, m, d] = dateStr.split("-").map(Number);
-  const date = new Date(y, m - 1, d + days); // local arithmetic
+  const date = new Date(y, m - 1, d + days);
   return toLocalDateStr(date);
 }
 
-/** Parse "YYYY-MM-DD" → { day, month, isToday } theo local */
 function formatDate(dateStr: string) {
-  const [, m, d] = dateStr.split("-").map(Number);
+  const [y, m, d] = dateStr.split("-").map(Number);
   return {
     day: d,
     month: m,
@@ -63,7 +56,7 @@ function formatDate(dateStr: string) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MealSection
+// Components
 // ─────────────────────────────────────────────────────────────────────────────
 
 const MealSection = memo(function MealSection({
@@ -81,83 +74,85 @@ const MealSection = memo(function MealSection({
   const hasItems = meal && meal.ingredients.length > 0;
 
   return (
-    <section className="glass-card rounded-2xl overflow-hidden">
-      <div className="flex justify-between items-center px-4 py-3.5">
-        <div className="flex items-center gap-3">
-          <div
-            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-              hasItems ? "bg-primary/12" : "bg-primary/6"
-            }`}
-          >
-            <span
-              className={`material-symbols-outlined text-xl ${
-                hasItems ? "filled-icon text-primary" : "text-primary/50"
-              }`}
-            >
+    <section className="bg-surface-container-lowest rounded-3xl border border-primary/10 overflow-hidden transition-all hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5">
+      <div className="flex items-center justify-between p-4 sm:p-5">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+            <span className="material-symbols-outlined filled-icon text-primary text-2xl">
               {icon}
             </span>
           </div>
           <div>
-            <p className="font-body-md font-bold text-base text-on-background">
+            <h3 className="font-h2 text-base font-bold text-on-background">
               {label}
-            </p>
-            <p className="font-numbers text-[10px] uppercase tracking-wider text-outline mt-0.5">
-              {hasItems
-                ? `Tổng: ${meal.totalCalories.toLocaleString()} kcal`
-                : "Chưa thêm món"}
+            </h3>
+            <p className="font-numbers text-xs text-outline mt-0.5">
+              <span className="font-bold text-primary">
+                {meal?.totalCalories ?? 0}
+              </span>{" "}
+              kcal
             </p>
           </div>
         </div>
-        <button
+        <motion.button
           onClick={() => onAdd(mealType)}
-          className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0 ${
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shrink-0 ${
             hasItems
-              ? "bg-primary text-white shadow-md shadow-primary/25 hover:opacity-90"
+              ? "bg-primary text-white shadow-md shadow-primary/25"
               : "bg-primary/10 text-primary hover:bg-primary/20"
           }`}
         >
-          <span className="material-symbols-outlined text-lg">add</span>
-        </button>
+          <span className="material-symbols-outlined text-xl">add</span>
+        </motion.button>
       </div>
 
-      {hasItems && (
-        <div className="border-t border-primary/6 px-4 pb-3 pt-2 space-y-2">
-          {meal.ingredients.map((ing) => (
-            <div
-              key={ing.id}
-              className="flex items-center gap-3 py-2 border-b border-primary/4 last:border-0 group"
-            >
-              <div className="w-10 h-10 rounded-lg bg-primary/8 flex items-center justify-center shrink-0">
-                <span className="text-lg" role="img" aria-label="món ăn">
-                  🍽️
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-body-md font-semibold text-sm text-on-background truncate">
-                  {ing.name}
-                </p>
-                <p className="font-numbers text-[10px] uppercase tracking-wider text-outline mt-0.5">
-                  Khẩu phần: {ing.amount ?? 100}g
-                </p>
-              </div>
-              <span className="font-numbers font-semibold text-sm text-primary shrink-0">
-                {ing.calories.toLocaleString()}
-                <span className="text-[10px] font-normal text-outline ml-0.5">
-                  kcal
-                </span>
-              </span>
-              <button
-                onClick={() => onRemoveIngredient(meal.id, ing.id)}
-                className="w-7 h-7 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/20"
-                aria-label={`Xóa ${ing.name}`}
-                title="Xóa"
+      <AnimatePresence>
+        {hasItems && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="border-t border-primary/6 px-4 pb-4 pt-2 space-y-2 overflow-hidden"
+          >
+            {meal.ingredients.map((ing) => (
+              <div
+                key={ing.id}
+                className="flex items-center gap-3 py-2 border-b border-primary/4 last:border-0 group"
               >
-                <span className="material-symbols-outlined text-sm">close</span>
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+                <div className="w-10 h-10 rounded-lg bg-primary/8 flex items-center justify-center shrink-0">
+                  <span className="text-lg" role="img" aria-label="món ăn">
+                    🥗
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0 pr-2">
+                  <p className="font-body-md font-semibold text-sm text-on-background truncate">
+                    {ing.name}
+                  </p>
+                  <p className="font-numbers text-[11px] text-outline">
+                    {ing.amount}g • P:{ing.protein} C:{ing.carbs} F:{ing.fat}
+                  </p>
+                </div>
+                <span className="font-numbers font-bold text-sm text-on-background shrink-0 mr-1">
+                  {ing.calories}
+                  <span className="text-[10px] font-normal text-outline ml-1">
+                    kcal
+                  </span>
+                </span>
+                <button
+                  onClick={() => onRemoveIngredient(meal.id, ing.id)}
+                  className="w-7 h-7 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/20"
+                  aria-label={`Xóa ${ing.name}`}
+                  title="Xóa"
+                >
+                  <span className="material-symbols-outlined text-sm">close</span>
+                </button>
+              </div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 });
@@ -166,30 +161,39 @@ const MealSection = memo(function MealSection({
 // Page
 // ─────────────────────────────────────────────────────────────────────────────
 
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.1,
+      duration: 0.4,
+      ease: "easeOut" as const,
+    },
+  }),
+};
+
 export default function DiaryPage() {
   const { currentLog, loadLog, addIngredients, removeIngredient } =
     useDiaryStore();
   const { profile, loadProfile, updateProfile } = useProfileStore();
   const [mounted, setMounted] = useState(false);
-  const [currentDate, setCurrentDate] = useState(getToday); // local today
+  const [currentDate, setCurrentDate] = useState(getToday);
   const [modalMeal, setModalMeal] = useState<MealType | null>(null);
 
   useEffect(() => {
     loadProfile();
     loadLog(getToday());
-    // Use a microtask to avoid "synchronous setState in effect" error
-    queueMicrotask(() => setMounted(true));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    setMounted(true);
+  }, [loadProfile, loadLog]);
 
   useEffect(() => {
     if (mounted) loadLog(currentDate);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentDate]);
+  }, [currentDate, mounted, loadLog]);
 
   const today = getToday();
 
-  // ── Navigation — dùng offsetDate đã fix ──
   const goBack = useCallback(
     () => setCurrentDate((d) => offsetDate(d, -1)),
     [],
@@ -197,7 +201,6 @@ export default function DiaryPage() {
   const goNext = useCallback(() => {
     setCurrentDate((d) => {
       const next = offsetDate(d, 1);
-      // Không cho phép vượt quá hôm nay
       return next > getToday() ? d : next;
     });
   }, []);
@@ -220,25 +223,24 @@ export default function DiaryPage() {
     return currentLog?.meals.find((m) => m.mealType === type);
   }
 
-  const handleSaveIngredients = useCallback(
-    (mealType: MealType, ingredients: Ingredient[]) => {
-      addIngredients(mealType, ingredients, handleStreakUpdate);
-      closeModal();
+  const handleAddIngredient = useCallback(
+    (mealType: MealType, ingredient: Ingredient) => {
+      // Re-using addIngredients for single ingredient too
+      addIngredients(mealType, [ingredient], handleStreakUpdate);
     },
-    [addIngredients, handleStreakUpdate, closeModal]
+    [addIngredients, handleStreakUpdate],
   );
 
   const handleRemoveIngredient = useCallback(
     (mealId: string, ingredientId: string) => {
       removeIngredient(mealId, ingredientId, handleStreakUpdate);
     },
-    [removeIngredient, handleStreakUpdate]
+    [removeIngredient, handleStreakUpdate],
   );
 
   if (!mounted) return null;
 
   const { day, month, isToday: todayFlag } = formatDate(currentDate);
-  // isAfterToday: string compare "YYYY-MM-DD" là đúng vì format cố định
   const isAfterToday = currentDate >= today;
 
   const macros = currentLog?.meals.reduce(
@@ -261,7 +263,6 @@ export default function DiaryPage() {
 
   return (
     <div className="bg-background text-on-background font-body-md min-h-screen">
-      {/* ── HEADER ── */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-b border-emerald-900/10 h-14 flex justify-center items-center px-4 sm:px-6">
         <div className="w-full max-w-[1100px] flex justify-between items-center gap-2">
           <div className="flex items-center gap-2 shrink-0">
@@ -297,25 +298,25 @@ export default function DiaryPage() {
       </header>
 
       <main className="pt-16 pb-28 sm:pb-24 px-4 sm:px-6 max-w-[1100px] mx-auto">
-        {/* ── Date Nav ── */}
         <nav className="flex items-center justify-center gap-4 sm:gap-8 my-4 sm:my-5">
-          <button
+          <motion.button
+            whileTap={{ scale: 0.9 }}
             onClick={goBack}
             className="p-2 hover:bg-surface-container rounded-full transition-colors group shrink-0"
           >
             <span className="material-symbols-outlined text-xl sm:text-2xl text-outline group-hover:text-primary">
               chevron_left
             </span>
-          </button>
+          </motion.button>
 
           <h2 className="font-h1 text-xl sm:text-3xl text-primary font-bold text-center leading-tight">
             {todayFlag ? "Hôm nay" : "Ngày"},{" "}
-            <span className="font-numbers">{day}</span> tháng{" "}
+            <span className="font-numbers">{day}</span> Tháng{" "}
             <span className="font-numbers">{month}</span>
           </h2>
 
-          {/* isAfterToday: disable khi đang ở hôm nay hoặc sau hôm nay */}
-          <button
+          <motion.button
+            whileTap={{ scale: 0.9 }}
             onClick={goNext}
             disabled={isAfterToday}
             className="p-2 hover:bg-surface-container rounded-full transition-colors group disabled:opacity-30 shrink-0"
@@ -323,28 +324,30 @@ export default function DiaryPage() {
             <span className="material-symbols-outlined text-xl sm:text-2xl text-outline group-hover:text-primary">
               chevron_right
             </span>
-          </button>
+          </motion.button>
         </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-start">
-          {/* LEFT: Summary */}
           <div className="lg:col-span-7 space-y-4 sm:space-y-5">
-            <section className="glass-card rounded-3xl p-4 sm:p-6">
+            <motion.section
+              custom={0}
+              variants={cardVariants}
+              initial="hidden"
+              animate="visible"
+              className="glass-card rounded-3xl p-4 sm:p-6"
+            >
               <p className="font-label-caps text-[10px] uppercase tracking-widest text-outline mb-3">
                 Tổng kết hôm nay
               </p>
-              <div className="flex items-end gap-3 mb-5">
-                <span
-                  className={`font-numbers font-bold text-5xl sm:text-6xl leading-none tracking-tight ${
-                    remaining < 0 ? "text-error" : "text-primary"
-                  }`}
-                >
-                  {Math.abs(remaining).toLocaleString()}
+              <div className="flex items-baseline gap-2 mb-6">
+                <span className="font-numbers text-5xl sm:text-6xl font-black text-primary tracking-tighter">
+                  {remaining.toLocaleString()}
                 </span>
-                <span className="font-numbers text-sm text-outline mb-2">
+                <span className="font-body-md text-sm font-semibold text-outline uppercase tracking-wider">
                   kcal còn lại
                 </span>
               </div>
+
               <div className="space-y-3">
                 {[
                   {
@@ -368,20 +371,26 @@ export default function DiaryPage() {
                       </span>
                     </div>
                     <div className="h-2 rounded-full bg-primary/10 overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-primary transition-all duration-700"
-                        style={{
-                          width: `${row.pct}%`,
-                          opacity: row.opaque ? 0.25 : 1,
-                        }}
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${row.pct}%` }}
+                        transition={{ duration: 1, ease: "easeOut" }}
+                        className="h-full rounded-full bg-primary"
+                        style={{ opacity: row.opaque ? 0.25 : 1 }}
                       />
                     </div>
                   </div>
                 ))}
               </div>
-            </section>
+            </motion.section>
 
-            <section className="glass-card rounded-3xl p-4 sm:p-6">
+            <motion.section
+              custom={1}
+              variants={cardVariants}
+              initial="hidden"
+              animate="visible"
+              className="glass-card rounded-3xl p-4 sm:p-6"
+            >
               <p className="font-label-caps text-[10px] uppercase tracking-widest text-outline mb-4">
                 Dinh dưỡng
               </p>
@@ -408,57 +417,67 @@ export default function DiaryPage() {
                       </span>
                     </div>
                     <div className="h-1.5 sm:h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-primary rounded-full transition-all duration-700"
-                        style={{
-                          width: `${Math.min((m.current / m.target) * 100, 100)}%`,
-                        }}
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min((m.current / m.target) * 100, 100)}%` }}
+                        transition={{ duration: 1, ease: "easeOut" }}
+                        className="h-full bg-primary rounded-full"
                       />
                     </div>
                   </div>
                 ))}
               </div>
-            </section>
+            </motion.section>
           </div>
 
-          {/* RIGHT: Meals */}
           <div className="lg:col-span-5 space-y-3">
             <div className="flex justify-between items-center px-1 mb-1">
               <h3 className="font-h2 text-base sm:text-lg text-primary font-bold">
                 Bữa ăn hôm nay
               </h3>
             </div>
-            {MEAL_ORDER.map((type) => (
-              <MealSection
+            {MEAL_ORDER.map((type, index) => (
+              <motion.div
                 key={type}
-                mealType={type}
-                meal={getMeal(type)}
-                onAdd={openModal}
-                onRemoveIngredient={handleRemoveIngredient}
-              />
+                custom={index + 2}
+                variants={cardVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                <MealSection
+                  mealType={type}
+                  meal={getMeal(type)}
+                  onAdd={openModal}
+                  onRemoveIngredient={handleRemoveIngredient}
+                />
+              </motion.div>
             ))}
           </div>
         </div>
       </main>
 
-      <button
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
         onClick={() => openModal("breakfast")}
-        className="fixed bottom-20 right-4 sm:right-8 w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-primary text-white flex items-center justify-center shadow-2xl shadow-primary/35 hover:scale-105 active:scale-95 transition-transform z-40"
+        className="fixed bottom-20 right-4 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 rounded-3xl bg-primary text-white flex items-center justify-center shadow-2xl shadow-primary/40 z-40"
       >
-        <span className="material-symbols-outlined text-2xl sm:text-3xl">
+        <span className="material-symbols-outlined text-3xl sm:text-4xl">
           add
         </span>
-      </button>
+      </motion.button>
 
       <BottomNav />
 
-      {modalMeal && (
-        <AddMealModal
-          mealType={modalMeal}
-          onClose={closeModal}
-          onSave={(ingredients) => handleSaveIngredients(modalMeal, ingredients)}
-        />
-      )}
+      <AnimatePresence>
+        {modalMeal && (
+          <AddMealModal
+            mealType={modalMeal}
+            onClose={closeModal}
+            onAdd={(ingredient) => handleAddIngredient(modalMeal, ingredient)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
