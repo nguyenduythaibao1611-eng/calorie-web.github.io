@@ -451,11 +451,18 @@ export default function DiaryPage() {
             {MEAL_ORDER.map((type, index) => (
               <motion.div
                 key={type}
-                mealType={type}
-                meal={getMeal(type)}
-                onAdd={openModal}
-                onRemoveIngredient={handleRemoveIngredient}
-              />
+                custom={index + 2}
+                variants={cardVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                <MealSection
+                  mealType={type}
+                  meal={getMeal(type)}
+                  onAdd={openModal}
+                  onRemoveIngredient={handleRemoveIngredient}
+                />
+              </motion.div>
             ))}
           </div>
         </div>
@@ -474,7 +481,7 @@ export default function DiaryPage() {
         <span className="material-symbols-outlined text-2xl sm:text-3xl">
           add
         </span>
-      </button>
+      </motion.button>
 
       <BottomNav />
 
