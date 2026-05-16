@@ -31,9 +31,9 @@ type DiaryState = {
       bestStreak: number;
     }) => void,
   ) => void;
-  addIngredient: (
+  addIngredients: (
     mealType: "breakfast" | "lunch" | "dinner" | "snack",
-    ingredient: import("@/types").Ingredient,
+    ingredients: import("@/types").Ingredient[],
     onStreakUpdate?: (streak: {
       currentStreak: number;
       bestStreak: number;
@@ -158,34 +158,40 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
     }
   },
 
-  // Thêm món ăn vào bữa ăn (tự động gộp nếu trùng tên)
-  addIngredient: (mealType, ingredient, onStreakUpdate) => {
+
+
+  // Thêm nhiều món ăn cùng lúc
+  addIngredients: (mealType, newIngredients, onStreakUpdate) => {
     const { currentLog, currentDate, addMeal } = get();
     if (!currentLog) return;
+    if (newIngredients.length === 0) return;
 
     const existingMeal = currentLog.meals.find((m) => m.mealType === mealType);
 
     if (existingMeal) {
-      const existingIngIndex = existingMeal.ingredients.findIndex(
-        (i) => i.name === ingredient.name
-      );
+      // Bắt đầu với mảng nguyên liệu hiện có
+      let updatedIngredients = [...existingMeal.ingredients];
 
-      let updatedIngredients;
-      if (existingIngIndex >= 0) {
-        // Gộp món
-        updatedIngredients = [...existingMeal.ingredients];
-        const old = updatedIngredients[existingIngIndex];
-        updatedIngredients[existingIngIndex] = {
-          ...old,
-          amount: (old.amount || 0) + (ingredient.amount || 0),
-          calories: old.calories + ingredient.calories,
-          protein: Math.round((old.protein + ingredient.protein) * 10) / 10,
-          carbs: Math.round((old.carbs + ingredient.carbs) * 10) / 10,
-          fat: Math.round((old.fat + ingredient.fat) * 10) / 10,
-        };
-      } else {
-        // Thêm mới
-        updatedIngredients = [...existingMeal.ingredients, ingredient];
+      for (const ingredient of newIngredients) {
+        const existingIngIndex = updatedIngredients.findIndex(
+          (i) => i.name === ingredient.name
+        );
+
+        if (existingIngIndex >= 0) {
+          // Gộp món
+          const old = updatedIngredients[existingIngIndex];
+          updatedIngredients[existingIngIndex] = {
+            ...old,
+            amount: (old.amount || 0) + (ingredient.amount || 0),
+            calories: old.calories + ingredient.calories,
+            protein: Math.round((old.protein + ingredient.protein) * 10) / 10,
+            carbs: Math.round((old.carbs + ingredient.carbs) * 10) / 10,
+            fat: Math.round((old.fat + ingredient.fat) * 10) / 10,
+          };
+        } else {
+          // Thêm mới
+          updatedIngredients.push(ingredient);
+        }
       }
 
       const updatedMeal: MealEntry = {
@@ -214,12 +220,14 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
         now.getMinutes()
       ).padStart(2, "0")}`;
       
+      const totalCalories = newIngredients.reduce((s, i) => s + i.calories, 0);
+
       addMeal(
         {
           id: `${mealType}-${Date.now()}`,
           mealType,
-          ingredients: [ingredient],
-          totalCalories: ingredient.calories,
+          ingredients: newIngredients,
+          totalCalories,
           time,
         },
         onStreakUpdate

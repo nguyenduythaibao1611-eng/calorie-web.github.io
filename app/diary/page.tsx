@@ -8,7 +8,7 @@ import { useProfileStore } from "@/store/profileStore";
 import type { MealEntry, Ingredient } from "@/types";
 import { BottomNav } from "@/components/nav/BottomNav";
 
-const AddMealModal = dynamic(() => import("@/components/diary/AddMealModal"), {
+const AddMealModal = dynamic(() => import("@/components/diary/AddMealModalV2"), {
   loading: () => null,
   ssr: false,
 });
@@ -167,7 +167,7 @@ const MealSection = memo(function MealSection({
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function DiaryPage() {
-  const { currentLog, loadLog, addIngredient, removeIngredient } =
+  const { currentLog, loadLog, addIngredients, removeIngredient } =
     useDiaryStore();
   const { profile, loadProfile, updateProfile } = useProfileStore();
   const [mounted, setMounted] = useState(false);
@@ -220,11 +220,12 @@ export default function DiaryPage() {
     return currentLog?.meals.find((m) => m.mealType === type);
   }
 
-  const handleAddIngredient = useCallback(
-    (mealType: MealType, ingredient: Ingredient) => {
-      addIngredient(mealType, ingredient, handleStreakUpdate);
+  const handleSaveIngredients = useCallback(
+    (mealType: MealType, ingredients: Ingredient[]) => {
+      addIngredients(mealType, ingredients, handleStreakUpdate);
+      closeModal();
     },
-    [addIngredient, handleStreakUpdate]
+    [addIngredients, handleStreakUpdate, closeModal]
   );
 
   const handleRemoveIngredient = useCallback(
@@ -455,7 +456,7 @@ export default function DiaryPage() {
         <AddMealModal
           mealType={modalMeal}
           onClose={closeModal}
-          onAdd={(ingredient) => handleAddIngredient(modalMeal, ingredient)}
+          onSave={(ingredients) => handleSaveIngredients(modalMeal, ingredients)}
         />
       )}
     </div>

@@ -50,6 +50,8 @@ export function searchIngredient(
       fat: i.fat ?? 0,
       // `amount` not provided in JSON — default to 100 (grams)
       amount: i.amount ?? 100,
+      id: i.id || Math.random().toString(36).substring(7),
+      name: i.name || "Món không tên",
     }),
   );
 
