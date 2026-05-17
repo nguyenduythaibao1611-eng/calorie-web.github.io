@@ -5,6 +5,7 @@ import { useDiaryStore } from "@/store/diaryStore";
 import { useProfileStore } from "@/store/profileStore";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { AppShell } from "@/components/nav/AppShell";
 
 const MEAL_LABELS: Record<string, string> = {
   breakfast: "Bữa sáng",
@@ -51,15 +52,16 @@ const cardVariants = {
 export default function DashboardPage() {
   const [mounted, setMounted] = useState(false);
   const { currentLog, currentDate, loadLog, updateWater } = useDiaryStore();
-  const { profile, syncStreak } = useProfileStore();
+  const { profile, syncStreak, loadProfile } = useProfileStore();
 
   useEffect(() => {
     // Use a microtask to avoid "synchronous setState in effect" error
     queueMicrotask(() => setMounted(true));
+    loadProfile();
     loadLog(new Date().toISOString().slice(0, 10));
     // Đồng bộ streak từ logs khi mount trang
     syncStreak();
-  }, [loadLog, syncStreak]);
+  }, [loadLog, syncStreak, loadProfile]);
 
   if (!mounted) return null;
 
@@ -108,43 +110,9 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="bg-background text-on-background font-body-md min-h-screen">
-      {/* HEADER */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-b border-emerald-900/10 h-14 flex justify-center items-center px-4 sm:px-6">
-        <div className="w-full max-w-7xl flex justify-between items-center gap-2">
-          <div className="flex items-center gap-1.5 shrink-0">
-            <span className="material-symbols-outlined filled-icon text-primary text-2xl">
-              local_fire_department
-            </span>
-            <h1 className="font-h1 text-xl sm:text-2xl text-primary font-black tracking-tight">
-              CaloMate
-            </h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="hidden sm:flex items-center gap-1.5 bg-primary-fixed-dim/30 px-3 py-1.5 rounded-full">
-              <span className="material-symbols-outlined filled-icon text-primary text-base">
-                local_fire_department
-              </span>
-              <span className="font-label-caps text-xs font-bold uppercase tracking-wider text-primary">
-                Chuỗi{" "}
-                <span className="font-numbers">
-                  {profile?.currentStreak ?? 0}
-                </span>{" "}
-                ngày
-              </span>
-            </div>
-            <Link href="/settings">
-              <button className="hover:bg-surface-container transition-all active:scale-95 p-2 rounded-full min-h-[44px] min-w-[44px] flex items-center justify-center">
-                <span className="material-symbols-outlined text-primary text-xl">
-                  settings
-                </span>
-              </button>
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <main className="pt-16 pb-28 sm:pb-24 px-4 sm:px-6 max-w-[1100px] mx-auto">
+    <AppShell>
+      <div className="bg-background text-on-background font-body-md min-h-screen">
+        <main className="pt-16 pb-28 sm:pb-24 px-4 sm:px-6 max-w-[1100px] mx-auto">
         {/* Date Navigation */}
         <nav className="flex items-center justify-center gap-4 sm:gap-8 my-4 sm:my-5">
           <button
@@ -405,43 +373,7 @@ export default function DashboardPage() {
         </motion.div>
       </Link>
 
-      <footer className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-t border-primary/10 h-16 flex justify-center items-center">
-        <nav className="w-full max-w-7xl flex justify-around items-center px-2 sm:px-8">
-          <Link
-            href="/"
-            className="flex flex-col items-center gap-0.5 sm:gap-1 py-2 px-4 sm:px-8 rounded-2xl bg-secondary-container text-primary transition-all"
-          >
-            <span className="material-symbols-outlined filled-icon text-xl sm:text-2xl">
-              home
-            </span>
-            <span className="font-label-caps text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.1em]">
-              Tổng quan
-            </span>
-          </Link>
-          <Link
-            href="/diary"
-            className="flex flex-col items-center gap-0.5 sm:gap-1 text-outline hover:text-primary transition-colors py-2 px-4 sm:px-8"
-          >
-            <span className="material-symbols-outlined text-xl sm:text-2xl">
-              menu_book
-            </span>
-            <span className="font-label-caps text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.1em]">
-              Nhật ký
-            </span>
-          </Link>
-          <Link
-            href="/stats"
-            className="flex flex-col items-center gap-0.5 sm:gap-1 text-outline hover:text-primary transition-colors py-2 px-4 sm:px-8"
-          >
-            <span className="material-symbols-outlined text-xl sm:text-2xl">
-              bar_chart
-            </span>
-            <span className="font-label-caps text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.1em]">
-              Thống kê
-            </span>
-          </Link>
-        </nav>
-      </footer>
-    </div>
+      </div>
+    </AppShell>
   );
 }

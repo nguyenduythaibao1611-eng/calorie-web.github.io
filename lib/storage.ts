@@ -67,17 +67,6 @@ export function getProfile(): UserProfile | null {
       parsed.bestStreak = 0;
     }
 
-    // In development, force streaks to 0 to avoid stale local test data
-    try {
-      // process.env is replaced at build-time by Next.js — safe to check
-      if (process.env.NODE_ENV === "development") {
-        parsed.currentStreak = 0;
-        parsed.bestStreak = 0;
-      }
-    } catch {
-      // ignore
-    }
-
     return parsed;
   } catch {
     return null;
