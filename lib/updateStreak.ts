@@ -4,7 +4,7 @@
  * Helper để cập nhật streak trong profile khi có log mới
  */
 
-import { calcCurrentStreak, calcBestStreak } from "./calc";
+import { calcCurrentStreak, calcBestStreak, toLocalDateStr } from "./calc";
 import { getLogs, getProfile, saveProfile } from "./storage";
 
 /**
@@ -24,10 +24,12 @@ export function calculateAndUpdateStreak(): {
   bestStreak: number;
 } {
   // Lấy tất cả logs từ năm trước đến hiện tại
+  // Dùng toLocalDateStr() thay vì toISOString() để tránh lệch ngày
+  // với người dùng UTC+7 (Việt Nam) sau 17:00 UTC (00:00 giờ VN)
   const startDate = new Date();
   startDate.setFullYear(startDate.getFullYear() - 1);
-  const start = startDate.toISOString().split("T")[0];
-  const end = new Date().toISOString().split("T")[0];
+  const start = toLocalDateStr(startDate);
+  const end = toLocalDateStr(new Date());
 
   const allLogs = getLogs(start, end);
 

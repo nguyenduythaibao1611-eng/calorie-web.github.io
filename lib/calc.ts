@@ -44,6 +44,23 @@ const CAL_PER_GRAM = {
 // ─────────────────────────────────────────────
 
 /**
+ * Format ngày theo local timezone thành chuỗi YYYY-MM-DD.
+ *
+ * KHÔNG dùng toISOString() vì nó trả về UTC — với người dùng UTC+7 (Việt Nam),
+ * sau 17:00 UTC (tức 00:00 ngày hôm sau giờ VN), toISOString() sẽ trả về
+ * ngày hôm sau thay vì ngày hiện tại, gây lệch streak 1 ngày.
+ *
+ * @param date - Đối tượng Date cần format (mặc định là hiện tại)
+ * @returns Chuỗi ngày theo local timezone, vd: "2026-05-17"
+ */
+export function toLocalDateStr(date: Date = new Date()): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+/**
  * Tính BMR theo công thức Mifflin-St Jeor.
  *
  * Nam  : BMR = 10 × weight + 6.25 × height − 5 × age + 5
@@ -168,7 +185,9 @@ export function calcCurrentStreak(logs: DailyLog[]): number {
   for (let i = 0; i <= 365; i++) {
     const d = new Date();
     d.setDate(d.getDate() - i);
-    const log = logMap.get(d.toISOString().split("T")[0]);
+    // Dùng toLocalDateStr() thay vì toISOString() để tránh lệch ngày
+    // với người dùng UTC+7 (Việt Nam) sau 17:00 UTC (00:00 giờ VN)
+    const log = logMap.get(toLocalDateStr(d));
     if (log && hasAllMainMeals(log)) {
       streak++;
     } else {
