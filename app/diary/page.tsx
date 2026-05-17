@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { useDiaryStore } from "@/store/diaryStore";
 import { useProfileStore } from "@/store/profileStore";
 import type { MealEntry, Ingredient } from "@/types";
-import { BottomNav } from "@/components/nav/BottomNav";
+import { AppShell } from "@/components/nav/AppShell";
 
 const AddMealModal = dynamic(() => import("@/components/diary/AddMealModalV2"), {
   loading: () => null,
@@ -267,43 +267,9 @@ export default function DiaryPage() {
   };
 
   return (
-    <div className="bg-background text-on-background font-body-md min-h-screen">
-      {/* HEADER */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-b border-emerald-900/10 h-14 flex justify-center items-center px-4 sm:px-6">
-        <div className="w-full max-w-[1100px] flex justify-between items-center gap-2">
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="material-symbols-outlined filled-icon text-primary text-2xl">
-              local_fire_department
-            </span>
-            <h1 className="font-h1 text-xl sm:text-2xl text-primary font-black tracking-tight">
-              CaloMate
-            </h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="hidden sm:flex items-center gap-2 bg-primary-fixed-dim/30 px-4 py-1.5 rounded-full">
-              <span className="material-symbols-outlined filled-icon text-primary text-base">
-                local_fire_department
-              </span>
-              <span className="font-label-caps text-xs font-bold uppercase tracking-wider text-primary">
-                Chuỗi{" "}
-                <span className="font-numbers">
-                  {profile?.currentStreak ?? 0}
-                </span>{" "}
-                ngày
-              </span>
-            </div>
-            <Link href="/settings">
-              <button className="hover:bg-surface-container transition-all active:scale-95 p-2 rounded-full">
-                <span className="material-symbols-outlined text-primary text-xl">
-                  settings
-                </span>
-              </button>
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <main className="pt-16 pb-28 sm:pb-24 px-4 sm:px-6 max-w-[1100px] mx-auto">
+    <AppShell>
+      <div className="bg-background text-on-background font-body-md min-h-screen">
+        <main className="pt-16 pb-28 sm:pb-24 px-4 sm:px-6 max-w-[1100px] mx-auto">
         {/* Date Nav */}
         <nav className="flex items-center justify-center gap-4 sm:gap-8 my-4 sm:my-5">
           <motion.button
@@ -485,8 +451,6 @@ export default function DiaryPage() {
         </span>
       </motion.button>
 
-      <BottomNav />
-
       {modalMeal && (
         <AddMealModal
           mealType={modalMeal}
@@ -494,6 +458,7 @@ export default function DiaryPage() {
           onSave={(ingredients) => handleSaveIngredients(modalMeal, ingredients)}
         />
       )}
-    </div>
+      </div>
+    </AppShell>
   );
 }
