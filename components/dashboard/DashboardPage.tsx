@@ -51,13 +51,15 @@ const cardVariants = {
 export default function DashboardPage() {
   const [mounted, setMounted] = useState(false);
   const { currentLog, currentDate, loadLog, updateWater } = useDiaryStore();
-  const { profile } = useProfileStore();
+  const { profile, syncStreak } = useProfileStore();
 
   useEffect(() => {
     // Use a microtask to avoid "synchronous setState in effect" error
     queueMicrotask(() => setMounted(true));
     loadLog(new Date().toISOString().slice(0, 10));
-  }, [loadLog]);
+    // Đồng bộ streak từ logs khi mount trang
+    syncStreak();
+  }, [loadLog, syncStreak]);
 
   if (!mounted) return null;
 

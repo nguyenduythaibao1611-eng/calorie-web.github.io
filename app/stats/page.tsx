@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { useProfileStore } from "@/store/profileStore";
 import { getLogs } from "@/lib/storage";
 import type { DailyLog } from "@/types";
-import { calcCurrentStreak, calcBestStreak } from "@/lib/calc";
+
 import { BottomNav } from "@/components/nav/BottomNav";
 import Link from "next/link";
 
@@ -92,7 +92,7 @@ const cardVariants = {
 export default function StatsPage() {
   const [mounted, setMounted] = useState(false);
   const [logs, setLogs] = useState<DailyLog[]>([]);
-  const { profile, loadProfile, updateProfile } = useProfileStore();
+  const { profile, loadProfile, syncStreak } = useProfileStore();
 
   useEffect(() => {
     loadProfile();
@@ -102,20 +102,10 @@ export default function StatsPage() {
       setLogs(getLogs(days[0], days[days.length - 1]));
       setMounted(true);
     });
+    // Đồng bộ streak từ logs (dùng chung logic với các trang khác)
+    syncStreak();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    if (!profile || logs.length === 0) return;
-    const currentStreak = calcCurrentStreak(logs);
-    const bestStreak = calcBestStreak(logs);
-    if (
-      profile.currentStreak !== currentStreak ||
-      profile.bestStreak !== bestStreak
-    ) {
-      updateProfile({ currentStreak, bestStreak });
-    }
-  }, [logs, profile, updateProfile]);
 
   const target = profile?.macroTarget?.calories ?? 2000;
   const today = new Date().toISOString().split("T")[0];

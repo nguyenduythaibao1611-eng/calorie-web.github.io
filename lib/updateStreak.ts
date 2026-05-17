@@ -5,7 +5,7 @@
  */
 
 import { calcCurrentStreak, calcBestStreak } from "./calc";
-import { getLogs } from "./storage";
+import { getLogs, getProfile, saveProfile } from "./storage";
 
 /**
  * Cập nhật currentStreak và bestStreak trong profile từ tất cả logs
@@ -13,6 +13,9 @@ import { getLogs } from "./storage";
  * - Thêm bữa ăn mới
  * - Xóa bữa ăn
  * - Cập nhật bữa ăn
+ *
+ * Streak được persist vào profile sau khi tính toán, đảm bảo
+ * hàm self-contained và không phụ thuộc vào caller để lưu dữ liệu.
  *
  * @returns Object chứa { currentStreak, bestStreak }
  */
@@ -30,6 +33,17 @@ export function calculateAndUpdateStreak(): {
 
   const currentStreak = calcCurrentStreak(allLogs);
   const bestStreak = calcBestStreak(allLogs);
+
+  // Persist streak vào profile để tránh mất dữ liệu khi reload trang
+  const profile = getProfile();
+  if (profile) {
+    saveProfile({
+      ...profile,
+      currentStreak,
+      // Dùng Math.max để bestStreak không bị ghi đè bởi giá trị thấp hơn
+      bestStreak: Math.max(bestStreak, profile.bestStreak ?? 0),
+    });
+  }
 
   return { currentStreak, bestStreak };
 }

@@ -178,7 +178,7 @@ const cardVariants = {
 export default function DiaryPage() {
   const { currentLog, loadLog, addIngredients, removeIngredient } =
     useDiaryStore();
-  const { profile, loadProfile, updateProfile } = useProfileStore();
+  const { profile, loadProfile, syncStreak } = useProfileStore();
   const [mounted, setMounted] = useState(false);
   const [currentDate, setCurrentDate] = useState(getToday); // local today
   const [modalMeal, setModalMeal] = useState<MealType | null>(null);
@@ -186,6 +186,8 @@ export default function DiaryPage() {
   useEffect(() => {
     loadProfile();
     loadLog(getToday());
+    // Đồng bộ streak từ logs khi mount trang
+    syncStreak();
     // Use a microtask to avoid "synchronous setState in effect" error
     queueMicrotask(() => setMounted(true));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -212,10 +214,10 @@ export default function DiaryPage() {
   const closeModal = useCallback(() => setModalMeal(null), []);
 
   const handleStreakUpdate = useCallback(
-    (streak: { currentStreak: number; bestStreak: number }) => {
-      if (profile) updateProfile(streak);
+    () => {
+      syncStreak();
     },
-    [profile, updateProfile],
+    [syncStreak],
   );
 
   const target = profile?.macroTarget?.calories ?? 2000;
