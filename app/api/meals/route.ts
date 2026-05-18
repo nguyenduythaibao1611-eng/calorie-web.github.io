@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
 // GET /api/meals?userId=xxx&date=2024-05-18
 // Lấy tất cả bữa ăn của 1 user trong 1 ngày, kèm ingredients
 export async function GET(request: NextRequest) {
