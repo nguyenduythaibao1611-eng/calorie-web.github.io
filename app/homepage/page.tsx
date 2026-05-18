@@ -1,49 +1,44 @@
 'use client';
 
-import { useEffect, useState } from "react";
-
-const features = [
-  {
-    icon: "local_fire_department",
-    title: "Theo dõi calo",
-    description: "Tính toán lượng calo nạp vào và tiêu hao mỗi ngày dựa trên TDEE được cá nhân hóa.",
-  },
-  {
-    icon: "menu_book",
-    title: "Quản lý bữa ăn",
-    description: "Lưu bữa sáng, trưa, tối và các bữa phụ dễ dàng, nhanh chóng mỗi ngày.",
-  },
-  {
-    icon: "bar_chart",
-    title: "Thống kê tiến trình",
-    description: "Xem biểu đồ thay đổi theo ngày và theo tuần để theo dõi hành trình rõ ràng.",
-  },
-  {
-    icon: "monitoring",
-    title: "Phân tích Macro",
-    description: "Theo dõi tỷ lệ protein, carbs, chất béo để đảm bảo chế độ ăn cân bằng, khoa học.",
-  },
-];
+import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useProfileStore } from "@/store/profileStore";
 
 export default function Home() {
+  const router = useRouter();
+  const profile = useProfileStore((state) => state.profile);
   const [navOpen, setNavOpen] = useState(false);
-  const [navScrolled, setNavScrolled] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [barsLoaded, setBarsLoaded] = useState(false);
 
+  const handleStart = useCallback(() => {
+    const hasProfile = profile && profile.name && profile.name.trim() !== "";
+    if (hasProfile) {
+      router.push("/dashboard");
+    } else {
+      router.push("/setup");
+    }
+  }, [profile, router]);
+
+  const features = [
+    { icon: "calculate", title: "Tính TDEE tự động", description: "Nhập thông số cơ thể, CaloMate sẽ tính toán lượng calo cần thiết mỗi ngày một cách chính xác." },
+    { icon: "analytics", title: "Theo dõi macro chi tiết", description: "Giám sát Protein, Carbs, Chất béo hàng ngày và nhận gợi ý cải thiện để đạt mục tiêu nhanh hơn." },
+    { icon: "food_bank", title: "Thực phẩm Việt Nam", description: "Cơ sở dữ liệu rộng lớn các thực phẩm Việt Nam với thông tin dinh dưỡng chính xác, cập nhật liên tục." },
+  ];
+
   useEffect(() => {
-    const onScroll = () => setNavScrolled(window.scrollY > 20);
-    onScroll();
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    const handleScroll = () => setScrolled(window.scrollY > 0);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setBarsLoaded(true), 500);
-    return () => window.clearTimeout(timer);
+    const timer = setTimeout(() => setBarsLoaded(true), 600);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
-    const revealEls = document.querySelectorAll<HTMLElement>(".reveal");
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -52,69 +47,56 @@ export default function Home() {
           }
         });
       },
-      { threshold: 0.13 }
+      { threshold: 0.1 }
     );
 
-    revealEls.forEach((el) => observer.observe(el));
+    document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, []);
 
   return (
-    <main className="bg-[#f4fbf6] text-[#161d1a] overflow-x-hidden">
-      <nav className={`navbar ${navScrolled ? "scrolled" : ""}`}>
+    <main className="bg-[#f4fbf6]">
+      {/* Navigation */}
+      <nav className={`navbar ${scrolled ? "scrolled" : ""}`}>
         <div className="navbar-inner">
-          <a className="logo" href="#trang-chu">
-            <span className="material-symbols-outlined icon-fill" style={{ color: "#005239", fontSize: 26 }}>
+          <div className="logo">
+            <span className="material-symbols-outlined filled-icon text-primary" style={{ fontSize: 20 }}>
               local_fire_department
             </span>
-            <span className="logo-text">CaloMate</span>
-          </a>
-
-          <div className={`nav-links ${navOpen ? "open" : ""}`}>
-            <a className="nav-link" href="#tinh-nang" onClick={() => setNavOpen(false)}>
-              Tính năng
-            </a>
-            <a className="nav-link" href="#cach-hoat-dong" onClick={() => setNavOpen(false)}>
-              Cách hoạt động
-            </a>
-            <a className="nav-link" href="#thong-ke" onClick={() => setNavOpen(false)}>
-              Thống kê
-            </a>
-            <a className="nav-link" href="#lien-he" onClick={() => setNavOpen(false)}>
-              Liên hệ
-            </a>
-            <a className="btn-nav" href="#bat-dau" onClick={() => setNavOpen(false)}>
-              Bắt đầu
-            </a>
+            <span className="font-h1 font-black tracking-tight logo-text">CaloMate</span>
           </div>
-
-          <button className="hamburger" type="button" aria-label="Mở menu" onClick={() => setNavOpen((open) => !open)}>
-            <span />
-            <span />
-            <span />
+          <div className={`nav-links ${navOpen ? "open" : ""}`}>
+            <a className="nav-link" href="#tinh-nang">Tính năng</a>
+            <Link className="nav-link" href="/diary">Nhật ký</Link>
+            <Link className="nav-link" href="/stats">Thống kê</Link>
+            <button className="nav-link" onClick={handleStart}>Bắt đầu</button>
+            <Link className="btn-nav" href="/settings">
+              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                account_circle
+              </span>
+              Tài khoản
+            </Link>
+          </div>
+          <button className="hamburger" onClick={() => setNavOpen(!navOpen)}>
+            <span></span>
+            <span></span>
+            <span></span>
           </button>
         </div>
       </nav>
 
-      <section className="hero" id="trang-chu">
-        <div className="blob" style={{ top: "-8%", right: "-5%", width: 580, height: 580, background: "#a5f3cd" }} />
-        <div className="blob" style={{ top: "45%", left: "-8%", width: 480, height: 480, background: "#caeadd", opacity: 0.45 }} />
-        <div className="blob" style={{ bottom: "-15%", right: "15%", width: 360, height: 360, background: "#8ad6b2", opacity: 0.3 }} />
-
+      {/* Hero Section */}
+      <section className="hero">
         <div className="hero-inner">
           <div>
             <div className="eyebrow anim-text d1">
-              <span className="material-symbols-outlined icon-fill" style={{ fontSize: 14, color: "#e86c00" }}>
-                local_fire_department
+              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+                auto_awesome
               </span>
-              Ứng dụng dinh dưỡng dành cho bạn
+              Công cụ quản lý dinh dưỡng toàn diện
             </div>
             <h1 className="hero-h1 anim-text d2">
-              Kiểm soát <span className="g">calo.</span>
-              <br />
-              Xây dựng vóc dáng.
-              <br />
-              Sống khỏe mỗi ngày.
+              <span className="g">Kiểm soát dinh dưỡng</span>, <br /> thay đổi cơ thể
             </h1>
             <p className="hero-sub anim-text d3">
               CaloMate giúp bạn tính TDEE, theo dõi macro, ghi nhật ký bữa ăn và tiến trình thay đổi cơ thể bằng giao diện đơn giản, hiện đại và trực quan.
@@ -197,6 +179,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Features Section */}
       <section className="section" id="tinh-nang">
         <div className="section-inner">
           <h2 className="sec-title reveal">Tất cả những gì bạn cần<br />để kiểm soát dinh dưỡng</h2>
@@ -219,6 +202,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Stats Section */}
       <section className="section" id="thong-ke" style={{ paddingTop: 0 }}>
         <div className="stats-band reveal">
           <div className="sb-item">
@@ -238,6 +222,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* How It Works Section */}
       <section className="section how-bg" id="cach-hoat-dong">
         <div className="section-inner">
           <h2 className="sec-title reveal">
@@ -267,6 +252,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* CTA Section */}
       <section className="section" id="bat-dau">
         <div className="cta-box reveal" style={{ position: "relative" }}>
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 22 }}>
@@ -278,16 +264,17 @@ export default function Home() {
           </div>
           <h2 className="cta-title">Bắt đầu hành trình thay đổi<br />cơ thể ngay hôm nay</h2>
           <p className="cta-sub">Chỉ mất 30 giây để tạo hồ sơ và nhận kế hoạch<br />dinh dưỡng cá nhân hóa hoàn toàn miễn phí.</p>
-          <a className="btn-primary" href="#" style={{ fontSize: 16, padding: "15px 40px", borderRadius: 14, display: "inline-flex", boxShadow: "0 8px 28px rgba(0,82,57,.32)" }}>
+          <button className="btn-primary" onClick={handleStart} style={{ fontSize: 16, padding: "15px 40px", borderRadius: 14, display: "inline-flex", boxShadow: "0 8px 28px rgba(0,82,57,.32)" }}>
             <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
               arrow_forward
             </span>
             Bắt đầu với CaloMate
-          </a>
+          </button>
           <p className="cta-note">✓ Miễn phí hoàn toàn · ✓ Tiếng Việt 100% · ✓ Không cần thẻ ngân hàng</p>
         </div>
       </section>
 
+      {/* Footer */}
       <footer id="lien-he">
         <div className="footer-inner">
           <div className="footer-logo">
@@ -298,9 +285,9 @@ export default function Home() {
             <span className="footer-copy" style={{ marginLeft: 6 }}>© 2026</span>
           </div>
           <div className="footer-links">
-            <a className="footer-link" href="#">Chính sách bảo mật</a>
-            <a className="footer-link" href="#">Điều khoản sử dụng</a>
-            <a className="footer-link" href="#">Liên hệ</a>
+            <a className="footer-link" href="/privacy">Chính sách bảo mật</a>
+            <a className="footer-link" href="/terms">Điều khoản sử dụng</a>
+            <a className="footer-link" href="/contact">Liên hệ</a>
           </div>
         </div>
       </footer>
