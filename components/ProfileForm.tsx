@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   TrendingDown,
@@ -22,6 +23,7 @@ const activityLevels = [
 
 export default function ProfileForm() {
   const { setProfile } = useProfileStore();
+  const router = useRouter();
 
   const [form, setForm] = useState({
     gender: "male",
@@ -32,7 +34,6 @@ export default function ProfileForm() {
     goal: "maintain" as "lose" | "maintain" | "gain",
   });
 
-  // Derive TDEE and Macros during render
   const w = Math.abs(Number(form.weight));
   const h = Math.abs(Number(form.height));
   const a = Math.abs(Number(form.age));
@@ -43,7 +44,6 @@ export default function ProfileForm() {
   if (!w || !h || !a) {
     error = "Vui lòng nhập đầy đủ thông số lớn hơn 0";
   } else {
-    // Công thức Mifflin-St Jeor
     let bmr = 10 * w + 6.25 * h - 5 * a;
     bmr = form.gender === "male" ? bmr + 5 : bmr - 161;
 
@@ -52,10 +52,8 @@ export default function ProfileForm() {
     if (form.goal === "lose") tdee -= 500;
     if (form.goal === "gain") tdee += 500;
 
-    // Edge Case: Đảm bảo calo không âm hoặc quá thấp (Minimum 1200kcal)
     const finalCal = Math.max(Math.round(tdee), 1200);
 
-    // Phân bổ Macros (Đảm bảo không ra số 0 gây lỗi chia cho 0 ở Dashboard)
     const protein = Math.max(Math.round((finalCal * 0.3) / 4), 1);
     const fat = Math.max(Math.round((finalCal * 0.25) / 9), 1);
     const carbs = Math.max(Math.round((finalCal * 0.45) / 4), 1);
@@ -66,7 +64,6 @@ export default function ProfileForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Final check trước khi lưu
     if (error || +form.weight <= 0 || +form.height <= 0 || +form.age <= 0) {
       alert("Thông tin nhập vào không hợp lệ!");
       return;
@@ -89,12 +86,11 @@ export default function ProfileForm() {
     };
 
     setProfile(profile);
-    alert("Hồ sơ đã được đồng bộ thành công!");
+    router.push('/dashboard');
   };
 
   return (
     <div className="min-h-screen bg-[#F7FDF9] flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans text-[#1A2F24]">
-      {/* Form card — rộng dần theo màn hình */}
       <div className="max-w-[480px] sm:max-w-[520px] lg:max-w-[600px] w-full pt-8 lg:pt-10 pb-12 lg:pb-16 px-6 sm:px-10 lg:px-12">
 
         {/* Header */}
@@ -137,7 +133,7 @@ export default function ProfileForm() {
             </div>
           </div>
 
-          {/* Tuổi, Cao, Nặng - Chặn giá trị âm và 0 */}
+          {/* Tuổi, Cao, Nặng */}
           <div className="grid grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
             {[
               { key: "age", label: "TUỔI", max: 120 },
@@ -153,11 +149,9 @@ export default function ProfileForm() {
                   min="1"
                   max={item.max}
                   value={form[item.key as keyof typeof form]}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    // Chỉ nhận số dương (Task 24: 0g input prevention)
-                    setForm({ ...form, [item.key]: val });
-                  }}
+                  onChange={(e) =>
+                    setForm({ ...form, [item.key]: e.target.value })
+                  }
                   className={`w-full bg-white text-[#1A2F24] text-base lg:text-lg font-semibold px-4 py-3.5 lg:py-4 rounded-xl focus:outline-none border shadow-sm transition-all ${
                     +form[item.key as keyof typeof form] <= 0
                       ? "border-red-500"
@@ -206,10 +200,7 @@ export default function ProfileForm() {
                   key={g.v}
                   type="button"
                   onClick={() =>
-                    setForm({
-                      ...form,
-                      goal: g.v as "lose" | "maintain" | "gain",
-                    })
+                    setForm({ ...form, goal: g.v as "lose" | "maintain" | "gain" })
                   }
                   className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${
                     form.goal === g.v
@@ -218,7 +209,9 @@ export default function ProfileForm() {
                   }`}
                 >
                   <g.icon
-                    className={`w-5 h-5 lg:w-6 lg:h-6 mb-2 ${form.goal === g.v ? "text-[#084C3A]" : "text-gray-500"}`}
+                    className={`w-5 h-5 lg:w-6 lg:h-6 mb-2 ${
+                      form.goal === g.v ? "text-[#084C3A]" : "text-gray-500"
+                    }`}
                   />
                   <span className="text-[11px] lg:text-xs font-bold">{g.l}</span>
                 </button>
@@ -226,14 +219,14 @@ export default function ProfileForm() {
             </div>
           </div>
 
-          {/* Hiển thị lỗi nếu có (Task 24 requirement) */}
+          {/* Error */}
           {error && (
             <div className="flex items-center gap-2 p-3 lg:p-4 rounded-lg bg-red-50 text-red-600 text-xs lg:text-sm font-bold">
               <AlertCircle className="w-4 h-4 lg:w-5 lg:h-5" /> {error}
             </div>
           )}
 
-          {/* Results Display */}
+          {/* Results */}
           <div className="relative overflow-hidden bg-[#F2F8F4] p-6 lg:p-7 rounded-2xl border border-[#E3EFE8]">
             <span className="material-symbols-outlined absolute -bottom-6 -right-4 text-[130px] lg:text-[160px] text-[#084C3A] opacity-[0.04] pointer-events-none transform -rotate-12">
               energy_savings_leaf
@@ -254,27 +247,9 @@ export default function ProfileForm() {
 
             <div className="border-t border-[#D5E6DC]/80 pt-5 grid grid-cols-3 gap-2 lg:gap-5 relative z-10">
               {[
-                {
-                  label: "Tinh bột",
-                  val: results.carbs,
-                  icon: "bakery_dining",
-                  color: "#A05E2C",
-                  bg: "#F4EBE1",
-                },
-                {
-                  label: "Đạm",
-                  val: results.protein,
-                  icon: "set_meal",
-                  color: "#3B7254",
-                  bg: "#E3EFE8",
-                },
-                {
-                  label: "Chất béo",
-                  val: results.fat,
-                  icon: "egg_alt",
-                  color: "#4C8F62",
-                  bg: "#E8F3EA",
-                },
+                { label: "Tinh bột", val: results.carbs,   icon: "bakery_dining", color: "#A05E2C", bg: "#F4EBE1" },
+                { label: "Đạm",      val: results.protein, icon: "set_meal",      color: "#3B7254", bg: "#E3EFE8" },
+                { label: "Chất béo", val: results.fat,     icon: "egg_alt",       color: "#4C8F62", bg: "#E8F3EA" },
               ].map((m) => (
                 <div key={m.label}>
                   <div className="flex items-center gap-1.5 mb-1.5">
@@ -301,6 +276,7 @@ export default function ProfileForm() {
             </div>
           </div>
 
+          {/* Submit */}
           <div className="pt-2">
             <button
               type="submit"

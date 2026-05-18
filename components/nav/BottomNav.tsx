@@ -5,9 +5,10 @@ import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 
 const NAV_ITEMS = [
-  { href: '/',      label: 'Tổng quan', icon: 'home'      },
-  { href: '/diary', label: 'Nhật ký',   icon: 'menu_book' },
-  { href: '/stats', label: 'Thống kê',  icon: 'bar_chart' },
+  { href: '/homepage',  label: 'Trang chủ',  icon: 'home'      },
+  { href: '/dashboard', label: 'Tổng quan', icon: 'dashboard' },
+  { href: '/diary',     label: 'Nhật ký',   icon: 'menu_book' },
+  { href: '/stats',     label: 'Thống kê',  icon: 'bar_chart' },
 ];
 
 export function BottomNav() {
@@ -15,18 +16,16 @@ export function BottomNav() {
 
   return (
     <footer className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-t border-[#005239]/10 h-16 lg:h-[68px] flex justify-center items-center">
-      {/* max-w-7xl đồng bộ với header và main — px tăng dần theo màn hình */}
-      <nav className="w-full max-w-7xl flex justify-around items-center px-4 sm:px-6 lg:px-10">
+      <nav className="w-full max-w-7xl flex justify-around items-center px-2 sm:px-6 lg:px-10">
         {NAV_ITEMS.map(({ href, label, icon }) => {
-          const active = href === '/' ? pathname === '/' : pathname?.startsWith(href);
+          const active = pathname === href;
 
           return (
             <Link
               key={href}
               href={href}
-              className="flex flex-col items-center gap-1 py-2 px-8 rounded-2xl relative"
+              className="flex flex-col items-center gap-1 py-2 px-3 sm:px-5 rounded-2xl relative transition-all"
             >
-              {/* Active background */}
               {active && (
                 <motion.div
                   layoutId="nav-active"
@@ -35,7 +34,6 @@ export function BottomNav() {
                 />
               )}
 
-              {/* Icon */}
               <motion.span
                 className="material-symbols-outlined text-2xl relative z-10"
                 style={{
@@ -48,9 +46,8 @@ export function BottomNav() {
                 {icon}
               </motion.span>
 
-              {/* Label */}
               <motion.span
-                className="text-[10px] font-bold uppercase tracking-[0.1em] font-['Be_Vietnam_Pro'] relative z-10"
+                className="text-[10px] font-bold uppercase tracking-[0.08em] font-['Be_Vietnam_Pro'] relative z-10"
                 animate={{ color: active ? '#005239' : '#6f7973' }}
                 transition={{ duration: 0.2 }}
               >
@@ -62,4 +59,4 @@ export function BottomNav() {
       </nav>
     </footer>
   );
-} 
+}

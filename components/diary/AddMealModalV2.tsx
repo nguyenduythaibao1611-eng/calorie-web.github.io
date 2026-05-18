@@ -4,8 +4,6 @@ import { useState } from "react";
 import type { Ingredient } from "@/types";
 import FOOD_DB from "@/lib/ingredients.json";
 
-// ─────────────────────────────────────────────────────────────────────────────
-
 type FoodItem = (typeof FOOD_DB)[number];
 type MealType = "breakfast" | "lunch" | "dinner" | "snack";
 
@@ -17,10 +15,7 @@ const MEAL_META: Record<MealType, { label: string; icon: string }> = {
 };
 
 function removeAccents(str: string) {
-  return str
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
 
 function calcNutrition(food: FoodItem, grams: number) {
@@ -33,16 +28,16 @@ function calcNutrition(food: FoodItem, grams: number) {
   };
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-
 interface AddMealModalProps {
   mealType: MealType;
+  existingIngredients?: Ingredient[];
   onClose: () => void;
   onSave: (ingredients: Ingredient[]) => void;
 }
 
 export default function AddMealModal({
   mealType,
+  existingIngredients = [],
   onClose,
   onSave,
 }: AddMealModalProps) {
@@ -51,8 +46,8 @@ export default function AddMealModal({
   const [grams, setGrams] = useState("100");
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  // Cart state
-  const [cart, setCart] = useState<Ingredient[]>([]);
+  // Khởi tạo cart với các món đã có sẵn
+  const [cart, setCart] = useState<Ingredient[]>(existingIngredients);
 
   const filtered =
     query.trim() === ""
@@ -97,7 +92,6 @@ export default function AddMealModal({
       return [...prev, newIngredient];
     });
 
-    // Reset expanded item but don't close modal
     setSelected(null);
     setGrams("100");
     setExpandedId(null);
@@ -116,26 +110,22 @@ export default function AddMealModal({
 
   return (
     <>
-      {/* Backdrop */}
       <div
         onClick={onClose}
         className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm"
         aria-hidden="true"
       />
 
-      {/* Sheet / Modal */}
       <div
         role="dialog"
         aria-modal="true"
         aria-label={`Thêm món vào ${MEAL_META[mealType].label}`}
         className="fixed bottom-0 left-0 right-0 z-[101] bg-background rounded-t-3xl max-h-[95vh] flex flex-col shadow-2xl md:top-1/2 md:left-1/2 md:bottom-auto md:right-auto md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-3xl md:w-[900px] md:max-w-[95vw] md:h-[85vh]"
       >
-        {/* Drag handle (mobile only) */}
         <div className="flex justify-center pt-3 md:hidden">
           <div className="w-10 h-1 rounded-full bg-primary/20" />
         </div>
 
-        {/* Header */}
         <div className="flex items-center justify-between px-5 pt-3 pb-4 border-b border-primary/10">
           <h2 className="font-h2 text-lg font-bold text-on-background">
             Thêm món — {MEAL_META[mealType].label}
@@ -151,16 +141,12 @@ export default function AddMealModal({
           </button>
         </div>
 
-        {/* 2-Column Layout */}
         <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
-          {/* LEFT PANE: Search & List */}
+          {/* LEFT PANE */}
           <div className="flex-1 flex flex-col md:border-r border-primary/10 min-h-0">
-            {/* Search */}
             <div className="p-4 border-b border-primary/5">
               <div className="flex items-center gap-2.5 bg-surface-container-lowest rounded-xl border border-primary/15 px-3.5 py-2.5">
-                <span className="material-symbols-outlined text-outline text-base">
-                  search
-                </span>
+                <span className="material-symbols-outlined text-outline text-base">search</span>
                 <input
                   type="text"
                   placeholder="Tìm nguyên liệu..."
@@ -172,12 +158,9 @@ export default function AddMealModal({
               </div>
             </div>
 
-            {/* Food List */}
             <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2 pb-24 md:pb-4 custom-scrollbar">
               {filtered.length === 0 && (
-                <p className="text-center text-outline text-sm py-6">
-                  Không tìm thấy nguyên liệu 😕
-                </p>
+                <p className="text-center text-outline text-sm py-6">Không tìm thấy nguyên liệu 😕</p>
               )}
               {filtered.map((food) => (
                 <div key={food.id}>
@@ -190,56 +173,35 @@ export default function AddMealModal({
                     }`}
                   >
                     <div className="flex-1">
-                      <p className="font-body-md font-semibold text-sm text-on-background">
-                        {food.name}
-                      </p>
+                      <p className="font-body-md font-semibold text-sm text-on-background">{food.name}</p>
                       <p className="font-numbers text-[11px] text-outline mt-0.5">
                         P: {food.protein}g · C: {food.carbs}g · F: {food.fat}g
                       </p>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
-                      <span className="font-numbers text-sm text-on-background">
-                        {food.calories} kcal
-                      </span>
+                      <span className="font-numbers text-sm text-on-background">{food.calories} kcal</span>
                       <button
                         className="w-7 h-7 flex items-center justify-center rounded-md border border-primary/20 hover:bg-primary/10 text-primary transition-colors"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleFoodClick(food);
-                        }}
+                        onClick={(e) => { e.stopPropagation(); handleFoodClick(food); }}
                       >
-                        <span className="material-symbols-outlined text-lg">
-                          add
-                        </span>
+                        <span className="material-symbols-outlined text-lg">add</span>
                       </button>
                     </div>
                   </div>
 
-                  {/* Inline gram input when expanded */}
                   {expandedId === food.id && (
                     <div className="mt-2 p-4 bg-surface-container-lowest rounded-xl border border-primary/12 space-y-3 shadow-inner">
                       <div className="flex items-center justify-between">
-                        <p className="font-label-caps text-[11px] uppercase tracking-widest text-outline">
-                          Số lượng (gram)
-                        </p>
+                        <p className="font-label-caps text-[11px] uppercase tracking-widest text-outline">Số lượng (gram)</p>
                         {nutrition && (
-                          <span className="font-numbers font-bold text-sm text-primary">
-                            {nutrition.calories} kcal
-                          </span>
+                          <span className="font-numbers font-bold text-sm text-primary">{nutrition.calories} kcal</span>
                         )}
                       </div>
-
                       <div className="flex items-center gap-3">
                         <button
-                          onClick={() =>
-                            setGrams((g) =>
-                              String(Math.max(10, (Number(g) || 100) - 10)),
-                            )
-                          }
+                          onClick={() => setGrams((g) => String(Math.max(10, (Number(g) || 100) - 10)))}
                           className="w-10 h-10 rounded-full bg-primary/10 text-primary text-xl flex items-center justify-center hover:bg-primary/20 transition-colors"
-                        >
-                          −
-                        </button>
+                        >−</button>
                         <div className="flex-1 flex items-end justify-center gap-2">
                           <input
                             type="number"
@@ -248,39 +210,24 @@ export default function AddMealModal({
                             onChange={(e) => setGrams(e.target.value)}
                             className="w-20 text-center font-numbers font-bold text-2xl text-primary bg-transparent outline-none border-b-2 border-primary/20 focus:border-primary pb-1 transition-colors"
                           />
-                          <span className="font-numbers text-sm text-outline pb-1">
-                            g
-                          </span>
+                          <span className="font-numbers text-sm text-outline pb-1">g</span>
                         </div>
                         <button
-                          onClick={() =>
-                            setGrams((g) => String((Number(g) || 100) + 10))
-                          }
+                          onClick={() => setGrams((g) => String((Number(g) || 100) + 10))}
                           className="w-10 h-10 rounded-full bg-primary/10 text-primary text-xl flex items-center justify-center hover:bg-primary/20 transition-colors"
-                        >
-                          +
-                        </button>
+                        >+</button>
                       </div>
-
                       <div className="flex gap-2 pt-2">
                         <button
-                          onClick={() => {
-                            setExpandedId(null);
-                            setSelected(null);
-                            setGrams("100");
-                          }}
+                          onClick={() => { setExpandedId(null); setSelected(null); setGrams("100"); }}
                           className="flex-1 py-2.5 rounded-xl font-body-md font-bold text-sm text-primary bg-primary/10 hover:bg-primary/20 transition-colors"
-                        >
-                          Hủy
-                        </button>
+                        >Hủy</button>
                         <button
                           onClick={handleAddToCart}
                           disabled={!grams || Number(grams) <= 0}
                           className="flex-[2] py-2.5 rounded-xl font-body-md font-bold text-sm text-white bg-primary shadow-lg shadow-primary/25 disabled:opacity-40 hover:opacity-90 transition-all flex justify-center items-center gap-2"
                         >
-                          <span className="material-symbols-outlined text-sm">
-                            add_shopping_cart
-                          </span>
+                          <span className="material-symbols-outlined text-sm">add_shopping_cart</span>
                           Thêm vào bữa
                         </button>
                       </div>
@@ -291,73 +238,50 @@ export default function AddMealModal({
             </div>
           </div>
 
-          {/* RIGHT PANE: Cart (Desktop: Side by side, Mobile: Bottom fixed or inline) */}
-          {/* We will make it a sliding panel or fixed block on mobile, but side-by-side on desktop */}
+          {/* RIGHT PANE */}
           <div
             className={`w-full md:w-[320px] flex flex-col bg-surface-container-lowest md:border-none border-t border-primary/10 absolute md:static bottom-0 left-0 right-0 z-10 transition-transform ${
               cart.length > 0 ? "translate-y-0" : "translate-y-[120%] md:translate-y-0"
             }`}
           >
-            {/* Cart Header */}
             <div className="p-4 border-b border-primary/10 flex items-center gap-3 bg-surface-container-low/50">
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <span className="material-symbols-outlined filled-icon text-primary text-xl">
-                  {MEAL_META[mealType].icon}
-                </span>
+                <span className="material-symbols-outlined filled-icon text-primary text-xl">{MEAL_META[mealType].icon}</span>
               </div>
               <div>
-                <h3 className="font-h2 font-bold text-base text-on-background">
-                  {MEAL_META[mealType].label}
-                </h3>
-                <p className="font-numbers text-[11px] uppercase text-outline">
-                  Tổng: {totalCartCalories} KCAL
-                </p>
+                <h3 className="font-h2 font-bold text-base text-on-background">{MEAL_META[mealType].label}</h3>
+                <p className="font-numbers text-[11px] uppercase text-outline">Tổng: {totalCartCalories} KCAL</p>
               </div>
             </div>
 
-            {/* Cart Items List */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar min-h-[100px] max-h-[30vh] md:max-h-none">
               {cart.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-outline opacity-60">
-                  <span className="material-symbols-outlined text-4xl mb-2">
-                    restaurant
-                  </span>
+                  <span className="material-symbols-outlined text-4xl mb-2">restaurant</span>
                   <p className="text-sm">Chưa chọn món nào</p>
                 </div>
               ) : (
                 cart.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center justify-between group"
-                  >
+                  <div key={item.id} className="flex items-center justify-between group">
                     <div className="flex-1 min-w-0 pr-3">
-                      <p className="font-body-md font-semibold text-sm text-on-background truncate">
-                        {item.name}
-                      </p>
-                      <p className="font-numbers text-[10px] text-outline">
-                        {item.amount}g • {item.calories} kcal
-                      </p>
+                      <p className="font-body-md font-semibold text-sm text-on-background truncate">{item.name}</p>
+                      <p className="font-numbers text-[10px] text-outline">{item.amount}g • {item.calories} kcal</p>
                     </div>
                     <button
                       onClick={() => handleRemoveFromCart(item.id)}
                       className="w-7 h-7 rounded-full flex items-center justify-center bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors shrink-0"
                     >
-                      <span className="material-symbols-outlined text-sm">
-                        close
-                      </span>
+                      <span className="material-symbols-outlined text-sm">close</span>
                     </button>
                   </div>
                 ))
               )}
             </div>
 
-            {/* Cart Footer */}
             <div className="p-4 border-t border-primary/10 bg-background md:bg-transparent">
               <div className="flex items-center justify-between mb-4">
                 <span className="font-body-md text-sm text-outline">Tổng calo</span>
-                <span className="font-numbers font-bold text-lg text-primary">
-                  {totalCartCalories} kcal
-                </span>
+                <span className="font-numbers font-bold text-lg text-primary">{totalCartCalories} kcal</span>
               </div>
               <button
                 onClick={() => onSave(cart)}
