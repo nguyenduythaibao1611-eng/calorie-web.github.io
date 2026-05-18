@@ -182,11 +182,21 @@ export function hasAllMainMeals(log: DailyLog): boolean {
 export function calcCurrentStreak(logs: DailyLog[]): number {
   const logMap = new Map(logs.map((l) => [l.date, l]));
   let streak = 0;
-  for (let i = 0; i <= 365; i++) {
+  
+  const todayDateStr = toLocalDateStr(new Date());
+  const todayLog = logMap.get(todayDateStr);
+  const todayCompleted = todayLog && hasAllMainMeals(todayLog);
+  
+  // If today is completed, we count starting from today (i=0)
+  // If today is not completed, we count starting from yesterday (i=1)
+  // so the streak isn't visually lost until tomorrow.
+  const startIndex = todayCompleted ? 0 : 1;
+
+  for (let i = startIndex; i <= 365; i++) {
     const d = new Date();
     d.setDate(d.getDate() - i);
 
-const log = logMap.get(toLocalDateStr(d));
+    const log = logMap.get(toLocalDateStr(d));
 
     if (log && hasAllMainMeals(log)) {
       streak++;

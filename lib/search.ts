@@ -37,15 +37,24 @@ export async function searchIngredient(
   const dbIngredients = await prisma.ingredient.findMany();
 
   // 2. Chuyển đổi format cho khớp 100% với kiểu dữ liệu cũ của team ông
-  const normalizedIngredients: Ingredient[] = dbIngredients.map((i) => ({
-    id: i.id,
-    name: i.name,
-    calories: i.calories,
-    protein: i.protein,
-    carbs: i.carbs,
-    fat: i.fat,
-    amount: 100, // Mặc định 100g như code cũ của ông
-  }));
+  const normalizedIngredients: Ingredient[] = dbIngredients.map(
+    (i: {
+      id: string;
+      name: string;
+      calories: number;
+      protein: number;
+      carbs: number;
+      fat: number;
+    }) => ({
+      id: i.id,
+      name: i.name,
+      calories: i.calories,
+      protein: i.protein,
+      carbs: i.carbs,
+      fat: i.fat,
+      amount: 100, // Mặc định 100g như code cũ của ông
+    })
+  );
 
   // 3. Logic chấm điểm và lọc kết quả (Giữ nguyên)
   return normalizedIngredients
