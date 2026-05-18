@@ -400,5 +400,5 @@ git push origin feature/feature-name
 
 ---
 
-**Cập nhật lần cuối:** 16/05/2026  
-**Version:** 0.1.0
+**Cập nhật lần cuối:** 
+**Version:** 
