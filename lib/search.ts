@@ -1,6 +1,6 @@
 'use server'; // Biến file này thành Server Action chạy ngầm
 
-import prisma from "@/lib/prisma"; // Ống nước Database
+import { prisma } from "@/lib/prisma"; // Ống nước Database
 import type { Ingredient } from "@/types";
 
 function normalize(str: string): string {
