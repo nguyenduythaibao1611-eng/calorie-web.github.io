@@ -7,8 +7,8 @@ import { Card, CardGrid } from "@astrojs/starlight/components";
 
 # 🍽️ Calorie Web - Tài Liệu Hoàn Chỉnh
 
-**Cập nhật lần cuối:** 17/05/2026 
-**Version:** 0.2.0
+**Cập nhật lần cuối:** 11/05/2026 
+**Version:** 0.1.0
 
 Chào mừng đến với tài liệu dự án **Calorie Web**. Đây là ứng dụng web hiện đại được xây dựng bằng **Next.js 16** và **React 19**, được thiết kế để giúp người dùng theo dõi và quản lý lượng calo tiêu thụ hàng ngày.
 
@@ -55,6 +55,7 @@ Chào mừng đến với tài liệu dự án **Calorie Web**. Đây là ứng 
 | **TypeScript**       | Version 5 (strict mode) |
 | **State Management** | Zustand 5.0.13          |
 | **Styling**          | Tailwind CSS v4         |
+| **Animations**       | Framer Motion 12.38.0 (NEW!) |
 | **Charts**           | Recharts 3.8.1          |
 | **Icons**            | Lucide React 1.14.0     |
 
@@ -64,10 +65,10 @@ Chào mừng đến với tài liệu dự án **Calorie Web**. Đây là ứng 
 
 | URL | Component | Mô Tả | Status |
 |-----|-----------|-------|--------|
-| `/` | `app/page.tsx` + `DashboardPage.tsx` | Home page - hiển thị Dashboard theo dõi calo hôm nay, macro nutrients, và bottom navigation | ✅ Active |
-| `/diary` | `app/diary/page.tsx` | Giao diện nhập nhật ký calo hàng ngày với 4 bữa ăn, modal tìm kiếm món ăn Việt, nhập gram và tự động tính dinh dưỡng | ✅ Active |
-| `/settings` | `app/settings/page.tsx` | Thiết lập và chỉnh sửa hồ sơ người dùng (giới tính, tuổi, chiều cao, cân nặng, mức độ hoạt động, mục tiêu) | ✅ Active |
-| `/stats` | `app/stats/page.tsx` | Thống kê chi tiết, biểu đồ Recharts, phân tích tỷ lệ macros và theo dõi chuỗi streak | ✅ Active |
+| `/` | `app/page.tsx` + `DashboardPage.tsx` | Home page - hiển thị ProfileForm nếu chưa setup, hoặc Dashboard | ✅ Active |
+| `/diary` | `app/diary/page.tsx` | Giao diện nhập nhật ký calo hàng ngày, 4 bữa ăn | ✅ Active |
+| `/settings` | `app/settings/page.tsx` | Cài đặt ứng dụng | 📋 Planned |
+| `/stats` | `app/stats/page.tsx` | Thống kê, biểu đồ, analytics | 🔄 In Progress |
 
 ### Chi Tiết từng Page
 
@@ -90,20 +91,20 @@ Chào mừng đến với tài liệu dự án **Calorie Web**. Đây là ứng 
   - Hiển thị tổng calories từng bữa và cả ngày
 - **Dependencies:** `useDiaryStore`
 
-#### **Settings Page** (`/settings`)
-- **Chức năng:**
-  - Form cài đặt và cập nhật thông tin cá nhân (Giới tính, Tuổi, Chiều cao, Cân nặng, Mức độ vận động, Mục tiêu).
-  - Tự động tính toán lại nhu cầu dinh dưỡng hàng ngày (Calories mục tiêu, Carbs, Protein, Fat) dựa trên công thức Mifflin-St Jeor và hiển thị trực tiếp khi người dùng nhập dữ liệu.
-  - Đồng bộ tức thì và lưu trữ an toàn trong localStorage thông qua Zustand store.
-- **Dependencies:** `useProfileStore`, `lucide-react`, `next/navigation`
+#### **Settings Page** (`/settings`) [Planning]
+- **Dự kiến chức năng:**
+  - Chỉnh sửa hồ sơ người dùng
+  - Thay đổi mục tiêu calo
+  - Cài đặt thông báo
+  - Quản lý dữ liệu
 
-#### **Stats Page** (`/stats`)
-- **Chức năng:**
-  - Biểu đồ cột chồng (`WeeklyChart`) hiển thị lượng calo nạp vào so với mục tiêu của 7 ngày gần nhất.
-  - Thẻ thống kê (`StatCard`) hiển thị các chỉ số: Calo trung bình ngày, Số ngày đạt mục tiêu, Tổng lượng thâm hụt/thặng dư, và Chuỗi ngày streak hiện tại.
-  - Phân tích cơ cấu dinh dưỡng đa lượng (`MacroSection`) hiển thị tỷ lệ phần trăm và lượng calo của Tinh bột, Đạm, Chất béo.
-  - Chuỗi Streak được tự động đồng bộ và tính toán dựa trên quy tắc thông minh (đủ 3 bữa chính mỗi ngày).
-- **Dependencies:** `Recharts`, `useDiaryStore`, `useProfileStore`, `framer-motion`
+#### **Stats Page** (`/stats`) [In Progress]
+- **Dự kiến chức năng:**
+  - Biểu đồ calories theo ngày/tuần/tháng
+  - Macro distribution charts
+  - Progress towards goals
+  - Streak tracking
+- **Dependencies:** `Recharts`, `useDiaryStore`, `useProfileStore`
 
 ---
 
@@ -219,41 +220,46 @@ Chào mừng đến với tài liệu dự án **Calorie Web**. Đây là ứng 
 
 ## ✨ Tính Năng Đã Hoàn Thiện
 
-✅ **Diary UI**: Giao diện nhập nhật ký calo, 4 section bữa ăn, modal thêm nguyên liệu, xóa nguyên liệu, tổng calories từng bữa và cả ngày.
-✅ **Tìm kiếm món ăn**: Modal tìm kiếm 15+ món Việt phổ biến, nhập gram, tự động tính calo & macros.
-✅ **Hồ sơ người dùng & Settings**: Thiết lập hồ sơ người dùng, chọn giới tính, tuổi, cân nặng, chiều cao, mức độ vận động và mục tiêu sức khỏe (giảm/duy trì/tăng cân).
-✅ **Tính toán dinh dưỡng**: Tính toán BMR, TDEE và mục tiêu macros (Protein, Carbs, Fat) tự động theo công thức Mifflin-St Jeor khoa học.
-✅ **Hệ thống Streak**: Tự động đếm và đồng bộ chuỗi ngày streak liên tục (`currentStreak` và `bestStreak`) khi có đủ 3 bữa chính (sáng, trưa, tối), lưu trữ tức thì và đồng bộ qua Zustand store.
-✅ **Trang Thống kê (Stats)**: Biểu đồ cột chồng Recharts theo dõi calo hàng tuần, phân tích cơ cấu macros, thẻ thống kê thâm hụt/thặng dư calo và chuỗi ngày.
-✅ **Lưu trữ tự động**: Cơ chế Zustand + localStorage giúp ứng dụng hoạt động hoàn toàn offline, giữ nguyên dữ liệu khi reload.
-✅ **Responsive**: Giao diện mobile-first, tối ưu mượt mà cho điện thoại và máy tính bảng.
-✅ **Components**: Bộ thư viện component UI chất lượng cao (Button, Card, Input, Modal, Badge, ProgressBar).
+✅ **Diary UI**: Giao diện nhập nhật ký calo, 4 section bữa ăn, modal thêm nguyên liệu, xóa nguyên liệu, tổng calories từng bữa và cả ngày
+✅ **Tìm kiếm món ăn**: Modal tìm kiếm 15+ món Việt, nhập gram, tự động tính calories
+✅ **Hồ sơ người dùng**: Tạo và quản lý hồ sơ, chọn mục tiêu (giảm/duy trì/tăng cân)
+✅ **Tính toán dinh dưỡng**: Tính BMR, TDEE, macros (Protein, Carbs, Fat) chuẩn theo công thức Mifflin-St Jeor
+✅ **Lưu trữ tự động**: Dùng Zustand + localStorage, không mất dữ liệu khi reload
+✅ **Responsive**: Mobile-first, tối ưu cho điện thoại
+✅ **Sửa toàn bộ lỗi**: Đã fix lỗi typescript, props, import/export, duplicate export, v.v.
+✅ **Database Động**: Chuyển đổi từ hệ thống data tĩnh (JSON) sang database động, hỗ trợ CRUD operations thời gian thực
+✅ **Responsive Layout**: Tối ưu hóa giao diện để hiển thị tốt trên mọi thiết bị (mobile, tablet, desktop)
+✅ **PR #2 - Fix Timezone Bug**: Sửa lỗi timezone trong streak calculation, đảm bảo tính toán chuỗi ngày chính xác trên các múi giờ khác nhau
+✅ **Dashboard**: Hiển thị thông tin dinh dưỡng hôm nay
+✅ **Components**: Hoàn tất UI component library (Button, Card, Input, Modal, Badge, ProgressBar)
+✅ **Task 22**: Fix lỗi searchIngredient
+✅ **Task 23**: Tối ưu Responsive cho Dashboard và làm lại UI ProfileForm sang trọng hơn
 
 ---
 
 ## 📈 Tiến Độ & Kế Hoạch
 
 ### ✅ Hoàn Thành
-- Trang Nhật ký bữa ăn (Diary UI) với 4 bữa chính/phụ, modal thêm/xóa món, tính tổng calo tự động.
-- Trang Cài đặt hồ sơ (Settings Page) với form nhập thông tin cá nhân và tính TDEE trực quan.
-- Trang Thống kê (Stats Page) với biểu đồ Recharts, phân tích tỷ lệ Macros, thẻ đo lường thâm hụt.
-- Hệ thống Streak đồng bộ hóa thông minh (chỉ tính streak khi nhập đủ 3 bữa chính/ngày).
-- Core tính toán dinh dưỡng (calc.ts) và cơ chế cập nhật streak an toàn (updateStreak.ts).
-- State management toàn cục với Zustand + cơ chế auto-persist localStorage.
-- Giao diện Dashboard bắt mắt hiển thị lượng calo nạp vào so với mục tiêu.
-- Thư viện Base UI components và Responsive Mobile-first toàn diện.
-- Giải quyết 100% lỗi TypeScript, props, và các lỗi import/export.
+- Diary UI (4 bữa, modal thêm/xóa món, tổng calo)
+- Giao diện thiết lập hồ sơ người dùng (ProfileForm)
+- Core tính toán dinh dưỡng (calc.ts)
+- State management với Zustand, auto-persist
+- Dashboard layout + calorie tracker
+- Base UI components library
+- Sửa toàn bộ lỗi typescript, props, import/export
 
 ### 🔄 Đang phát triển
-- Tối ưu UX/UI nâng cao, tích hợp thêm hiệu ứng chuyển cảnh siêu mượt với Framer Motion.
-- Nghiên cứu thêm tính năng phân tích xu hướng dài hạn (xu hướng tháng/quý).
+- Stats page với biểu đồ
+- Advanced analytics
 
 ### 📋 Sắp làm
-- Thiết lập thông báo nhắc nhở uống nước/ghi chép hàng ngày (Notifications).
-- Hướng dẫn sử dụng chi tiết (Interactive onboarding).
-- Tích hợp Backend API & Cơ sở dữ liệu đám mây.
-- Hệ thống tài khoản người dùng (User Authentication).
-- Hỗ trợ Progressive Web App (PWA) để cài đặt ứng dụng lên màn hình điện thoại và chạy offline.
+- Settings page
+- Biểu đồ calories, protein, carbs, fat theo ngày/tuần
+- Tối ưu UX cho mobile/tablet
+- Thêm hướng dẫn sử dụng chi tiết
+- Backend API integration
+- User authentication
+- PWA support
 
 ---
 
@@ -702,25 +708,34 @@ type AppState = {
 ### Phase 2: Core UI ✅ (Hoàn thành)
 - Home/Dashboard page
 - Diary page
-- ProfileForm
+- ProfileForm & Settings page
 - All base components
+- Framer Motion setup
 
-### Phase 3: Features 🔄 (Đang làm)
-- Stats page + charts
+### Phase 3: Features ✅ (Hoàn thành)
+- Stats page + weekly charts
 - Advanced data visualization
-- Analytics
+- Analytics & streak tracking
+- Dynamic imports & lazy loading
+- Motion animations
 
-### Phase 4: Polish 📋 (Sắp làm)
-- Settings page
-- Notifications
-- Testing
-- Optimization
-- Documentation refinement
+### Phase 4: Polish 🔄 (Đang làm)
+- Performance optimization
+- Mobile gesture support
+- Advanced analytics (monthly trends)
+- Data export features
+- Testing & refinement
 
 ### Phase 5: Backend 📋 (Sắp làm)
 - API endpoints
 - Database integration
 - User authentication
+- Cloud sync
+
+### Phase 6: Deployment 📋 (Sắp làm)
+- Cloud deployment (Vercel/Netlify)
+- PWA features
+- Performance monitoring
 
 ---
 
@@ -813,5 +828,18 @@ Xem [Hướng Dẫn Đóng Góp](../README.md#git-workflow) trong README chính.
 
 ---
 
-**Documentation Version:** 0.2.0  
-**Last Updated:** 17/05/2026
+**Documentation Version:** 0.1.0  
+**Last Updated:** 19/05/2026
+
+---
+
+## 📋 Changelog
+
+### v0.1.0 (19/05/2026)
+
+**Enhancements:**
+- ✨ **Database Động**: Thay thế hệ thống data tĩnh bằng database động, hỗ trợ thêm/xóa/cập nhật nguyên liệu và món ăn thời gian thực
+- ✨ **Responsive Layout**: Tối ưu hóa layout với Tailwind CSS breakpoints, Đảm bảo giao diện đẹp trên mọi thiết bị
+
+**Bug Fixes:**
+- 🐛 [PR #2] **Fix Timezone Bug in Streak Calculation** - Sửa lỗi tính toán chuỗi ngày khi người dùng ở các múi giờ khác nhau
