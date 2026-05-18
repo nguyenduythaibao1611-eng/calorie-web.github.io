@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
-const nextConfig: NextConfig = {
+let nextConfig: NextConfig = {
   // ── Compiler optimizations ────────────────────────────────────────────────
   compiler: {
     // Xóa console.log ở production build
@@ -44,4 +45,13 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Wrap config with Sentry
+export default withSentryConfig(nextConfig, {
+  // Sentry options
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  
+  // Only upload source maps in CI environment
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: true,
+});
