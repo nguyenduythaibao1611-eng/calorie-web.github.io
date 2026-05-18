@@ -68,11 +68,11 @@
 | 📱 Responsive UI | Mobile-first, Bottom Navigation | ✅ Completed |
 | 🎞️ Animations | Framer Motion UI effects | ✅ Completed |
 
-![alt text](image.png)
-![alt text](image-1.png)
-![alt text](image-2.png)
-![alt text](image-3.png)
-![alt text](image-4.png)
+![alt text](docs/image.png)
+![alt text](docs/image-1.png)
+![alt text](docs/image-2.png)
+![alt text](docs/image-3.png)
+![alt text](docs/image-4.png)
 
 ---
 
@@ -224,9 +224,9 @@ chore: update dependencies
 | [`80a9f37`](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/commit/80a9f37) | Nguyễn Duy Thái Bảo | 19/05 | `fix: resolve merge conflict` |
 | [`6bfeabd`](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/commit/6bfeabd) | Đặng Đức Minh | 19/05 | `fix: Add postinstall prisma generate to fix Vercel cache` |
 
-![alt text](image-5.png)
-![alt text](image-6.png)
-![alt text](image-7.png)
+![alt text](docs/image-5.png)
+![alt text](docs/image-6.png)
+![alt text](docs/image-7.png)
 
 ---
 
@@ -244,12 +244,12 @@ chore: update dependencies
 | Statistics | `/stats` | Weekly/monthly calorie & macro charts (Recharts) | Trần Tiến Đạt + Lê Hoàng Triều |
 | Settings | `/settings` | Edit personal information and nutrition goals | Đặng Đức Minh |
 
-![alt text](image-8.png)
-![alt text](image-9.png)
-![alt text](image-10.png)
-![alt text](image-11.png)
-![alt text](image-12.png)
-![alt text](image-13.png)
+![alt text](docs/image-8.png)
+![alt text](docs/image-9.png)
+![alt text](docs/image-10.png)
+![alt text](docs/image-11.png)
+![alt text](docs/image-12.png)
+![alt text](docs/image-13.png)
 
 ### (b) Tailwind CSS
 
@@ -285,7 +285,7 @@ The project uses **Tailwind CSS v4** integrated via PostCSS. Key utility classes
 
 > Evidence commit: [`8ef7d6d`](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/commit/8ef7d6d) — `feat: complete Task 23 - optimize Responsive UI for Dashboard on Mobile and Tablet`
 
-> 📸 _[Insert screenshots from Chrome DevTools Responsive mode for each breakpoint]_
+
 
 ---
 
@@ -353,10 +353,10 @@ The project uses **Tailwind CSS v4** integrated via PostCSS. Key utility classes
 
 > Evidence commit: [`8a7bb38`](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/commit/8a7bb38) — `add UserProfile, MacroTarget, Ingredient, MealEntry, DailyLog + add localStorage layer`
 
-![alt text](image-14.png)
-![alt text](image-15.png)
-![alt text](image-16.png)
-![alt text](image-17.png)
+![alt text](docs/image-14.png)
+![alt text](docs/image-15.png)
+![alt text](docs/image-16.png)
+![alt text](docs/image-17.png)
 
 ---
 
@@ -373,7 +373,7 @@ The project uses **Tailwind CSS v4** integrated via PostCSS. Key utility classes
 | Best Practices | 100 |
 | SEO | 100 |
 
-![alt text](image-18.png)
+![alt text](docs/image-18.png)
 
 **Issues identified and fixes applied:**
 
@@ -398,7 +398,7 @@ The project uses **Tailwind CSS v4** integrated via PostCSS. Key utility classes
 
 > Evidence commit: [`78bb0e2`](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/commit/78bb0e2) — `perf: complete Task 25 - Lighthouse optimization, lazy load and accessibility`
 
-![alt text](image-19.png)
+![alt text](docs/image-19.png)
 
 **Final build status (19/05/2026):**
 ```
