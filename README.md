@@ -22,7 +22,7 @@
 | Nguyễn Duy Thái Bảo | 24020015 | Leader / Frontend Developer |
 | Đặng Đức Minh | 24020001 | Backend Developer / Database |
 | Từ Văn Huy Hoàng | 24020009 | Full-stack Developer / Tech Lead |
-| Trần Tiến Đạt | _(Student ID)_ | Frontend Developer / UI |
+| Trần Tiến Đạt | 24020013 | Frontend Developer / UI |
 | Lê Hoàng Triều | _(Student ID)_ | Frontend Developer / Animations & Stats |
 
 ---
