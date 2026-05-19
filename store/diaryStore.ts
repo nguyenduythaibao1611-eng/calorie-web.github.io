@@ -20,6 +20,11 @@ type DiaryState = {
     onStreakUpdate?: StreakCallback
   ) => void;
   removeIngredient: (mealId: string, ingredientId: string, onStreakUpdate?: StreakCallback) => void;
+  replaceMealIngredients: (
+    mealType: "breakfast" | "lunch" | "dinner" | "snack",
+    ingredients: Ingredient[],
+    onStreakUpdate?: StreakCallback
+  ) => void;
   updateWater: (water: number) => void;
 };
 
@@ -152,42 +157,86 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
   // FIX: ingredientId có thể là ing.id hoặc ing.name (fallback).
   // Filter loại bỏ ingredient nếu id match HOẶC (id undefined và name match).
   removeIngredient: (mealId, ingredientId, onStreakUpdate) => {
-  const { currentLog, currentDate } = get();
-  if (!currentLog) return;
+    const { currentLog, currentDate, removeMeal } = get();
+    if (!currentLog) return;
 
-  const meal = currentLog.meals.find((m) => m.id === mealId);
-  if (!meal) return;
+    const meal = currentLog.meals.find((m) => m.id === mealId);
+    if (!meal) return;
 
-  // Sử dụng index hoặc logic lọc chính xác hơn
-  const updatedIngredients = meal.ingredients.filter((ing) => {
-    // Ưu tiên xóa theo ID, chỉ fallback theo name nếu thực sự cần thiết
-    return ing.id ? ing.id !== ingredientId : ing.name !== ingredientId;
-  });
+    const updatedIngredients = meal.ingredients.filter((ing) => {
+      if (ing.id) {
+        // Nếu ingredient có id → so sánh theo id
+        return ing.id !== ingredientId;
+      } else {
+        // Fallback: ingredient không có id → so sánh theo name
+        return ing.name !== ingredientId;
+      }
+    });
 
-  // Tạo meal mới
-  const updatedMeal: MealEntry = {
-    ...meal,
-    ingredients: updatedIngredients,
-    totalCalories: updatedIngredients.reduce((s, i) => s + i.calories, 0),
-  };
+    if (updatedIngredients.length === 0) {
+      removeMeal(mealId, onStreakUpdate);
+    } else {
+      const updatedMeal: MealEntry = {
+        ...meal,
+        ingredients: updatedIngredients,
+        totalCalories: updatedIngredients.reduce((s, i) => s + i.calories, 0),
+      };
 
-  // Tạo log mới
-  const newMeals = currentLog.meals.map((m) => (m.id === mealId ? updatedMeal : m));
-  const updatedLog: DailyLog = {
-    ...currentLog,
-    meals: newMeals,
-    totalCalories: newMeals.reduce((sum, m) => sum + m.totalCalories, 0),
-  };
+      const updatedLog: DailyLog = {
+        ...currentLog,
+        meals: currentLog.meals.map((m) => (m.id === mealId ? updatedMeal : m)),
+        totalCalories: 0,
+      };
+      updatedLog.totalCalories = calcTotalCalories(updatedLog);
+      saveLog(currentDate, updatedLog);
+      set({ currentLog: updatedLog });
 
-  // LƯU Ý: Lưu vào storage trước
-  saveLog(currentDate, updatedLog);
-  
-  // Cập nhật state để UI phản hồi ngay lập tức
-  set({ currentLog: updatedLog });
+      const streak = calculateAndUpdateStreak();
+      onStreakUpdate?.(streak);
+    }
+  },
 
-  const streak = calculateAndUpdateStreak();
-  onStreakUpdate?.(streak);
-},
+  // Replace toàn bộ ingredients của một bữa — dùng khi lưu từ modal (tránh cộng dồn)
+  replaceMealIngredients: (mealType, ingredients, onStreakUpdate) => {
+    const { currentLog, currentDate, addMeal, removeMeal } = get();
+    if (!currentLog) return;
+
+    // Nếu cart rỗng → xóa meal đó đi
+    if (ingredients.length === 0) {
+      const existingMeal = currentLog.meals.find((m) => m.mealType === mealType);
+      if (existingMeal) removeMeal(existingMeal.id, onStreakUpdate);
+      return;
+    }
+
+    const totalCalories = ingredients.reduce((s, i) => s + i.calories, 0);
+    const existingMeal = currentLog.meals.find((m) => m.mealType === mealType);
+
+    if (existingMeal) {
+      // Replace ingredients trong meal đã có, không cộng dồn
+      const updatedMeal: MealEntry = {
+        ...existingMeal,
+        ingredients,
+        totalCalories,
+      };
+      const updatedLog: DailyLog = {
+        ...currentLog,
+        meals: currentLog.meals.map((m) => (m.id === existingMeal.id ? updatedMeal : m)),
+        totalCalories: 0,
+      };
+      updatedLog.totalCalories = calcTotalCalories(updatedLog);
+      saveLog(currentDate, updatedLog);
+      set({ currentLog: updatedLog });
+
+      const streak = calculateAndUpdateStreak();
+      onStreakUpdate?.(streak);
+    } else {
+      // Chưa có meal → tạo mới
+      const now = new Date();
+      const time = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+      const id = `${mealType}-${Date.now()}`;
+      addMeal({ id, mealType, ingredients, totalCalories, time }, onStreakUpdate);
+    }
+  },
 
   updateWater: (water) => {
     const { currentLog, currentDate } = get();
