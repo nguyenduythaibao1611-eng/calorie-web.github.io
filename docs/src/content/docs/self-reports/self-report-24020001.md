@@ -1,5 +1,5 @@
 ---
-title: "Personal Contribution Report - Đặng Đức Minh"
+title: "Personal Contribution Report - Dang Duc Minh"
 description: "Detailed contribution report for Planning, UI, DB Integration, Optimization, and Peer Review tasks in the Calomate project."
 ---
 
@@ -7,7 +7,7 @@ description: "Detailed contribution report for Planning, UI, DB Integration, Opt
 
 | | |
 |---|---|
-| **Full Name** | Đặng Đức Minh |
+| **Full Name** | Dang Duc Minh |
 | **Student ID** | 24020001 |
 | **Team** | Calomate |
 | **Role in Team** | Member |
@@ -36,45 +36,54 @@ The team was working with Next.js App Router and Zustand for the first time, and
 
 ## Task 2 — UI Implementation
 
-**Week:** Weeks 1–2, May 9–16, 2026
+**Week:** Weeks 1–3, May 9–20, 2026
 
 **Work completed:**
-- Finalized ProfileForm UI: adjusted logo, colors, watermark (commit 591f3ef)
-- Completed Task 20: Dashboard displaying real data, Water tracking (commit 8057296)
-- Completed Task 18: Connected TDEE logic and saved to Store (commit 077c27a)
-- Completed Task 14: Profile page UI (commit fc208f2)
-- Fixed several UI bugs and tested mobile interface (commits 29a6404, ecec104)
+- Finalized ProfileForm UI: adjusted logo, colors, watermark (commit `591f3ef`)
+- Completed Task 20: Dashboard displaying real data, Water tracking (commit `8057296`)
+- Completed Task 18: Connected TDEE logic and saved to Store (commit `077c27a`)
+- Completed Task 14: Profile page UI (commit `fc208f2`)
+- Fixed several UI bugs and tested mobile interface (commits `29a6404`, `ecec104`)
+- **Improved DashboardPage** — merged DashboardPage with diary, fixed layout bugs, improved multi-device responsiveness (commits `92fd704`, `a1a7035`, `9e9fc0c`) *(Completed instructor feedback: required to update the Dashboard)*
+- **Adjusted water glass sizing** for better consistency across different screen sizes (commits `9e2e6eb`, `ba378a3`)
+- **Improved the Homepage**: optimized nav, hero CTA, stats numbers, and accessibility (commit `97e5470`) *(Supported instructor feedback: required to create a Homepage)*
 
 **Evidence of contribution:**
 - [PR #47 – Profile UI (Task 14)](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/47)
 - [PR #57 – Task 18: TDEE & store connection](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/57)
 - [PR #60 – Task 20: Dashboard real data](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/60)
 - [PR #76 – UI improvements & bug fixes](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/76)
+- [PR #128 – Fix DashboardPage](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/128)
+- [PR #133 – Fix DashboardPage V3](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/133)
+- [PR #134 – Fix layout drinks](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/134)
+- [PR #135 – Optimize multi-device layout](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/135)
 
 **Difficulties encountered:**
-Most of the UI code was written with heavy AI assistance — I understand the logic at a basic level but haven't fully grasped every detail. Debugging prop-passing errors between Dashboard and Store took quite a long time due to my limited familiarity with Zustand.
+Most of the UI code was written with heavy AI assistance — I understand the logic at a basic level but haven't fully grasped every detail. Debugging prop-passing errors between Dashboard and Store took quite a long time due to my limited familiarity with Zustand. Adjusting responsive layout across multiple screen sizes also required many iterations.
 
-**Self-assessment:** 7/10
+**Self-assessment:** 8/10
 
 ---
 
 ## Task 3 — Database Integration
 
-**Week:** Weeks 2–3, May 17–19, 2026
+**Week:** Weeks 2–3, May 17–20, 2026
 
 **Work completed:**
 - Learned Prisma ORM and Supabase from scratch — had no prior experience with either technology before this project
-- Installed Prisma, connected to Supabase, selected compatible library versions for the team (commit c8a525f)
-- Migrated data from a static database (JSON) to a dynamic database with Prisma (commit 43ed13a)
-- Built API routes for meals, users, and ingredients (commits a3351ae, e04334b, 4236e93)
-- Fixed static rendering issue: added `force-dynamic` to `route.ts` files (commits 2fa4fdb, d85a01c)
-- Fixed `postinstall prisma generate` so Vercel generates the client at the correct time (commit 6bfeabd)
+- Installed Prisma, connected to Supabase, selected compatible library versions for the team (commit `c8a525f`)
+- Migrated data from a static database (JSON) to a dynamic database with Prisma (commit `43ed13a`)
+- Built API routes for meals, users, and ingredients (commits `a3351ae`, `e04334b`, `4236e93`)
+- Fixed static rendering issue: added `force-dynamic` to `route.ts` files (commits `2fa4fdb`, `d85a01c`)
+- Fixed `postinstall prisma generate` so Vercel generates the client at the correct time (commit `6bfeabd`)
+- **Removed User/Meal tables from Prisma and updated storage to use localStorage** after re-evaluating the architecture (commit `144e51c`)
 - Reviewed and approved PR #93 (timezone bug fix in streak — discovered and implemented by another member)
 
 **Evidence of contribution:**
 - [PR #91 – Migrate static DB to dynamic](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/91)
 - [PR #97 – Prisma API setup](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/97)
 - [PR #99 – API database v2 (final)](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/99)
+- [PR #121 – Refactor storage and Prisma](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/121)
 
 **Difficulties encountered:**
 This was the hardest part for me personally. Having no prior knowledge of Prisma and Supabase, most of the work was done with AI assistance and documentation — my actual depth of understanding is still limited.
@@ -86,21 +95,23 @@ The Vercel deployment phase ran into many consecutive errors and took much longe
 
 ## Task 4 — Optimization
 
-**Week:** Week 2, May 10–11, 2026
+**Week:** Weeks 2–3, May 10–20, 2026
 
 **Work completed:**
-- Completed Task 25: optimized Lighthouse score to above 75 (commit 78bb0e2)
+- Completed Task 25: optimized Lighthouse score to above 75 (commit `78bb0e2`)
 - Applied lazy loading with `next/dynamic` for Modal and Charts
 - Added `aria-label` to interactive elements to improve Accessibility
 - Added `useMemo` and `useCallback` to several components
 - Configured Cache Headers in `next.config.ts`
-- Completed Task 23: Responsive UI for Dashboard on Mobile and Tablet (commit 8ef7d6d)
-- Fixed missing `id` attribute in `searchIngredient` function (commit ae59f20)
+- Completed Task 23: Responsive UI for Dashboard on Mobile and Tablet (commit `8ef7d6d`)
+- Fixed missing `id` attribute in `searchIngredient` function (commit `ae59f20`)
+- **Optimized accessibility on the Homepage** — improved nav, CTA, and stats numbers (commit `97e5470`)
 
 **Evidence of contribution:**
 - [PR #71 – Task 25 Performance optimization](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/71)
 - [PR #65 – Task 23 Responsive UI](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/65)
 - [PR #64 – Fix search ingredient id](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/64)
+- [PR #104 – Homepage improvements](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/104)
 
 **Difficulties encountered:**
 The optimization steps were mostly carried out by following AI guidance and the Next.js documentation — I understood the purpose of each step but haven't fully grasped the underlying technical reasoning. `optimizeCss` caused a build error with no clear reason and took extra time to resolve.
@@ -111,10 +122,10 @@ The optimization steps were mostly carried out by following AI guidance and the 
 
 ## Task 5 — Peer Review
 
-**Week:** Week 3, May 17–19, 2026
+**Week:** Week 3, May 17–20, 2026
 
 **Work completed:**
-- Internal code review as reviewer (indominusrex932005-arch): approved and merged PRs #59, #65, #68, #69, #71, #72, #76, #81, #93, #99
+- Internal code review as reviewer (indominusrex932005-arch): approved and merged PRs #59, #65, #68, #69, #71, #72, #76, #81, #93, #99, #103, #104, #121, #128, #129, #133, #134, #135
 - Cross-team peer review for hothong3k/QuickToDo: read source code and submitted a feedback issue on UX
 
 **Feedback submitted to team hothong3k/QuickToDo:**
@@ -136,8 +147,8 @@ Reviewing another team's code was not too difficult since it only required readi
 ## Personal Contribution Summary
 
 **Summary of contributions to the project:**
-My main contributions were in database integration and some UI work. Most of the code was written with significant AI and documentation assistance — I understand the overall flow at a high level but haven't deeply internalized every technical detail. The most time-consuming part was the Prisma deployment to Vercel, due to dependency on another member's environment and my unfamiliarity with the build errors. Through this project, I gained a basic understanding of Prisma, Supabase, and team collaboration via GitHub — though there is still much more to learn.
+My main contributions were in database integration and UI work. Most of the code was written with significant AI and documentation assistance — I understand the overall flow at a high level but haven't deeply internalized every technical detail. The most time-consuming part was the Prisma deployment to Vercel, due to dependency on another member's environment and my unfamiliarity with the build errors. In the final sprint, I focused on improving the Dashboard layout, optimizing water glass responsiveness, and supporting Homepage improvements — completing the instructor's feedback items. Through this project, I gained a basic understanding of Prisma, Supabase, and team collaboration via GitHub — though there is still much more to learn.
 
 **Estimated % contribution relative to the team:** ~25%
 
-**Overall self-assessment score:** 7/10
+**Overall self-assessment score:** 7.4/10

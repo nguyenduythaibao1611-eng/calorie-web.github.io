@@ -57,7 +57,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="bg-[#f4fbf6]" style={{ zoom: 1.16 }}>
+    <main className="bg-[#f4fbf6]" style={{ zoom: 1 }}>
       {/* Navigation */}
       <nav className={`navbar ${scrolled ? "scrolled" : ""}`}>
         <div className="navbar-inner">
@@ -69,7 +69,7 @@ export default function Home() {
           </div>
           <div className={`nav-links ${navOpen ? "open" : ""}`}>
             <a className="nav-link" href="#tinh-nang" onClick={closeNav}>Tính năng</a>
-            <Link className="nav-link" href="/diary" onClick={closeNav}>Nhật ký</Link>
+            <Link className="nav-link" href="/dashboard" onClick={closeNav}>Tổng quan</Link>
             <Link className="nav-link" href="/stats" onClick={closeNav}>Thống kê</Link>
             <button className="btn-nav" onClick={() => { closeNav(); handleStart(); }}>Bắt đầu</button>
           </div>
