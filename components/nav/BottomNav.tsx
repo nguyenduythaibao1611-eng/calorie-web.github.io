@@ -7,7 +7,6 @@ import { motion } from 'framer-motion';
 const NAV_ITEMS = [
   { href: '/homepage',  label: 'Trang chủ',  icon: 'home'      },
   { href: '/dashboard', label: 'Tổng quan', icon: 'dashboard' },
-  { href: '/diary',     label: 'Nhật ký',   icon: 'menu_book' },
   { href: '/stats',     label: 'Thống kê',  icon: 'bar_chart' },
 ];
 
