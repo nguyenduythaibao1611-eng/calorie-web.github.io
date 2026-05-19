@@ -71,13 +71,7 @@ export default function Home() {
             <a className="nav-link" href="#tinh-nang" onClick={closeNav}>Tính năng</a>
             <Link className="nav-link" href="/diary" onClick={closeNav}>Nhật ký</Link>
             <Link className="nav-link" href="/stats" onClick={closeNav}>Thống kê</Link>
-            <button className="nav-link" onClick={() => { closeNav(); handleStart(); }}>Bắt đầu</button>
-            <Link className="btn-nav" href="/profile" onClick={closeNav}>
-              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
-                account_circle
-              </span>
-              Tài khoản
-            </Link>
+            <button className="btn-nav" onClick={() => { closeNav(); handleStart(); }}>Bắt đầu</button>
           </div>
           <button
             className="hamburger"
@@ -107,21 +101,7 @@ export default function Home() {
             <p className="hero-sub anim-text d3">
               CaloMate giúp bạn tính TDEE, theo dõi macro, ghi nhật ký bữa ăn và tiến trình thay đổi cơ thể bằng giao diện đơn giản, hiện đại và trực quan.
             </p>
-            <div className="hero-btns anim-text d4">
-              {/* FIX: dùng onClick thay vì href="#bat-dau" để hành vi nhất quán */}
-              <button className="btn-primary" onClick={handleStart}>
-                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
-                  rocket_launch
-                </span>
-                Bắt đầu miễn phí
-              </button>
-            </div>
-            <div className="hero-stats anim-text d4">
-              <div className="hstat" style={{ paddingLeft: 0 }}>
-                <span className="hstat-num fn">30s</span>
-                <span className="hstat-lbl">Để bắt đầu</span>
-              </div>
-            </div>
+
           </div>
 
           <div className="mock-wrap anim-card">
@@ -209,25 +189,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="section" id="thong-ke" style={{ paddingTop: 0 }}>
-        <div className="stats-band reveal">
-          <div className="sb-item">
-            <div className="sb-num fn">120+</div>
-            <div className="sb-lbl">Người dùng đang hoạt động</div>
-          </div>
-          <div className="sb-div" />
-          <div className="sb-item">
-            <div className="sb-num fn">1,800+</div>
-            <div className="sb-lbl">Bữa ăn đã ghi nhận</div>
-          </div>
-          <div className="sb-div" />
-          <div className="sb-item">
-            <div className="sb-num fn">4.9 ★</div>
-            <div className="sb-lbl">Đánh giá từ 100+ người dùng</div>
-          </div>
-        </div>
-      </section>
+
 
       {/* How It Works Section */}
       <section className="section how-bg" id="cach-hoat-dong">
