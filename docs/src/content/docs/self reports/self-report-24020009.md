@@ -107,13 +107,14 @@
 **Tuần:** Tuần 3 (16/05/2026 – 17/05/2026)
 
 **Công việc đã làm:**
-- Chưa thực hiện hoạt động review đánh giá chéo lớp học. Sẽ cập nhật chi tiết phần này sau khi có thông tin phân công từ giảng viên.
+- **Thực hiện hoạt động đánh giá chéo (Peer Review) dự án của nhóm khác:** Tiến hành kiểm thử và đọc hiểu mã nguồn của nhóm `tducn110` (dự án Tracker_yourMoney). Phát hiện lỗi nghiêm trọng liên quan đến kiểu dữ liệu khi thanh toán hóa đơn và đóng góp ý kiến phản hồi chất lượng cao dưới dạng GitHub Issue.
+  * Chi tiết lỗi: Trong hàm `BillService.payBill()`, hệ thống lưu giao dịch với thuộc tính `source: "bill_payment"` nhưng giá trị này không được chấp nhận trong schema validation, gây lỗi validation khi lưu giao dịch và có thể làm sai lệch dữ liệu khi lọc hoặc xuất báo cáo CSV.
 
 **Bằng chứng đóng góp:**
-- *(Chưa có - Sẽ cập nhật sau)*
+- [GitHub Issue #177 gửi nhóm tducn110/Tracker_yourMoney](https://github.com/tducn110/Tracker_yourMoney/issues/177)
 
 **Khó khăn gặp phải:**
-- *(Chưa có - Sẽ cập nhật sau)*
+- Không có khó khăn đáng kể nào. Việc đọc hiểu mã nguồn và phát hiện các lỗi logic của nhóm bạn được hoàn thành nhanh chóng nhờ kinh nghiệm làm việc với hệ thống định nghĩa kiểu dữ liệu nghiêm ngặt trong CaloMate.
 
 **Đánh giá bản thân:** 8/10
 
@@ -124,6 +125,6 @@
 **Tóm tắt những gì bạn đã đóng góp cho dự án:**
 Trong dự án CaloMate, tôi tự hào khi đảm nhận vai trò Lập trình viên Full-stack & Phụ trách kỹ thuật cốt lõi của nhóm. Tôi đã thiết kế và xây dựng thành công công cụ tính toán dinh dưỡng Mifflin-St Jeor tự động, xây dựng hệ thống UI Components dùng chung cốt lõi, phát triển thuật toán tìm kiếm món ăn Việt thông minh (chuẩn hóa tiếng Việt, xếp hạng kết quả) và triển khai hệ thống đồng bộ hóa chuỗi ngày đạt mục tiêu (Streak Sync) trên toàn ứng dụng. Đồng thời, tôi luôn tích cực hỗ trợ giải quyết các xung đột merge conflict lớn, tối ưu hóa Git workflow của cả nhóm và viết tài liệu kỹ thuật hoàn chỉnh. Qua dự án này, tôi đã cải thiện đáng kể kỹ năng lập trình Next.js/React 19, quản lý state nâng cao với Zustand, và tích lũy được nhiều kinh nghiệm thực chiến quý báu khi giải quyết các bài toán logic phức tạp trong làm việc nhóm.
 
-**Ước tính % đóng góp so với cả nhóm:** *(Sẽ cập nhật sau)*
+**Ước tính % đóng góp so với cả nhóm:** ~25%
 
 **Điểm tự đánh giá tổng thể:** 8/10
