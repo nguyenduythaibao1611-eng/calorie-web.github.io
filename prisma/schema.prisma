@@ -8,44 +8,12 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// Bảng User
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  meals     Meal[]   
-  createdAt DateTime @default(now())
-}
-
-// Bảng Meal (Bữa ăn)
-model Meal {
-  id          String   @id @default(uuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  mealType    String   
-  date        DateTime 
-  totalKcal   Int      @default(0)
-  ingredients MealIngredient[] 
-  createdAt   DateTime @default(now())
-}
-
-// Bảng Ingredient (Dữ liệu nguyên liệu gốc)
+// Bảng Ingredient (Dữ liệu nguyên liệu gốc - read-only, seed từ trước)
 model Ingredient {
-  id       String   @id @default(uuid())
+  id       String @id @default(uuid())
   name     String
   calories Int
   protein  Float
   carbs    Float
   fat      Float
-  meals    MealIngredient[]
-}
-
-// Bảng trung gian MealIngredient
-model MealIngredient {
-  id           String     @id @default(uuid())
-  mealId       String
-  ingredientId String
-  meal         Meal       @relation(fields: [mealId], references: [id], onDelete: Cascade)
-  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
-  amountInGram Int        
 }
