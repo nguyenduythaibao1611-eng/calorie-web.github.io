@@ -182,3 +182,4 @@ export function getLogs(startDate: string, endDate: string): DailyLog[] {
     return [];
   }
 }
+

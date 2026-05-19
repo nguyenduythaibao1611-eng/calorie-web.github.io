@@ -91,7 +91,7 @@ const ingredientVariants = {
 const accordionVariants = {
   hidden: { opacity: 0, height: 0 },
   visible: {
-    opacity: 1,
+opacity: 1,
     height: "auto",
     transition: { duration: 0.25 },
   },
@@ -161,7 +161,7 @@ function WeekCalendar({ currentDate, todayStr, onSelectDate }: WeekCalendarProps
               <span className={`font-numbers text-[9px] mt-0.5 leading-tight ${isSelected ? "text-white/80" : "text-primary"}`}>
                 {kcal >= 1000 ? `${(kcal / 1000).toFixed(1)}k` : kcal}
               </span>
-            ) : (
+) : (
               <span className="mt-0.5 h-[13px]" />
             )}
           </motion.button>
@@ -189,8 +189,13 @@ export default function DashboardPage() {
     snack: true,
   });
 
-  const { currentLog, currentDate, loadLog, updateWater, removeIngredient, addIngredients } =
-    useDiaryStore();
+const currentLog = useDiaryStore((state) => state.currentLog);
+const currentDate = useDiaryStore((state) => state.currentDate);
+
+const loadLog = useDiaryStore((state) => state.loadLog);
+const updateWater = useDiaryStore((state) => state.updateWater);
+const removeIngredient = useDiaryStore((state) => state.removeIngredient);
+const addIngredients = useDiaryStore((state) => state.addIngredients);
   const { profile, syncStreak, loadProfile } = useProfileStore();
 
   useEffect(() => {
@@ -243,7 +248,7 @@ export default function DashboardPage() {
 
   // ── Meal map ──────────────────────────────────────────────────────────────
   const mealMap = Object.fromEntries(
-    (currentLog?.meals || []).map((m) => [m.mealType, m]),
+(currentLog?.meals || []).map((m) => [m.mealType, m]),
   );
 
   // ── Section label for meal list — shows date when not today ───────────────
@@ -311,7 +316,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-start">
 
             {/* ════════════════════════════════════════════════════════════
-                LEFT: Bữa ăn
+LEFT: Bữa ăn
             ════════════════════════════════════════════════════════════ */}
             <motion.div
               className="lg:col-span-5 space-y-3"
@@ -370,7 +375,7 @@ export default function DashboardPage() {
                             {/* Toggle chevron */}
                             <motion.span
                               animate={{ rotate: isExpanded ? 180 : 0 }}
-                              transition={{ duration: 0.2 }}
+transition={{ duration: 0.2 }}
                               className="material-symbols-outlined text-outline text-xl flex-shrink-0"
                             >
                               expand_more
@@ -425,7 +430,7 @@ export default function DashboardPage() {
                                         <motion.li
                                           key={ingKey}
                                           variants={ingredientVariants}
-                                          initial="hidden"
+initial="hidden"
                                           animate="visible"
                                           exit="exit"
                                           className="flex items-center gap-2 py-1.5 group/item"
@@ -466,7 +471,7 @@ export default function DashboardPage() {
                           <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl border-2 border-dashed border-outline-variant flex items-center justify-center flex-shrink-0 group-hover:bg-primary/5 transition-colors">
                             <span className="material-symbols-outlined text-outline-variant text-xl sm:text-2xl">
                               add
-                            </span>
+</span>
                           </div>
                           <div className="flex-grow min-w-0">
                             <div className="flex justify-between items-center gap-2">
@@ -532,7 +537,7 @@ export default function DashboardPage() {
                       strokeDasharray={CIRC}
                       strokeDashoffset={dashOffset}
                       className={`transition-all duration-700 ease-out ${
-                        percentage >= 100 ? "text-error" : "text-primary"
+percentage >= 100 ? "text-error" : "text-primary"
                       }`}
                     />
                   </svg>
@@ -599,7 +604,7 @@ export default function DashboardPage() {
 
               {/* Water */}
               <motion.section
-                custom={1}
+custom={1}
                 variants={cardVariants}
                 className="glass-card rounded-3xl p-4 sm:p-5"
               >
@@ -668,7 +673,7 @@ export default function DashboardPage() {
               ) ?? "breakfast";
             setModalMealType(nextEmpty);
           }}
-          className="fixed bottom-20 right-4 sm:right-8 z-40"
+className="fixed bottom-20 right-4 sm:right-8 z-40"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.92 }}
           initial={{ scale: 0, opacity: 0 }}

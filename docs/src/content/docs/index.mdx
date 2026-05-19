@@ -7,7 +7,7 @@ import { Card, CardGrid } from "@astrojs/starlight/components";
 
 # 🍽️ Calorie Web - Tài Liệu Hoàn Chỉnh
 
-**Cập nhật lần cuối:** 11/05/2026 
+**Cập nhật lần cuối:** 20/05/2026 
 **Version:** 0.1.0
 
 Chào mừng đến với tài liệu dự án **Calorie Web**. Đây là ứng dụng web hiện đại được xây dựng bằng **Next.js 16** và **React 19**, được thiết kế để giúp người dùng theo dõi và quản lý lượng calo tiêu thụ hàng ngày.
@@ -279,135 +279,202 @@ Chào mừng đến với tài liệu dự án **Calorie Web**. Đây là ứng 
 - Tất cả lỗi typescript, props, import/export đã được fix sạch
 - Storage layer được thiết kế để dễ migrate sang backend sau
 
-## 📁 Cấu Trúc Dự Án Chi Tiết
+## 📁 Cấu Trúc Dự Án Chi Tiết (129 Files)
 
 ```
-calorie-web/                                        # Root project
+calorie-web/                                          # Root project (129 files total)
 │
-├── 📂 app/                                         # Next.js 16 App Router
-│   ├── 📄 layout.tsx                              # Root layout (Geist fonts setup)
-│   ├── 📄 page.tsx                                # Home page
-│   ├── 📄 globals.css                             # Global styles với Tailwind
-│   └── favicon.ico                                # App favicon
+├── ⚙️ ROOT CONFIG & DOCUMENTATION
+│   ├── 📄 package.json                             # npm dependencies & scripts
+│   ├── 📄 package-lock.json                        # Dependencies lock file
+│   ├── 📄 tsconfig.json                            # TypeScript compiler (strict mode)
+│   ├── 📄 next.config.ts                           # Next.js configuration
+│   ├── 📄 eslint.config.mjs                        # ESLint rules
+│   ├── 📄 postcss.config.mjs                       # PostCSS configuration
+│   ├── 📄 next-env.d.ts                            # Next.js TypeScript declarations
+│   ├── 📄 .gitignore                               # Git ignore rules
+│   │
+│   ├── 📖 DOCUMENTATION
+│   ├── 📄 README.md                                # Main project README
+│   ├── 📄 AGENTS.md                                # Next.js Agent Rules
+│   ├── 📄 CLAUDE.md                                # Claude Assistant Config
+│   ├── 📄 TRACKING_SETUP.md                        # Tracking setup guide
+│   ├── 📄 TRACKING_IMPLEMENTATION_SUMMARY.md       # Tracking summary
+│   ├── 📄 TRACKING_API_REFERENCE.md                # Tracking API reference
+│   ├── 📄 trace.txt                                # Trace log
+│   ├── 📄 erd.mmd                                  # Entity Relationship Diagram
+│   └── 📄 erd.png                                  # ERD image
 │
-├── 📂 components/                                 # React Components (tái sử dụng)
-│   ├── 📄 button.tsx                             # Button component (empty)
+├── 📂 app/                                          # Next.js 16 App Router (14 files)
+│   ├── 📄 layout.tsx                               # Root layout
+│   ├── 📄 page.tsx                                 # Home page (/)
+│   ├── 📄 loading.tsx                              # Loading state
+│   ├── 📄 global-error.tsx                         # Global error handler
+│   ├── 📄 globals.css                              # Global Tailwind CSS
+│   ├── 📄 icon.svg                                 # App icon
+│   ├── 📄 favicon.ico                              # Favicon
 │   │
-│   ├── 📂 ui/                                    # UI Component Library
-│   │   ├── 📄 index.ts                          # Export all UI components
-│   │   ├── 📄 Button.tsx                        # Styled button component
-│   │   ├── 📄 Card.tsx                          # Card container component
-│   │   ├── 📄 Input.tsx                         # Form input component
-│   │   ├── 📄 Modal.tsx                         # Modal dialog component
-│   │   ├── 📄 ProgressBar.tsx                   # Progress indicator
-│   │   ├── 📄 Badge.tsx                         # Badge/tag component
-│   │   └── 📄 BottomNav.tsx                     # Bottom navigation bar
+│   ├── 📂 dashboard/
+│   │   └── 📄 page.tsx                            # Dashboard page
+│   ├── 📂 homepage/
+│   │   └── 📄 page.tsx                            # Homepage
+│   ├── 📂 setup/
+│   │   └── 📄 page.tsx                            # Setup page
+│   ├── 📂 stats/
+│   │   └── 📄 page.tsx                            # Stats page
+│   ├── 📂 sentry-example-page/
+│   │   └── 📄 page.tsx                            # Sentry example page
 │   │
-│   └── 📂 nav/                                  # Navigation Components
-│       └── 📄 BottomNav.tsx                    # Bottom nav with Home/Diary/Stats routes
+│   └── 📂 api/
+│       ├── 📂 ingredients/
+│       │   └── 📄 route.ts                        # Ingredients API
+│       └── 📂 sentry-example-api/
+│           └── 📄 route.ts                        # Sentry example API
 │
-├── 📂 lib/                                       # Utilities & Logic Functions
-│   ├── 📄 storage.ts                           # localStorage abstraction layer
-│   │   ├── getProfile() / saveProfile()
-│   │   ├── getLog(date) / saveLog(date, log)
-│   │   └── getLogs(startDate, endDate)
+├── 🎨 components/                                  # React Components (23 files)
+│   ├── 📄 button.tsx                              # Button component
+│   ├── 📄 CalorieCard.tsx                         # Calorie card
+│   ├── 📄 MacroBar.tsx                            # Macro progress bar
+│   ├── 📄 ProfileForm.tsx                         # Profile form
+│   ├── 📄 SettingsModal.tsx                       # Settings modal
 │   │
-│   ├── 📄 calc.ts                              # Calorie & Macro Calculations
-│   │   ├── calcBMR()          # Basal Metabolic Rate (Mifflin-St Jeor)
-│   │   ├── calcTDEE()         # Total Daily Energy Expenditure
-│   │   ├── calcCurrentStreak() / calcBestStreak()
-│   │   └── hasAllMainMeals()  # Check if day has breakfast, lunch & dinner
+│   ├── 📂 ui/                                     # UI Component Library (8 files)
+│   │   ├── 📄 index.ts                           # Export barrel
+│   │   ├── 📄 Button.tsx                         # Button component
+│   │   ├── 📄 Card.tsx                           # Card container
+│   │   ├── 📄 Input.tsx                          # Input field
+│   │   ├── 📄 Modal.tsx                          # Modal dialog
+│   │   ├── 📄 Badge.tsx                          # Badge/tag
+│   │   ├── 📄 ProgressBar.tsx                    # Progress bar
+│   │   └── 📄 BottomNav.tsx                      # Bottom nav
 │   │
-│   ├── 📄 updateStreak.ts                      # Centralized Streak Sync Helper
-│   │   └── calculateAndUpdateStreak() # Recomputes streak and persists to profile
+│   ├── 📂 nav/                                   # Navigation (3 files)
+│   │   ├── 📄 AppHeader.tsx                      # Header
+│   │   ├── 📄 AppShell.tsx                       # App shell wrapper
+│   │   └── 📄 BottomNav.tsx                      # Bottom navigation
 │   │
-│   ├── 📄 search.ts                            # Ingredient Search Function
-│   │   ├── normalize()         # Normalize Vietnamese text (remove accents, diacritics)
-│   │   ├── getMatchScore()     # Score-based search matching
-│   │   └── searchIngredient()  # Main search function with filtering
+│   ├── 📂 dashboard/                             # Dashboard (1 file)
+│   │   └── 📄 DashboardPage.tsx                  # Dashboard page
 │   │
-│   └── 📄 ingredients.json                     # Vietnamese Food Database
-│       └── 16 ingredients with nutritional data (calories, protein, carbs, fat)
+│   ├── 📂 diary/                                 # Diary (1 file)
+│   │   └── 📄 AddMealModalV2.tsx                 # Add meal modal V2
+│   │
+│   ├── 📂 stats/                                 # Stats Components (5 files)
+│   │   ├── 📄 index.ts                           # Export barrel
+│   │   ├── 📄 MacroSection.tsx                   # Macro section
+│   │   ├── 📄 StatCard.tsx                       # Stat card
+│   │   ├── 📄 StreakCard.tsx                     # Streak card
+│   │   └── 📄 WeeklyChart.tsx                    # Weekly chart
+│   │
+│   └── 📂 providers/                             # Providers (2 files)
+│       ├── 📄 AnalyticsProvider.tsx              # Analytics provider
+│       └── 📄 PageTransition.tsx                 # Page transitions
 │
-├── 📂 store/                                    # Zustand State Management
-│   ├── 📄 useAppStore.ts                      # Global app store
-│   │   ├── test: string
-│   │   └── setTest(value): void
-│   │
-│   ├── 📄 profileStore.ts                     # User Profile Management
-│   │   ├── profile: UserProfile | null
-│   │   ├── setProfile(profile)     # Set new profile
-│   │   ├── updateProfile(partial)  # Update partial profile
-│   │   └── loadProfile()           # Load from localStorage
-│   │
-│   └── 📄 diaryStore.ts                       # Daily Meal Logging
-│       ├── currentLog: DailyLog | null
-│       ├── currentDate: string
-│       ├── loadLog(date)      # Load daily log
-│       ├── addMeal(meal)      # Add meal entry
-│       ├── removeMeal(id)     # Remove meal entry
-│       └── updateMeal(id, updated)  # Update meal entry
+├── 📚 lib/                                         # Utilities (12 files)
+│   ├── 📄 storage.ts                             # localStorage layer
+│   ├── 📄 calc.ts                                # Calorie calculations
+│   ├── 📄 calc-water.ts                          # Water calculations
+│   ├── 📄 search.ts                              # Search function
+│   ├── 📄 updateStreak.ts                        # Streak calculation
+│   ├── 📄 ingredients.json                       # Food database
+│   ├── 📄 analytics.ts                           # Analytics
+│   ├── 📄 logging.ts                             # Logging
+│   ├── 📄 prisma.ts                              # Prisma client
+│   ├── 📄 sentry.config.ts                       # Sentry config
+│   ├── 📄 TRACKING_EXAMPLES.ts                   # Tracking examples
+│   └── 📄 tracking-hooks.ts                      # Tracking hooks
 │
-├── 📂 types/                                   # TypeScript Type Definitions
-│   ├── 📄 index.ts                            # Main Data Interfaces
-│   │   ├── MacroTarget        # Nutritional goals (calories, protein, carbs, fat)
-│   │   ├── UserProfile        # User info (name, age, weight, height, goal, macroTarget)
-│   │   ├── Ingredient         # Food item (name, macros, amount)
-│   │   ├── MealEntry          # Single meal (id, type, ingredients, totalCalories, time)
-│   │   └── DailyLog           # Daily record (date, meals, totalCalories)
+├── 🛍️ store/                                      # Zustand State (3 files)
+│   ├── 📄 useAppStore.ts                         # Global app store
+│   ├── 📄 profileStore.ts                        # Profile management
+│   └── 📄 diaryStore.ts                          # Diary logging
+│
+├── 📦 types/                                      # TypeScript Definitions (2 files)
+│   ├── 📄 index.ts                               # Main type definitions
+│   └── 📄 user.ts                                # User type
+│
+├── 🖼️ public/                                     # Static Assets (8 files)
+│   ├── 📄 next.svg                               # Next.js logo
+│   ├── 📄 vercel.svg                             # Vercel logo
+│   ├── 📄 globe.svg                              # Globe icon
+│   ├── 📄 icon.svg                               # App icon
+│   ├── 📄 file.svg                               # File icon
+│   ├── 📄 window.svg                             # Window icon
+│   ├── 📄 image.png                              # Image
+│   └── 📄 image-2.png                            # Image 2
+│
+├── 📚 docs/                                       # Astro Documentation (35+ files)
+│   ├── ⚙️ CONFIG
+│   ├── 📄 astro.config.mjs                       # Astro configuration
+│   ├── 📄 tsconfig.json                          # TypeScript config
+│   ├── 📄 package.json                           # Dependencies
+│   ├── 📄 package-lock.json                      # Lock file
+│   ├── 📄 README.md                              # Docs README
 │   │
-│   └── 📄 user.ts                             # User Type Definition
-│       └── User interface (id, name)
-│
-├── 📂 public/                                  # Static Assets
-│   └── (images, icons, fonts, etc.)
-│
-├── 📂 docs/                                    # Documentation (Astro Starlight)
-│   ├── 📄 astro.config.mjs                    # Astro configuration
-│   ├── 📄 tsconfig.json                       # TypeScript config for docs
-│   ├── 📄 package.json                        # Docs dependencies
-│   ├── 📄 README.md                           # Docs project README
+│   ├── 📂 public/
+│   │   └── 📄 favicon.svg                        # Favicon
 │   │
-│   ├── 📂 public/                             # Static docs assets
-│   │   └── (images, icons, etc.)
+│   ├── 📂 src/
+│   │   ├── 📄 content.config.ts                  # Content config
+│   │   │
+│   │   ├── 📂 assets/
+│   │   │   └── 📄 houston.webp                   # Houston image
+│   │   │
+│   │   └── 📂 content/
+│   │       └── 📂 docs/
+│   │           ├── 📄 index.mdx                  # Main docs
+│   │           ├── 📂 guides/
+│   │           │   └── 📄 example.md
+│   │           ├── 📂 reference/
+│   │           │   └── 📄 example.md
+│   │           └── 📂 self-reports/              # Self-report documents
+│   │               ├── 📄 self-report-24020001.md
+│   │               ├── 📄 self-report-24020001(TV).md
+│   │               ├── 📄 self-report-24020009.md
+│   │               ├── 📄 self-report-24020009(TV).md
+│   │               ├── 📄 self-report-24020012.md
+│   │               ├── 📄 self-report-24020012(TV).md
+│   │               ├── 📄 self-report-24020013.md
+│   │               ├── 📄 self-report-24020013(TV).md
+│   │               ├── 📄 self-report-24020015.md
+│   │               └── 📄 self-report-24020015(TV).md
 │   │
-│   └── 📂 src/                                # Documentation Source
-│       ├── 📄 content.config.ts              # Content collection config
-│       │
-│       ├── 📂 assets/                        # Documentation assets
-│       │   └── (diagrams, screenshots, etc.)
-│       │
-│       └── 📂 content/                       # Documentation Content
-│           └── 📂 docs/                      # Main documentation
-│               ├── 📄 index.mdx              # Main documentation file
-│               ├── 📂 guides/                # Setup & implementation guides
-│               │   └── 📄 example.md        # Guide examples
-│               └── 📂 reference/             # API & type references
-│                   └── 📄 example.md        # Reference examples
+│   ├── 📂 .vscode/
+│   │   ├── 📄 launch.json                        # VS Code launcher
+│   │   └── 📄 extensions.json                    # Extensions
+│   │
+│   └── 📂 Images (20 files)
+│       ├── 📄 image.png, image-1.png, ..., image-19.png
+│       └── Documentation images
 │
-├── 📄 AGENTS.md                              # Next.js Agent Rules & Breaking Changes Warning
-├── 📄 CLAUDE.md                              # Claude Assistant Configuration
-├── 📄 README.md                              # Main Project README (Vietnamese)
-├── 📄 next-env.d.ts                          # Next.js TypeScript declarations (auto-generated)
+├── 🗄️ prisma/                                     # Database (2 files)
+│   ├── 📄 schema.prisma                          # Database schema
+│   └── 📄 seed.ts                                # Database seed
 │
-└── ⚙️ Configuration Files (Root Level)
-    ├── 📄 eslint.config.mjs                  # ESLint rules (Next.js + TypeScript)
-    ├── 📄 next.config.ts                     # Next.js configuration
-    ├── 📄 tsconfig.json                      # TypeScript compiler options (strict mode)
-    ├── 📄 tailwind.config.js                 # Tailwind CSS config (v4)
-    ├── 📄 postcss.config.mjs                 # PostCSS plugins
-    └── 📄 package.json                       # Dependencies & npm scripts
+├── 📡 INSTRUMENTATION
+│   ├── 📄 instrumentation.ts                     # Server instrumentation
+│   └── 📄 instrumentation-client.ts              # Client instrumentation
+│
+└── 🔴 SENTRY (Error Tracking)
+    ├── 📄 sentry.server.config.ts                # Server config
+    └── 📄 sentry.edge.config.ts                  # Edge config
 ```
 
-### 📊 File Count by Folder
+### 📊 Tóm Tắt Cấu Trúc
 
-- **app/** - 4 files (layout, page, globals.css, favicon)
-- **components/** - 10+ files (ui components + nav)
-- **lib/** - 4 files (storage, calc, search, ingredients)
-- **store/** - 3 files (useAppStore, profileStore, diaryStore)
-- **types/** - 2 files (index, user)
-- **docs/** - Full Astro project structure with guides & references
-- **Root config** - 8 configuration files
+| Folder | File Count | Mô Tả |
+|--------|-----------|-------|
+| **Root** | 15 | Config, documentation, main files |
+| **app/** | 14 | Next.js pages & API routes |
+| **components/** | 23 | React components (UI, nav, features) |
+| **lib/** | 12 | Utilities & functions |
+| **store/** | 3 | Zustand state management |
+| **types/** | 2 | TypeScript definitions |
+| **public/** | 8 | Static assets |
+| **docs/** | 35+ | Astro documentation project |
+| **prisma/** | 2 | Database |
+| **Other** | 5+ | Instrumentation, Sentry |
+| **TOTAL** | **129** | All files in workspace |
 
 ---
 
@@ -843,3 +910,321 @@ Xem [Hướng Dẫn Đóng Góp](../README.md#git-workflow) trong README chính.
 
 **Bug Fixes:**
 - 🐛 [PR #2] **Fix Timezone Bug in Streak Calculation** - Sửa lỗi tính toán chuỗi ngày khi người dùng ở các múi giờ khác nhau
+
+---
+
+## 📋 File Index - Danh Sách Tất Cả File (129 Files)
+
+### 📌 Root Files (Config & Documentation)
+
+| File | Mô Tả | Loại |
+|------|-------|------|
+| `package.json` | Dependencies, scripts, metadata | Config |
+| `tsconfig.json` | TypeScript compiler configuration (strict mode) | Config |
+| `next.config.ts` | Next.js configuration | Config |
+| `eslint.config.mjs` | ESLint rules configuration | Config |
+| `postcss.config.mjs` | PostCSS configuration | Config |
+| `README.md` | Main project README | Documentation |
+| `AGENTS.md` | Next.js Agent Rules & Breaking Changes | Documentation |
+| `CLAUDE.md` | Claude Assistant Configuration | Documentation |
+| `TRACKING_SETUP.md` | Tracking implementation setup guide | Documentation |
+| `TRACKING_IMPLEMENTATION_SUMMARY.md` | Tracking implementation summary | Documentation |
+| `TRACKING_API_REFERENCE.md` | Tracking API reference | Documentation |
+| `next-env.d.ts` | Next.js TypeScript declarations (auto-generated) | TypeScript |
+| `trace.txt` | Trace log file | Logs |
+| `erd.mmd` | Entity Relationship Diagram (Mermaid) | Diagram |
+| `erd.png` | Entity Relationship Diagram (PNG image) | Image |
+| `.gitignore` | Git ignore rules | Config |
+
+### 📂 App Folder (Next.js App Router)
+
+| File | Mô Tả |
+|------|-------|
+| `app/layout.tsx` | Root layout component (Geist fonts setup) |
+| `app/page.tsx` | Home page (/) |
+| `app/loading.tsx` | Loading state component |
+| `app/global-error.tsx` | Global error handler |
+| `app/globals.css` | Global Tailwind CSS styles |
+| `app/icon.svg` | App icon (SVG) |
+| `app/favicon.ico` | Favicon (ICO) |
+| `app/dashboard/page.tsx` | Dashboard page (/dashboard) |
+| `app/homepage/page.tsx` | Homepage (/homepage) |
+| `app/setup/page.tsx` | Setup page (/setup) |
+| `app/stats/page.tsx` | Stats page (/stats) |
+| `app/sentry-example-page/page.tsx` | Sentry example page (/sentry-example-page) |
+| `app/api/ingredients/route.ts` | API route for ingredients (/api/ingredients) |
+| `app/api/sentry-example-api/route.ts` | Sentry example API route (/api/sentry-example-api) |
+
+### 🎨 Components Folder
+
+#### Base Components
+| File | Mô Tả |
+|------|-------|
+| `components/button.tsx` | Button component (empty) |
+| `components/CalorieCard.tsx` | Calorie information card |
+| `components/MacroBar.tsx` | Macro progress bar |
+| `components/ProfileForm.tsx` | User profile form |
+| `components/SettingsModal.tsx` | Settings modal |
+
+#### UI Components (`components/ui/`)
+| File | Mô Tả |
+|------|-------|
+| `components/ui/index.ts` | UI components export barrel |
+| `components/ui/Button.tsx` | Styled button component |
+| `components/ui/Card.tsx` | Card container component |
+| `components/ui/Input.tsx` | Form input component |
+| `components/ui/Modal.tsx` | Modal dialog component |
+| `components/ui/Badge.tsx` | Badge/tag component |
+| `components/ui/ProgressBar.tsx` | Progress indicator component |
+| `components/ui/BottomNav.tsx` | Bottom navigation component |
+
+#### Navigation Components (`components/nav/`)
+| File | Mô Tả |
+|------|-------|
+| `components/nav/AppHeader.tsx` | Header navigation component |
+| `components/nav/AppShell.tsx` | App shell layout wrapper |
+| `components/nav/BottomNav.tsx` | Bottom navigation with routing |
+
+#### Dashboard Components (`components/dashboard/`)
+| File | Mô Tả |
+|------|-------|
+| `components/dashboard/DashboardPage.tsx` | Main dashboard page component |
+
+#### Diary Components (`components/diary/`)
+| File | Mô Tả |
+|------|-------|
+| `components/diary/AddMealModalV2.tsx` | V2 add meal modal |
+
+#### Stats Components (`components/stats/`)
+| File | Mô Tả |
+|------|-------|
+| `components/stats/index.ts` | Stats components export barrel |
+| `components/stats/MacroSection.tsx` | Macro nutrients section |
+| `components/stats/StatCard.tsx` | Single stat display card |
+| `components/stats/StreakCard.tsx` | Streak counter card |
+| `components/stats/WeeklyChart.tsx` | Weekly calorie/macro chart |
+
+#### Providers Components (`components/providers/`)
+| File | Mô Tả |
+|------|-------|
+| `components/providers/AnalyticsProvider.tsx` | Analytics provider |
+| `components/providers/PageTransition.tsx` | Page transition animations |
+
+### 📚 Lib Folder (Utilities & Functions)
+
+| File | Mô Tả |
+|------|-------|
+| `lib/storage.ts` | localStorage abstraction layer |
+| `lib/calc.ts` | Calorie & macro calculations |
+| `lib/calc-water.ts` | Water intake calculations |
+| `lib/search.ts` | Ingredient search function |
+| `lib/updateStreak.ts` | Streak calculation & update |
+| `lib/ingredients.json` | Vietnamese food database |
+| `lib/analytics.ts` | Analytics utilities |
+| `lib/logging.ts` | Logging utilities |
+| `lib/prisma.ts` | Prisma client setup |
+| `lib/sentry.config.ts` | Sentry configuration |
+| `lib/TRACKING_EXAMPLES.ts` | Tracking examples & usage |
+| `lib/tracking-hooks.ts` | Custom tracking hooks |
+
+### 🛍️ Store Folder (Zustand State Management)
+
+| File | Mô Tả |
+|------|-------|
+| `store/useAppStore.ts` | Global app store |
+| `store/profileStore.ts` | User profile management store |
+| `store/diaryStore.ts` | Daily meal logging store |
+
+### 📦 Types Folder (TypeScript Definitions)
+
+| File | Mô Tả |
+|------|-------|
+| `types/index.ts` | Main type definitions (MacroTarget, UserProfile, MealEntry, DailyLog, Ingredient) |
+| `types/user.ts` | User type definition |
+
+### 🖼️ Public Folder (Static Assets)
+
+| File | Mô Tả |
+|------|-------|
+| `public/next.svg` | Next.js logo |
+| `public/vercel.svg` | Vercel logo |
+| `public/globe.svg` | Globe icon |
+| `public/icon.svg` | App icon |
+| `public/file.svg` | File icon |
+| `public/window.svg` | Window icon |
+| `public/image.png` | Image asset |
+| `public/image-2.png` | Image asset 2 |
+
+### 📚 Docs Folder (Astro Documentation)
+
+#### Docs Root
+| File | Mô Tả |
+|------|-------|
+| `docs/astro.config.mjs` | Astro configuration |
+| `docs/tsconfig.json` | TypeScript config for docs |
+| `docs/package.json` | Docs dependencies |
+| `docs/package-lock.json` | Docs lock file |
+| `docs/README.md` | Docs project README |
+
+#### Docs Public
+| File | Mô Tả |
+|------|-------|
+| `docs/public/favicon.svg` | Docs favicon |
+
+#### Docs Source Configuration
+| File | Mô Tả |
+|------|-------|
+| `docs/src/content.config.ts` | Content collection configuration |
+
+#### Docs Assets (`docs/src/assets/`)
+| File | Mô Tả |
+|------|-------|
+| `docs/src/assets/houston.webp` | Houston image (WebP) |
+
+#### Docs Content - Main (`docs/src/content/docs/`)
+| File | Mô Tả |
+|------|-------|
+| `docs/src/content/docs/index.mdx` | Main documentation index |
+
+#### Docs Content - Guides (`docs/src/content/docs/guides/`)
+| File | Mô Tả |
+|------|-------|
+| `docs/src/content/docs/guides/example.md` | Example guide |
+
+#### Docs Content - Reference (`docs/src/content/docs/reference/`)
+| File | Mô Tả |
+|------|-------|
+| `docs/src/content/docs/reference/example.md` | Example reference |
+
+#### Docs Content - Self Reports (`docs/src/content/docs/self-reports/`)
+| File | Mô Tả |
+|------|-------|
+| `docs/src/content/docs/self-reports/self-report-24020001.md` | Self-report 24020001 |
+| `docs/src/content/docs/self-reports/self-report-24020001(TV).md` | Self-report 24020001 (TV version) |
+| `docs/src/content/docs/self-reports/self-report-24020009.md` | Self-report 24020009 |
+| `docs/src/content/docs/self-reports/self-report-24020009(TV).md` | Self-report 24020009 (TV version) |
+| `docs/src/content/docs/self-reports/self-report-24020012.md` | Self-report 24020012 |
+| `docs/src/content/docs/self-reports/self-report-24020012(TV).md` | Self-report 24020012 (TV version) |
+| `docs/src/content/docs/self-reports/self-report-24020013.md` | Self-report 24020013 |
+| `docs/src/content/docs/self-reports/self-report-24020013(TV).md` | Self-report 24020013 (TV version) |
+| `docs/src/content/docs/self-reports/self-report-24020015.md` | Self-report 24020015 |
+| `docs/src/content/docs/self-reports/self-report-24020015(TV).md` | Self-report 24020015 (TV version) |
+
+#### Docs Images (Root)
+| File | Mô Tả |
+|------|-------|
+| `docs/image.png` | Documentation image |
+| `docs/image-1.png` | Documentation image 1 |
+| `docs/image-2.png` | Documentation image 2 |
+| `docs/image-3.png` | Documentation image 3 |
+| `docs/image-4.png` | Documentation image 4 |
+| `docs/image-5.png` | Documentation image 5 |
+| `docs/image-6.png` | Documentation image 6 |
+| `docs/image-7.png` | Documentation image 7 |
+| `docs/image-8.png` | Documentation image 8 |
+| `docs/image-9.png` | Documentation image 9 |
+| `docs/image-10.png` | Documentation image 10 |
+| `docs/image-11.png` | Documentation image 11 |
+| `docs/image-12.png` | Documentation image 12 |
+| `docs/image-13.png` | Documentation image 13 |
+| `docs/image-14.png` | Documentation image 14 |
+| `docs/image-15.png` | Documentation image 15 |
+| `docs/image-16.png` | Documentation image 16 |
+| `docs/image-17.png` | Documentation image 17 |
+| `docs/image-18.png` | Documentation image 18 |
+| `docs/image-19.png` | Documentation image 19 |
+
+#### Docs VS Code Config
+| File | Mô Tả |
+|------|-------|
+| `docs/.vscode/launch.json` | VS Code launch configuration |
+| `docs/.vscode/extensions.json` | VS Code extensions recommendations |
+
+### 📊 Prisma Folder (Database)
+
+| File | Mô Tả |
+|------|-------|
+| `prisma/schema.prisma` | Prisma schema definition |
+| `prisma/seed.ts` | Database seed script |
+
+### 📈 Instrumentation Files
+
+| File | Mô Tả |
+|------|-------|
+| `instrumentation.ts` | Server instrumentation |
+| `instrumentation-client.ts` | Client instrumentation |
+
+### Sentry Configuration Files
+
+| File | Mô Tả |
+|------|-------|
+| `sentry.server.config.ts` | Sentry server configuration |
+| `sentry.edge.config.ts` | Sentry edge configuration |
+
+---
+
+## 📊 Thống Kê File
+
+### Phân Bố Theo Folder
+
+| Folder | Số File | Mô Tả |
+|--------|---------|-------|
+| **Root** | 15 | Config files, documentation, main files |
+| **app/** | 14 | Next.js pages & API routes |
+| **components/** | 23 | React components (UI, navigation, features) |
+| **lib/** | 12 | Utility functions & data |
+| **store/** | 3 | Zustand state management |
+| **types/** | 2 | TypeScript type definitions |
+| **public/** | 8 | Static assets (SVG, PNG, etc.) |
+| **docs/** | 35+ | Astro documentation project |
+| **prisma/** | 2 | Database schema & seed |
+| **Instrumentation** | 3 | Server & client instrumentation |
+| **Sentry** | 2 | Error tracking configuration |
+| **TOTAL** | **129** | All files in workspace |
+
+### Phân Bố Theo Loại File
+
+| Loại File | Số Lượng | Mục Đích |
+|-----------|----------|---------|
+| **TypeScript (.ts)** | 35 | Logic, utilities, configuration |
+| **TSX (.tsx)** | 23 | React components |
+| **JSON (.json)** | 10 | Config, dependencies, data |
+| **Markdown (.md)** | 20+ | Documentation |
+| **MDX (.mdx)** | 1 | Interactive documentation |
+| **SVG (.svg)** | 4 | Vector graphics/icons |
+| **PNG (.png)** | 21 | Raster images |
+| **WebP (.webp)** | 1 | Modern image format |
+| **MJS (.mjs)** | 2 | ES modules configuration |
+| **Prisma (.prisma)** | 1 | Database schema |
+| **ICO (.ico)** | 1 | Favicon |
+| **TXT (.txt)** | 1 | Text log |
+| **Config Files** | ~10 | ESLint, PostCSS, etc. |
+
+---
+
+## 🔍 Quick File Lookup
+
+### Cần tìm gì? Đây là file cần xem:
+
+| Khi Cần... | File Cần Xem |
+|-----------|-------------|
+| **Tìm type definitions** | `types/index.ts` |
+| **Thêm/edit state** | `store/profileStore.ts` hoặc `store/diaryStore.ts` |
+| **Tính toán calo** | `lib/calc.ts` |
+| **Tìm kiếm nguyên liệu** | `lib/search.ts` |
+| **Dữ liệu thực phẩm** | `lib/ingredients.json` |
+| **Giao diện chính** | `components/dashboard/DashboardPage.tsx` |
+| **Form người dùng** | `components/ProfileForm.tsx` |
+| **UI components** | `components/ui/` folder |
+| **Styles global** | `app/globals.css` |
+| **API endpoints** | `app/api/` folder |
+| **Layout root** | `app/layout.tsx` |
+| **Tài liệu** | `docs/src/content/docs/index.mdx` |
+| **Database schema** | `prisma/schema.prisma` |
+| **Config Next.js** | `next.config.ts` |
+| **Dependencies** | `package.json` |
+
+---
+
+**File Index Updated:** 20/05/2026  
+**Total Files Indexed:** 129

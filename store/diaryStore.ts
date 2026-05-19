@@ -152,44 +152,42 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
   // FIX: ingredientId có thể là ing.id hoặc ing.name (fallback).
   // Filter loại bỏ ingredient nếu id match HOẶC (id undefined và name match).
   removeIngredient: (mealId, ingredientId, onStreakUpdate) => {
-    const { currentLog, currentDate, removeMeal } = get();
-    if (!currentLog) return;
+  const { currentLog, currentDate } = get();
+  if (!currentLog) return;
 
-    const meal = currentLog.meals.find((m) => m.id === mealId);
-    if (!meal) return;
+  const meal = currentLog.meals.find((m) => m.id === mealId);
+  if (!meal) return;
 
-    const updatedIngredients = meal.ingredients.filter((ing) => {
-      if (ing.id) {
-        // Nếu ingredient có id → so sánh theo id
-        return ing.id !== ingredientId;
-      } else {
-        // Fallback: ingredient không có id → so sánh theo name
-        return ing.name !== ingredientId;
-      }
-    });
+  // Sử dụng index hoặc logic lọc chính xác hơn
+  const updatedIngredients = meal.ingredients.filter((ing) => {
+    // Ưu tiên xóa theo ID, chỉ fallback theo name nếu thực sự cần thiết
+    return ing.id ? ing.id !== ingredientId : ing.name !== ingredientId;
+  });
 
-    if (updatedIngredients.length === 0) {
-      removeMeal(mealId, onStreakUpdate);
-    } else {
-      const updatedMeal: MealEntry = {
-        ...meal,
-        ingredients: updatedIngredients,
-        totalCalories: updatedIngredients.reduce((s, i) => s + i.calories, 0),
-      };
+  // Tạo meal mới
+  const updatedMeal: MealEntry = {
+    ...meal,
+    ingredients: updatedIngredients,
+    totalCalories: updatedIngredients.reduce((s, i) => s + i.calories, 0),
+  };
 
-      const updatedLog: DailyLog = {
-        ...currentLog,
-        meals: currentLog.meals.map((m) => (m.id === mealId ? updatedMeal : m)),
-        totalCalories: 0,
-      };
-      updatedLog.totalCalories = calcTotalCalories(updatedLog);
-      saveLog(currentDate, updatedLog);
-      set({ currentLog: updatedLog });
+  // Tạo log mới
+  const newMeals = currentLog.meals.map((m) => (m.id === mealId ? updatedMeal : m));
+  const updatedLog: DailyLog = {
+    ...currentLog,
+    meals: newMeals,
+    totalCalories: newMeals.reduce((sum, m) => sum + m.totalCalories, 0),
+  };
 
-      const streak = calculateAndUpdateStreak();
-      onStreakUpdate?.(streak);
-    }
-  },
+  // LƯU Ý: Lưu vào storage trước
+  saveLog(currentDate, updatedLog);
+  
+  // Cập nhật state để UI phản hồi ngay lập tức
+  set({ currentLog: updatedLog });
+
+  const streak = calculateAndUpdateStreak();
+  onStreakUpdate?.(streak);
+},
 
   updateWater: (water) => {
     const { currentLog, currentDate } = get();
