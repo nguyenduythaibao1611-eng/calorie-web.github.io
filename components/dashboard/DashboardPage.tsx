@@ -617,10 +617,9 @@ export default function DashboardPage() {
                 <div className="flex justify-between items-center mb-3 sm:mb-4">
                   <div>
                     <h3 className="font-h2 text-base sm:text-lg text-primary font-bold">
-                      Uống nước
+                      Mục tiêu uống nước
                     </h3>
                     <p className="text-xs text-outline">
-                      Mục tiêu:{" "}
                       <span className="font-numbers">{waterGoal.toLocaleString()}</span> ml
                       {" "}·{" "}
                       <span className="font-numbers">10</span> ly
@@ -633,9 +632,6 @@ export default function DashboardPage() {
                     <span className="font-label-caps text-xs sm:text-sm text-primary/60 ml-1 uppercase font-bold">
                       ml
                     </span>
-                    <p className="text-[10px] text-outline/60 font-numbers">
-                      {waterGlassCount}/10 ly
-                    </p>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2 sm:gap-0 sm:justify-between items-center px-0 sm:px-2">
@@ -653,11 +649,12 @@ export default function DashboardPage() {
                       aria-label={`Ly nước ${i + 1}`}
                     >
                       <span
-                        className={`material-symbols-outlined text-3xl sm:text-4xl ${
-                          i < waterGlassCount
-                            ? "filled-icon text-primary"
-                            : "text-outline/20"
+                        className={`material-symbols-outlined text-3xl sm:text-4xl transition-all ${
+                          i < waterGlassCount ? "text-primary" : "text-outline/20"
                         }`}
+                        style={{
+                          fontVariationSettings: i < waterGlassCount ? "'FILL' 1" : "'FILL' 0"
+                        }}
                       >
                         water_full
                       </span>
