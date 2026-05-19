@@ -11,6 +11,7 @@
     "docs": "documentation build src --output docs --format html"
   },
   "dependencies": {
+    "@next/third-parties": "^16.2.6",
     "@prisma/client": "^6.4.1",
     "@sentry/nextjs": "^10.53.1",
     "critters": "^0.0.23",

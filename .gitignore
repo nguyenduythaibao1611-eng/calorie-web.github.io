@@ -44,3 +44,6 @@ next-env.d.ts
 docs/node_modules/
 docs/.astro/
 docs/dist/
+
+# Sentry Config File
+.env.sentry-build-plugin

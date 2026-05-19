@@ -416,8 +416,8 @@ The project uses **Tailwind CSS v4** integrated via PostCSS. Key utility classes
 
 | Tool | Status | Notes |
 |---|---|---|
-| Google Analytics | _[Insert Tracking ID]_ | _[Insert dashboard screenshot]_ |
-| Sentry / Error monitoring | _[Insert DSN config]_ | _[Insert error dashboard screenshot]_ |
+| Google Analytics |G-YW2B5LPCB2 | ![alt text](public/image-2.png)|
+| Sentry / Error monitoring | https://b9b2cecf50aa40e27ea148a948d4f8a4@o4511417423364096.ingest.us.sentry.io/4511417443745792 | ![alt text](public/image.png)|
 
 
 
