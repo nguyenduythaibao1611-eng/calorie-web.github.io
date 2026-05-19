@@ -57,7 +57,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="bg-[#f4fbf6]" style={{ zoom: 1.2 }}>
+    <main className="bg-[#f4fbf6]" style={{ zoom: 1.16 }}>
       {/* Navigation */}
       <nav className={`navbar ${scrolled ? "scrolled" : ""}`}>
         <div className="navbar-inner">
