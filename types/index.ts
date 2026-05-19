@@ -39,6 +39,10 @@ export interface UserProfile {
   height: number
   /** Mục tiêu sức khỏe: giảm cân, duy trì, hoặc tăng cân */
   goal: 'lose' | 'maintain' | 'gain'
+  /** Giới tính */
+  gender?: 'male' | 'female'
+  /** Mức độ hoạt động */
+  activityLevel?: number
   /** Mục tiêu dinh dưỡng hàng ngày (chứa MacroTarget) */
   macroTarget: MacroTarget
   /** Chuỗi ngày hiện tại (số ngày liên tiếp đáp ứng mục tiêu) */
