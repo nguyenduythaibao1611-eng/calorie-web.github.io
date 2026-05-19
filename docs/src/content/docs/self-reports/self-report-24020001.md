@@ -1,156 +1,143 @@
-## Thông tin cá nhân
+---
+title: "Personal Contribution Report - Đặng Đức Minh"
+description: "Detailed contribution report for Planning, UI, DB Integration, Optimization, and Peer Review tasks in the Calomate project."
+---
+
+## Personal Information
 
 | | |
 |---|---|
-| **Họ tên** | Đặng Đức Minh |
-| **MSSV** | 24020001 |
-| **Nhóm** | Calomate |
-| **Vai trò trong nhóm** | Thành viên |
+| **Full Name** | Đặng Đức Minh |
+| **Student ID** | 24020001 |
+| **Team** | Calomate |
+| **Role in Team** | Member |
 
 ---
 
 ## Task 1 — Planning & Setup
 
-**Tuần:** Tuần 1, ngày 06/05 – 08/05/2026
+**Week:** Week 1, May 6–8, 2026
 
-**Công việc đã làm:**
+**Work completed:**
+- Participated in project planning with the team and divided tasks among members
+- Participated in reviewing and merging initial setup Pull Requests (PR #31, #32, #33, #34, #35, #36)
+- Took on the role of reviewer (indominusrex932005-arch) — inspecting code before merging into main
 
-- Tham gia lên kế hoạch dự án cùng nhóm, phân chia task cho các thành viên
-- Tham gia review và merge các Pull Request setup ban đầu (PR #31, #32, #33, #34, #35, #36)
-- Đảm nhận vai trò reviewer (indominusrex932005-arch) — kiểm tra code trước khi merge vào main
-
-**Bằng chứng đóng góp:**
-
+**Evidence of contribution:**
 - [Merge PR #35 – TypeScript definitions & storage layer](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/35)
 - [Merge PR #36 – TV1 data (ingredients database)](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/36)
 
-**Khó khăn gặp phải:**
+**Difficulties encountered:**
+The team was working with Next.js App Router and Zustand for the first time, and it took time to agree on a folder structure before getting started.
 
-Nhóm lần đầu làm việc với Next.js App Router và Zustand, mất thời gian thống nhất cấu trúc thư mục trước khi bắt đầu.
-
-**Đánh giá bản thân:** 7/10
+**Self-assessment:** 7/10
 
 ---
 
 ## Task 2 — UI Implementation
 
-**Tuần:** Tuần 1–2, ngày 09/05 – 16/05/2026
+**Week:** Weeks 1–2, May 9–16, 2026
 
-**Công việc đã làm:**
+**Work completed:**
+- Finalized ProfileForm UI: adjusted logo, colors, watermark (commit 591f3ef)
+- Completed Task 20: Dashboard displaying real data, Water tracking (commit 8057296)
+- Completed Task 18: Connected TDEE logic and saved to Store (commit 077c27a)
+- Completed Task 14: Profile page UI (commit fc208f2)
+- Fixed several UI bugs and tested mobile interface (commits 29a6404, ecec104)
 
-- Hoàn thiện UI ProfileForm: chỉnh logo, màu sắc, watermark (commit 591f3ef)
-- Hoàn thành Task 20: Dashboard hiển thị dữ liệu thật, Water tracking (commit 8057296)
-- Hoàn thành Task 18: Kết nối Logic TDEE và lưu Store (commit 077c27a)
-- Hoàn thành Task 14: UI trang Profile (commit fc208f2)
-- Fix một số lỗi UI và test giao diện mobile (commits 29a6404, ecec104)
-
-**Bằng chứng đóng góp:**
-
+**Evidence of contribution:**
 - [PR #47 – Profile UI (Task 14)](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/47)
-- [PR #57 – Task 18: kết nối TDEE & store](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/57)
+- [PR #57 – Task 18: TDEE & store connection](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/57)
 - [PR #60 – Task 20: Dashboard real data](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/60)
 - [PR #76 – UI improvements & bug fixes](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/76)
 
-**Khó khăn gặp phải:**
+**Difficulties encountered:**
+Most of the UI code was written with heavy AI assistance — I understand the logic at a basic level but haven't fully grasped every detail. Debugging prop-passing errors between Dashboard and Store took quite a long time due to my limited familiarity with Zustand.
 
-Phần lớn code UI được viết với sự hỗ trợ của AI — bản thân hiểu logic ở mức cơ bản nhưng chưa thực sự nắm sâu từng phần. Việc debug khi có lỗi props giữa Dashboard và Store mất khá nhiều thời gian vì chưa quen với Zustand.
-
-**Đánh giá bản thân:** 7/10
+**Self-assessment:** 7/10
 
 ---
 
 ## Task 3 — Database Integration
 
-**Tuần:** Tuần 2–3, ngày 17/05 – 19/05/2026
+**Week:** Weeks 2–3, May 17–19, 2026
 
-**Công việc đã làm:**
+**Work completed:**
+- Learned Prisma ORM and Supabase from scratch — had no prior experience with either technology before this project
+- Installed Prisma, connected to Supabase, selected compatible library versions for the team (commit c8a525f)
+- Migrated data from a static database (JSON) to a dynamic database with Prisma (commit 43ed13a)
+- Built API routes for meals, users, and ingredients (commits a3351ae, e04334b, 4236e93)
+- Fixed static rendering issue: added `force-dynamic` to `route.ts` files (commits 2fa4fdb, d85a01c)
+- Fixed `postinstall prisma generate` so Vercel generates the client at the correct time (commit 6bfeabd)
+- Reviewed and approved PR #93 (timezone bug fix in streak — discovered and implemented by another member)
 
-- Tìm hiểu Prisma ORM và Supabase từ đầu — trước dự án chưa có kinh nghiệm với hai công nghệ này
-- Cài đặt Prisma, kết nối Supabase, chọn phiên bản thư viện phù hợp cho nhóm (commit c8a525f)
-- Chuyển đổi dữ liệu từ Database tĩnh (JSON) sang Database động với Prisma (commit 43ed13a)
-- Xây dựng API routes cho meals, users, ingredients (commits a3351ae, e04334b, 4236e93)
-- Fix lỗi static render: thêm `force-dynamic` vào các file `route.ts` (commits 2fa4fdb, d85a01c)
-- Fix `postinstall prisma generate` để Vercel generate client đúng lúc (commit 6bfeabd)
-- Review và approve PR #93 (fix timezone bug trong streak — do thành viên khác phát hiện và implement)
-
-**Bằng chứng đóng góp:**
-
-- [PR #91 – Chuyển DB tĩnh sang động](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/91)
+**Evidence of contribution:**
+- [PR #91 – Migrate static DB to dynamic](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/91)
 - [PR #97 – Prisma API setup](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/97)
 - [PR #99 – API database v2 (final)](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/99)
 
-**Khó khăn gặp phải:**
+**Difficulties encountered:**
+This was the hardest part for me personally. Having no prior knowledge of Prisma and Supabase, most of the work was done with AI assistance and documentation — my actual depth of understanding is still limited.
+The Vercel deployment phase ran into many consecutive errors and took much longer than expected. Partly because I didn't fully understand the root cause of each error, and partly because I had to rely on another member's Vercel account to deploy and test — every fix required waiting for that person to act.
 
-Đây là phần khó nhất với bản thân. Chưa biết Prisma và Supabase từ trước nên phần lớn được thực hiện dựa trên AI và tài liệu — mức độ hiểu thực sự còn hạn chế.
-
-Giai đoạn deploy lên Vercel gặp nhiều lỗi liên tiếp và mất nhiều thời gian hơn dự kiến. Một phần vì chưa hiểu rõ nguyên nhân từng lỗi, một phần vì phải phụ thuộc vào tài khoản Vercel của thành viên khác để deploy và test — mỗi lần sửa đều phải chờ người kia thực hiện.
-
-**Đánh giá bản thân:** 7/10
+**Self-assessment:** 7/10
 
 ---
 
 ## Task 4 — Optimization
 
-**Tuần:** Tuần 2, ngày 10/05 – 11/05/2026
+**Week:** Week 2, May 10–11, 2026
 
-**Công việc đã làm:**
+**Work completed:**
+- Completed Task 25: optimized Lighthouse score to above 75 (commit 78bb0e2)
+- Applied lazy loading with `next/dynamic` for Modal and Charts
+- Added `aria-label` to interactive elements to improve Accessibility
+- Added `useMemo` and `useCallback` to several components
+- Configured Cache Headers in `next.config.ts`
+- Completed Task 23: Responsive UI for Dashboard on Mobile and Tablet (commit 8ef7d6d)
+- Fixed missing `id` attribute in `searchIngredient` function (commit ae59f20)
 
-- Hoàn thành Task 25: tối ưu Lighthouse score đạt trên 75 (commit 78bb0e2)
-- Áp dụng Lazy loading với `next/dynamic` cho Modal và Biểu đồ
-- Thêm `aria-label` cho các interactive elements để cải thiện Accessibility
-- Thêm `useMemo` và `useCallback` ở một số component
-- Cấu hình Cache Headers trong `next.config.ts`
-- Hoàn thành Task 23: Responsive UI cho Dashboard trên Mobile và Tablet (commit 8ef7d6d)
-- Fix thuộc tính `id` bị thiếu trong hàm `searchIngredient` (commit ae59f20)
-
-**Bằng chứng đóng góp:**
-
+**Evidence of contribution:**
 - [PR #71 – Task 25 Performance optimization](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/71)
 - [PR #65 – Task 23 Responsive UI](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/65)
 - [PR #64 – Fix search ingredient id](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pull/64)
 
-**Khó khăn gặp phải:**
+**Difficulties encountered:**
+The optimization steps were mostly carried out by following AI guidance and the Next.js documentation — I understood the purpose of each step but haven't fully grasped the underlying technical reasoning. `optimizeCss` caused a build error with no clear reason and took extra time to resolve.
 
-Các bước tối ưu chủ yếu thực hiện theo hướng dẫn của AI và tài liệu Next.js — hiểu được mục đích từng bước nhưng chưa nắm chắc lý do kỹ thuật phía sau. `optimizeCss` gây lỗi build không rõ nguyên nhân và mất thêm thời gian xử lý.
-
-**Đánh giá bản thân:** 7/10
+**Self-assessment:** 7/10
 
 ---
 
 ## Task 5 — Peer Review
 
-**Tuần:** Tuần 3, ngày 17/05 – 19/05/2026
+**Week:** Week 3, May 17–19, 2026
 
-**Công việc đã làm:**
+**Work completed:**
+- Internal code review as reviewer (indominusrex932005-arch): approved and merged PRs #59, #65, #68, #69, #71, #72, #76, #81, #93, #99
+- Cross-team peer review for hothong3k/QuickToDo: read source code and submitted a feedback issue on UX
 
-- Review code nội bộ với tư cách reviewer (indominusrex932005-arch): approve và merge PR #59, #65, #68, #69, #71, #72, #76, #81, #93, #99
-- Peer review nhóm hothong3k/QuickToDo: đọc source code và tạo issue phản hồi về UX
-
-**Nội dung feedback gửi cho nhóm hothong3k/QuickToDo:**
-
+**Feedback submitted to team hothong3k/QuickToDo:**
 Issue: *"Missing delete confirmation dialog and undo feature"*
 
-Mô tả: Khi người dùng nhấn nút xóa todo, item bị xóa ngay lập tức mà không có hộp thoại xác nhận hay tính năng Undo. Điều này có thể gây mất dữ liệu nếu người dùng nhấn nhầm — đặc biệt với các todo đã có mô tả chi tiết, nhiều subtask và ngày hết hạn.
+Description: When a user clicks the delete button on a todo, the item is removed immediately with no confirmation dialog or Undo functionality. This can cause data loss if the user clicks accidentally — especially for todos that have detailed descriptions, multiple subtasks, and due dates.
 
-**Bằng chứng đóng góp:**
+**Evidence of contribution:**
+- [Peer review issue submitted to hothong3k/QuickToDo](https://github.com/hothong3k/QuickToDo/issues)
+- [Internal PR merge history (reviewer: indominusrex932005-arch)](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pulls?q=is%3Apr+is%3Amerged)
 
-- [Issue peer review gửi cho nhóm hothong3k/QuickToDo](https://github.com/hothong3k/QuickToDo/issues)
-- [Lịch sử merge PR nội bộ (reviewer: indominusrex932005-arch)](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/pulls?q=is%3Apr+is%3Amerged)
+**Difficulties encountered:**
+Reviewing another team's code was not too difficult since it only required reading and commenting — this part went better than the coding tasks.
 
-**Khó khăn gặp phải:**
-
-Việc review code của nhóm khác không quá khó vì chỉ cần đọc hiểu và nhận xét — phần này làm được ổn hơn so với các task code.
-
-**Đánh giá bản thân:** 8/10
+**Self-assessment:** 8/10
 
 ---
 
-## Tổng Kết Đóng Góp Cá Nhân
+## Personal Contribution Summary
 
-**Tóm tắt những gì bạn đã đóng góp cho dự án:**
+**Summary of contributions to the project:**
+My main contributions were in database integration and some UI work. Most of the code was written with significant AI and documentation assistance — I understand the overall flow at a high level but haven't deeply internalized every technical detail. The most time-consuming part was the Prisma deployment to Vercel, due to dependency on another member's environment and my unfamiliarity with the build errors. Through this project, I gained a basic understanding of Prisma, Supabase, and team collaboration via GitHub — though there is still much more to learn.
 
-Tôi đóng góp chủ yếu ở phần database integration và một số phần UI. Hầu hết code được viết với sự hỗ trợ lớn từ AI và tài liệu — bản thân hiểu được luồng hoạt động ở mức tổng quan nhưng chưa nắm sâu từng chi tiết kỹ thuật. Phần tốn thời gian nhất là giai đoạn deploy Prisma lên Vercel do phụ thuộc vào môi trường của thành viên khác và chưa thực sự quen với các lỗi build. Qua dự án, tôi có thêm hiểu biết cơ bản về Prisma, Supabase và quy trình làm việc nhóm qua GitHub — dù vẫn còn nhiều thứ cần học thêm.
+**Estimated % contribution relative to the team:** ~25%
 
-**Ước tính % đóng góp so với cả nhóm:** ~25%
-
-**Điểm tự đánh giá tổng thể:** 7/10
+**Overall self-assessment score:** 7/10

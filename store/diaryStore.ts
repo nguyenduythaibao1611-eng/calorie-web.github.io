@@ -32,8 +32,12 @@ function getTodayDate(): string {
   return new Date().toISOString().split("T")[0];
 }
 
+/** Làm tròn số đến 1 chữ số thập phân */
+const roundMacro = (num: number) => Math.round(num * 10) / 10;
+
 function calcTotalCalories(log: DailyLog): number {
-  return log.meals.reduce((sum, meal) => sum + meal.totalCalories, 0);
+  // Đảm bảo tổng calo luôn là số nguyên
+  return Math.round(log.meals.reduce((sum, meal) => sum + meal.totalCalories, 0));
 }
 
 export const useDiaryStore = create<DiaryState>((set, get) => ({
@@ -115,9 +119,9 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
             ...old,
             amount: (old.amount ?? 0) + (ingredient.amount ?? 0),
             calories: old.calories + ingredient.calories,
-            protein: Math.round((old.protein + ingredient.protein) * 10) / 10,
-            carbs: Math.round((old.carbs + ingredient.carbs) * 10) / 10,
-            fat: Math.round((old.fat + ingredient.fat) * 10) / 10,
+            protein: roundMacro(old.protein + ingredient.protein),
+            carbs: roundMacro(old.carbs + ingredient.carbs),
+            fat: roundMacro(old.fat + ingredient.fat),
           };
         } else {
           updatedIngredients.push(ingredient);
@@ -144,11 +148,20 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
     } else {
       const now = new Date();
       const time = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-      const totalCalories = newIngredients.reduce((s, i) => s + i.calories, 0);
+      
+      // Làm tròn các chỉ số của nguyên liệu mới trước khi thêm
+      const processedIngredients = newIngredients.map(ing => ({
+        ...ing,
+        protein: roundMacro(ing.protein),
+        carbs: roundMacro(ing.carbs),
+        fat: roundMacro(ing.fat)
+      }));
+
+      const totalCalories = processedIngredients.reduce((s, i) => s + i.calories, 0);
       const id = `${mealType}-${Date.now()}`;
 
       addMeal(
-        { id, mealType, ingredients: newIngredients, totalCalories, time },
+        { id, mealType, ingredients: processedIngredients, totalCalories, time },
         onStreakUpdate
       );
     }

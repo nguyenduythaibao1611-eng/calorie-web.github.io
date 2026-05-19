@@ -469,9 +469,9 @@ export default function StatsPage() {
   }, [avgMacros]);
 
   const macroStats = useMemo(() => [
-    { label: "TINH BỘT", percent: Math.round((macroKcal.carbs / macroKcal.total) * 100), kcal: macroKcal.carbs, color: "primary" as const },
-    { label: "ĐẠM", percent: Math.round((macroKcal.protein / macroKcal.total) * 100), kcal: macroKcal.protein, color: "primary-container" as const },
-    { label: "CHẤT BÉO", percent: Math.round((macroKcal.fat / macroKcal.total) * 100), kcal: macroKcal.fat, color: "outline-variant" as const },
+    { label: "CARBS", percent: Math.round((macroKcal.carbs / macroKcal.total) * 100), kcal: macroKcal.carbs, color: "primary" as const },
+    { label: "PROTEIN", percent: Math.round((macroKcal.protein / macroKcal.total) * 100), kcal: macroKcal.protein, color: "primary-container" as const },
+    { label: "FAT", percent: Math.round((macroKcal.fat / macroKcal.total) * 100), kcal: macroKcal.fat, color: "outline-variant" as const },
   ], [macroKcal]);
 
   const weeklyData = useMemo(() => {
