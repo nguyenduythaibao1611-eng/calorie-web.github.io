@@ -52,9 +52,15 @@ function offsetDate(dateStr: string, days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-/** Returns array of 7 date strings: today is at index 3 (center) */
+/** Returns array of 7 date strings centered on the given date */
 function get7Days(centerDate: string): string[] {
   return Array.from({ length: 7 }, (_, i) => offsetDate(centerDate, i - 3));
+}
+
+/** Get total calories logged for a date */
+function dateCalories(dateStr: string): number {
+  const log = getLog(dateStr);
+  return log?.totalCalories ?? 0;
 }
 
 /** Check if a date has any logged food data */
@@ -107,7 +113,8 @@ interface WeekCalendarProps {
 }
 
 function WeekCalendar({ currentDate, todayStr, onSelectDate }: WeekCalendarProps) {
-  const days = get7Days(todayStr); // always centered on today
+  // FIX: center on currentDate so the strip follows when navigating with arrows
+  const days = get7Days(currentDate);
 
   return (
     <div className="flex items-center justify-between gap-1 sm:gap-2 px-1">
@@ -119,6 +126,8 @@ function WeekCalendar({ currentDate, todayStr, onSelectDate }: WeekCalendarProps
         const isSelected = dateStr === currentDate;
         const isFuture = dateStr > todayStr;
         const hasData = !isFuture && dateHasData(dateStr);
+        // FIX: show calorie count under each day that has data
+        const kcal = !isFuture ? dateCalories(dateStr) : 0;
 
         return (
           <motion.button
@@ -147,16 +156,14 @@ function WeekCalendar({ currentDate, todayStr, onSelectDate }: WeekCalendarProps
             <span className={`font-numbers font-bold text-sm sm:text-base mt-0.5 ${isSelected ? "text-white" : "text-on-background"}`}>
               {dayNum}
             </span>
-            {/* Dot indicator for days with data */}
-            <span
-              className={`
-                mt-1 w-1.5 h-1.5 rounded-full transition-all
-                ${hasData
-                  ? isSelected ? "bg-white/70" : "bg-primary"
-                  : "bg-transparent"
-                }
-              `}
-            />
+            {/* Calorie count — show if has data, else empty dot placeholder */}
+            {hasData && kcal > 0 ? (
+              <span className={`font-numbers text-[9px] mt-0.5 leading-tight ${isSelected ? "text-white/80" : "text-primary"}`}>
+                {kcal >= 1000 ? `${(kcal / 1000).toFixed(1)}k` : kcal}
+              </span>
+            ) : (
+              <span className="mt-0.5 h-[13px]" />
+            )}
           </motion.button>
         );
       })}
@@ -222,26 +229,29 @@ export default function DashboardPage() {
   };
 
   // ── Water ─────────────────────────────────────────────────────────────────
-  const waterGlasses = Math.min(Math.max(currentLog?.water || 0, 0), 50);
-  const waterMl = waterGlasses * 250;
+  const waterGlassCount = Math.min(Math.max(currentLog?.water || 0, 0), 50);
+  const waterMl = waterGlassCount * 250;
 
   const handleWaterClick = (i: number) => {
-    const newVal = i < waterGlasses ? i : i + 1;
+    const newVal = i < waterGlassCount ? i : i + 1;
     updateWater(Math.min(newVal, 50));
   };
 
   // ── Date nav ──────────────────────────────────────────────────────────────
-  const dateObj = new Date(currentDate || new Date());
-  const day = dateObj.getDate();
-  const month = dateObj.getMonth() + 1;
   const todayStr = getTodayStr();
-  const isToday = currentDate === todayStr;
-  const isAfterToday = (currentDate || "") > todayStr;
+  const isAfterToday = (currentDate || "") >= todayStr;
 
   // ── Meal map ──────────────────────────────────────────────────────────────
   const mealMap = Object.fromEntries(
     (currentLog?.meals || []).map((m) => [m.mealType, m]),
   );
+
+  // ── Section label for meal list — shows date when not today ───────────────
+  const dateObj = new Date(currentDate || new Date());
+  const isToday = currentDate === todayStr;
+  const mealSectionLabel = isToday
+    ? "Bữa ăn hôm nay"
+    : `Bữa ăn ngày ${dateObj.getDate()}/${dateObj.getMonth() + 1}`;
 
   // ── Toggle accordion ──────────────────────────────────────────────────────
   const toggleMeal = (mealType: string) => {
@@ -264,60 +274,58 @@ export default function DashboardPage() {
             transition={{ duration: 0.4 }}
             className="glass-card rounded-2xl p-3 sm:p-4 my-4 sm:my-5"
           >
-            <WeekCalendar
-              currentDate={currentDate}
-              todayStr={todayStr}
-              onSelectDate={loadLog}
-            />
+            {/* Arrow navigation integrated into the calendar card */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => loadLog(offsetDate(currentDate, -7))}
+                className="p-1.5 hover:bg-surface-container rounded-full transition-colors group shrink-0"
+                aria-label="Tuần trước"
+              >
+                <span className="material-symbols-outlined text-lg text-outline group-hover:text-primary">
+                  chevron_left
+                </span>
+              </button>
+
+              <div className="flex-1">
+                <WeekCalendar
+                  currentDate={currentDate}
+                  todayStr={todayStr}
+                  onSelectDate={loadLog}
+                />
+              </div>
+
+              <button
+                onClick={() => loadLog(offsetDate(currentDate, 7))}
+                disabled={isAfterToday}
+                className="p-1.5 hover:bg-surface-container rounded-full transition-colors group shrink-0 disabled:opacity-30"
+                aria-label="Tuần sau"
+              >
+                <span className="material-symbols-outlined text-lg text-outline group-hover:text-primary">
+                  chevron_right
+                </span>
+              </button>
+            </div>
           </motion.div>
-
-          {/* ── Date Navigation ─────────────────────────────────────────── */}
-          <nav className="flex items-center justify-center gap-4 sm:gap-8 mb-4 sm:mb-5">
-            <button
-              onClick={() => loadLog(offsetDate(currentDate, -1))}
-              className="p-2 hover:bg-surface-container rounded-full transition-colors group shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
-            >
-              <span className="material-symbols-outlined text-xl sm:text-2xl text-outline group-hover:text-primary">
-                chevron_left
-              </span>
-            </button>
-
-            <h2 className="font-h1 text-lg sm:text-2xl lg:text-3xl text-primary font-bold text-center leading-tight">
-              {isToday ? "Hôm nay" : "Ngày"},{" "}
-              <span className="font-numbers">{day}</span> tháng{" "}
-              <span className="font-numbers">{month}</span>
-            </h2>
-
-            <button
-              onClick={() => loadLog(offsetDate(currentDate, 1))}
-              disabled={isAfterToday}
-              className="p-2 hover:bg-surface-container rounded-full transition-colors group disabled:opacity-30 shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
-            >
-              <span className="material-symbols-outlined text-xl sm:text-2xl text-outline group-hover:text-primary">
-                chevron_right
-              </span>
-            </button>
-          </nav>
 
           {/* ── Main Grid ───────────────────────────────────────────────── */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-start">
 
             {/* ════════════════════════════════════════════════════════════
-                LEFT: Bữa ăn hôm nay
+                LEFT: Bữa ăn
             ════════════════════════════════════════════════════════════ */}
             <motion.div
               className="lg:col-span-5 space-y-3"
               initial="hidden"
               animate="visible"
             >
-              {/* Section header */}
+              {/* Section header — FIX: reflects actual selected date */}
               <motion.div
                 custom={0}
                 variants={cardVariants}
                 className="flex items-center px-1 mb-1"
               >
                 <h3 className="font-h2 text-base sm:text-lg text-primary font-bold">
-                  Bữa ăn hôm nay
+                  {mealSectionLabel}
                 </h3>
               </motion.div>
 
@@ -408,9 +416,8 @@ export default function DashboardPage() {
                                 <ul className="px-3 sm:px-4 py-2 space-y-0.5">
                                   <AnimatePresence initial={false}>
                                     {meal.ingredients.map((ing) => {
-                                      // FIX: ensure we always have a stable key and a valid id for deletion
                                       const ingKey = ing.id ?? ing.name;
-                                      const ingId = ing.id ?? ing.name; // fallback to name if id is missing
+                                      const ingId = ing.id ?? ing.name;
                                       const kcal = Math.round(
                                         Number(ing.calories) || 0,
                                       );
@@ -431,7 +438,6 @@ export default function DashboardPage() {
                                               {ing.amount ?? ""}g · {kcal} kcal
                                             </span>
                                           </div>
-                                          {/* FIX: pass meal.id and ingId correctly */}
                                           <motion.button
                                             onClick={() => removeIngredient(meal.id, ingId)}
                                             whileTap={{ scale: 0.8 }}
@@ -617,7 +623,7 @@ export default function DashboardPage() {
                       ml
                     </span>
                     <p className="text-[10px] text-outline/60 font-numbers">
-                      {waterGlasses}/8 ly
+                      {waterGlassCount}/8 ly
                     </p>
                   </div>
                 </div>
@@ -637,7 +643,7 @@ export default function DashboardPage() {
                     >
                       <span
                         className={`material-symbols-outlined text-3xl sm:text-4xl ${
-                          i < waterGlasses
+                          i < waterGlassCount
                             ? "filled-icon text-primary"
                             : "text-outline/20"
                         }`}
