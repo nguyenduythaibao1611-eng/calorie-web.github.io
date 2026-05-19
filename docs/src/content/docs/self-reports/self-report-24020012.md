@@ -146,6 +146,46 @@
 
 ---
 
+## Task 6 — Documentation Update
+
+**Week:** Week 3, May 19 – May 20
+
+**Work Done:**
+
+- Completed comprehensive file index for entire workspace (129 files total)
+- Scanned and catalogued all files recursively:
+  - Root files: 15 (config, documentation)
+  - app/ folder: 14 files (pages, API routes)
+  - components/ folder: 23 files (UI, nav, features)
+  - lib/ folder: 12 files (utilities & functions)
+  - store/ folder: 3 files (Zustand)
+  - types/ folder: 2 files (TypeScript definitions)
+  - public/ folder: 8 files (assets)
+  - docs/ folder: 35+ files (documentation)
+  - Other: 5+ files (Prisma, instrumentation, Sentry)
+- Updated documentation index (`docs/src/content/docs/index.mdx`) with:
+  - Detailed ASCII tree structure showing all 129 files
+  - File organization breakdown by type (TypeScript, TSX, JSON, Markdown, etc.)
+  - Quick file lookup table for easier navigation
+  - Updated timestamps and version numbers
+
+**Evidence:**
+
+- Commits: Git push with documentation updates
+- File: `docs/src/content/docs/index.mdx` (expanded section with new File Index)
+- Comprehensive table: "📋 File Index - Danh Sách Tất Cả File (129 Files)"
+- ASCII tree: Updated "📁 Cấu Trúc Dự Án Chi Tiết (129 Files)"
+
+**Challenges:**
+
+- Organizing and categorizing 129 files accurately
+- Ensuring file structure documentation matches actual workspace
+- Creating clear navigation for developers to find files quickly
+
+**Self-assessment:** 8/10
+
+---
+
 ## Personal Contribution Summary
 
 I contributed to the CaloMate project by designing and implementing the core infrastructure of the application:
@@ -155,9 +195,10 @@ I contributed to the CaloMate project by designing and implementing the core inf
 3. **Search & Data Features**: Implemented ingredient search system, managed 15+ Vietnamese dish database, integrated real data into stats page
 4. **Tracking & Monitoring**: Set up Google Analytics, Sentry error tracking, custom logger — foundation for production monitoring
 5. **Animations & UX**: Added Framer Motion animations to stats page, improved overall user experience
+6. **Documentation**: Created comprehensive file index (129 files), organized and catalogued all workspace files, maintained up-to-date documentation
 
-The parts I am most proud of are the database architecture (clean Prisma schema), tracking/logging infrastructure (production-ready setup), and ingredient search system (real-time filtering). Through this project, I learned how to design scalable backend architecture, optimize Next.js performance, and integrate monitoring tools for production applications.
+The parts I am most proud of are the database architecture (clean Prisma schema), tracking/logging infrastructure (production-ready setup), ingredient search system (real-time filtering), and documentation maintenance. Through this project, I learned how to design scalable backend architecture, optimize Next.js performance, integrate monitoring tools for production applications, and maintain comprehensive technical documentation.
 
-**Estimated contribution compared to the whole team:** ~10–15%
+**Estimated contribution compared to the whole team:** ~12–17%
 
-**Overall self-assessment:** 7/10
+**Overall self-assessment:** 8/10

@@ -146,6 +146,46 @@
 
 ---
 
+## Task 6 — Documentation Update
+
+**Tuần:** Tuần 3, ngày 19/05 – 20/05
+
+**Công việc đã làm:**
+
+- Hoàn thành file index toàn diện cho workspace (129 files tổng cộng)
+- Quét và phân loại tất cả files đệ quy:
+  - Root files: 15 files (config, documentation)
+  - app/ folder: 14 files (pages, API routes)
+  - components/ folder: 23 files (UI, nav, features)
+  - lib/ folder: 12 files (utilities & functions)
+  - store/ folder: 3 files (Zustand)
+  - types/ folder: 2 files (TypeScript definitions)
+  - public/ folder: 8 files (assets)
+  - docs/ folder: 35+ files (documentation)
+  - Các thư mục khác: 5+ files (Prisma, instrumentation, Sentry)
+- Cập nhật documentation index (`docs/src/content/docs/index.mdx`) với:
+  - ASCII tree chi tiết hiển thị tất cả 129 files
+  - Phân bố file theo loại (TypeScript, TSX, JSON, Markdown, v.v.)
+  - Bảng tra cứu nhanh để dễ dàng tìm file
+  - Cập nhật timestamp và version numbers
+
+**Bằng chứng đóng góp:**
+
+- Commits: Git push với documentation updates
+- File: `docs/src/content/docs/index.mdx` (mở rộng phần File Index)
+- Bảng toàn diện: "📋 File Index - Danh Sách Tất Cả File (129 Files)"
+- ASCII tree: Cập nhật "📁 Cấu Trúc Dự Án Chi Tiết (129 Files)"
+
+**Khó khăn gặp phải:**
+
+- Tổ chức và phân loại 129 files một cách chính xác
+- Đảm bảo file structure documentation khớp với workspace thực tế
+- Tạo navigation rõ ràng giúp developers tìm file nhanh chóng
+
+**Đánh giá bản thân:** 8/10
+
+---
+
 ## Tổng Kết Đóng Góp Cá Nhân
 
 Tôi đã đóng góp vào CaloMate project bằng cách thiết kế và implement core infrastructure của ứng dụng:
@@ -155,9 +195,10 @@ Tôi đã đóng góp vào CaloMate project bằng cách thiết kế và implem
 3. **Search & Data Features**: Implement ingredient search system, manage 15+ Vietnamese dish database, integrate real data vào stats page
 4. **Tracking & Monitoring**: Setup Google Analytics, Sentry error tracking, custom logger - foundation cho production monitoring
 5. **Animations & UX**: Thêm Framer Motion animations cho stats page, improve user experience
+6. **Documentation**: Tạo file index toàn diện (129 files), tổ chức và phân loại tất cả workspace files, duy trì documentation cập nhật
 
-Những phần tôi tự hào nhất là database architecture (clean Prisma schema), tracking/logging infrastructure (production-ready setup), và ingredient search system (real-time filtering). Qua dự án này, tôi học được cách thiết kế scalable backend architecture, optimize Next.js performance, và integrate monitoring tools cho production apps.
+Những phần tôi tự hào nhất là database architecture (clean Prisma schema), tracking/logging infrastructure (production-ready setup), ingredient search system (real-time filtering), và documentation maintenance. Qua dự án này, tôi học được cách thiết kế scalable backend architecture, optimize Next.js performance, integrate monitoring tools cho production apps, và duy trì comprehensive technical documentation.
 
-**Ước tính % đóng góp so với cả nhóm:** ~10 - 15%
+**Ước tính % đóng góp so với cả nhóm:** ~12 - 17%
 
-**Điểm tự đánh giá tổng thể:** 7/10
+**Điểm tự đánh giá tổng thể:** 8/10
