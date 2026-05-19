@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Be_Vietnam_Pro, Space_Grotesk } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
+
 import { PageTransition } from "@/components/providers/PageTransition";
 import { AnalyticsProvider } from "@/components/providers/AnalyticsProvider";
 
@@ -35,36 +36,46 @@ export default function RootLayout({
       className={`${beVietnamPro.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
       <head>
+        {/* Material Symbols */}
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
         />
-        {/* Google Analytics - Sửa lại theo chuẩn Next.js */}
+
+        {/* Google Analytics */}
         <Script
-          async
           src="https://www.googletagmanager.com/gtag/js?id=G-YW2B5LPCB2"
           strategy="afterInteractive"
         />
+
         <Script
-          id="gtag-init"
+          id="google-analytics"
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
+
+              function gtag(){
+                dataLayer.push(arguments);
+              }
+
+              window.gtag = gtag;
+
               gtag('js', new Date());
+
               gtag('config', 'G-YW2B5LPCB2', {
-                page_path: window.location.pathname,
+                send_page_view: false
               });
             `,
           }}
         />
       </head>
+
       <body className="h-full flex flex-col bg-[#f4fbf6] text-[#161d1a]">
+        {/* Track page changes */}
         <AnalyticsProvider />
-        <PageTransition>
-          {children}
-        </PageTransition>
+
+        <PageTransition>{children}</PageTransition>
       </body>
     </html>
   );

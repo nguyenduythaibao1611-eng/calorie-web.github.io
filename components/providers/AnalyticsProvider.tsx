@@ -1,31 +1,33 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { usePathname } from 'next/navigation';
-import { trackPageView, initGA } from '@/lib/analytics';
-import { logger } from '@/lib/logging';
+import { useEffect } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 
-/**
- * Analytics Provider Component
- * Tracks page views and initializes Google Analytics
- */
+declare global {
+  interface Window {
+    gtag: (...args: any[]) => void;
+  }
+}
+
 export function AnalyticsProvider() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
-    // Initialize GA on mount
-    initGA();
-  }, []);
+    if (!window.gtag) return;
 
-  useEffect(() => {
-    // Track page view on route change
-    trackPageView({
-      path: pathname,
-      title: document.title,
+    const url =
+      pathname +
+      (searchParams.toString()
+        ? `?${searchParams.toString()}`
+        : "");
+
+    window.gtag("event", "page_view", {
+      page_path: url,
+      page_title: document.title,
+      page_location: window.location.href,
     });
-
-    logger.info('Route changed', { path: pathname });
-  }, [pathname]);
+  }, [pathname, searchParams]);
 
   return null;
 }
