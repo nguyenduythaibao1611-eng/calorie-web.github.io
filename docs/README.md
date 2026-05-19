@@ -1,114 +1,64 @@
-# 📚 Calorie Web - Tài Liệu Dự Án
+# 🍽️ Calorie Web
 
-Folder này chứa **tài liệu dự án** được xây dựng bằng **Astro Starlight**.
+**Ứng dụng web quản lý calo hàng ngày** - Được xây dựng bằng Next.js 16, React 19, TypeScript
 
-## 📖 Nội Dung Tài Liệu
+Dự án tập trung vào tính đơn giản, dễ sử dụng và phù hợp với sinh viên hoặc người mới bắt đầu.
 
-Tài liệu cung cấp hướng dẫn chi tiết về:
-- **Bắt đầu nhanh** - Setup và cài đặt
-- **Kiến trúc** - Cấu trúc dự án và thiết kế
-- **Kiểu dữ liệu** - Các interface TypeScript
-- **Hướng dẫn phát triển** - Quy trình và convention
-- **State Management** - Zustand store
-- **Storage Layer** - Quản lý localStorage
-- **Tiến độ** - Tính năng hoàn thành và sắp làm
-
-## 🔗 Liên Kết Nhanh
-
-- **Tài liệu chính:** Xem `src/content/docs/index.mdx`
-- **README dự án:** Xem `../README.md`
-- **Hướng dẫn:** `src/content/docs/guides/`
-- **Tham khảo:** `src/content/docs/reference/`
-
-## 🛠️ Phát Triển Tài Liệu
-
-### Build Tài Liệu
-
-```bash
-cd docs
-npm install
-npm run dev      # Start dev server
-npm run build    # Build static site
-```
-
-### Cấu Trúc Folder
-
-```
-docs/
-├── src/
-│   ├── content/
-│   │   └── docs/
-│   │       ├── index.mdx          # Tài liệu chính
-│   │       ├── guides/            # Hướng dẫn
-│   │       └── reference/         # Tham khảo
-│   └── content.config.ts          # Cấu hình nội dung
-│
-├── astro.config.mjs               # Cấu hình Astro
-├── tsconfig.json                  # TypeScript config
-└── package.json                   # Dependencies
-```
-
-## 🛠️ Công Nghệ
-
-- **Astro** - Static site generator
-- **Starlight** - Documentation theme
-- **MDX** - Markdown + React components
-- **TypeScript** - Type safety
-
-## ✍️ Viết Tài Liệu
-
-### Template Trang
-
-```mdx
----
-title: Tiêu Đề Trang
-description: Mô tả ngắn
----
-
-# Tiêu Đề Trang
-
-Nội dung tại đây...
-
-## Phần
-
-Nội dung thêm...
-```
-
-### Ví Dụ Code
-
-```typescript
-// TypeScript code
-interface Example {
-  name: string
-}
-```
-
-### Bảng
-
-| Cột 1 | Cột 2 |
-|-------|-------|
-| Dữ liệu | Dữ liệu |
-
-## 🚀 Deploy
-
-Tài liệu có thể được build và deploy như static site:
-
-```bash
-npm run build   # Tạo dist/ folder
-```
+> **Trạng thái:** v0.1.0 (Early Stage Development)
 
 ---
 
-**Cập nhật lần cuối:** 08/05/2026  
-**Phiên bản:** 0.1.0
+## 📋 Mục lục
+
+- [Giới thiệu](#giới-thiệu)
+- [Tech Stack](#tech-stack)
+- [Cấu trúc Thư Mục](#cấu-trúc-thư-mục)
+- [Hướng Dẫn Cài Đặt](#hướng-dẫn-cài-đặt)
+- [Chạy Dự Án](#chạy-dự-án)
+- [Tracking & Monitoring Setup](#-tracking--monitoring-setup-optional)
+- [Pages Hiện Có](#📄-pages-hiện-có)
+- [API Endpoints](#-api-endpoints)
+- [Tính Năng Hiện Tại](#tính-năng-hiện-tại)
+- [Git Workflow](#git-workflow)
+- [Tiến Độ Hiện Tại](#tiến-độ-hiện-tại)
+- [Công Việc Sắp Tới](#công-việc-sắp-tới)
 
 ---
 
-##  Cấu trúc thư mục (Project Structure)
+## 🎯 Giới thiệu
 
-```bash
-app/          # Routing và layout chính (Next.js App Router)
-components/   # UI components (Button, Card, Chart,...)
-lib/          # Xử lý logic, helper functions
-store/        # Quản lý state (Zustand)
-types/        # Định nghĩa TypeScript types
+**Calorie Web** là ứng dụng giúp người dùng:
+- Ghi lại lượng calo tiêu thụ mỗi ngày
+- Theo dõi dinh dưỡng cơ bản (protein, carbs, fat)
+- Trực quan hóa dữ liệu bằng biểu đồ
+- Thiết lập mục tiêu calo cá nhân
+
+**Đối tượng sử dụng:**
+- Sinh viên muốn quản lý chế độ ăn
+- Người tập gym theo dõi dinh dưỡng
+- Người muốn kiểm soát cân nặng
+- Người không thích ứng dụng Phức tạp
+
+---
+
+## 🛠️ Tech Stack
+
+| Công Nghệ | Phiên Bản | Mục Đích |
+|-----------|----------|---------|
+| **Next.js** | 16.2.4 | Full-stack framework với App Router |
+| **React** | 19.2.4 | UI component library |
+| **TypeScript** | 5 | Type safety |
+| **Tailwind CSS** | 4 | Styling framework |
+| **Zustand** | 5.0.13 | State management |
+| **Recharts** | 3.8.1 | Data visualization |
+| **Framer Motion** | 12.38.0 | Animation library |
+| **Lucide React** | 1.14.0 | Icon library |
+| **Prisma** | 6.4.1 | ORM & Database |
+| **PostgreSQL** | Latest | Database |
+| **ESLint** | 9 | Code quality |
+| **Sentry** | 10.53.1 | Error tracking & monitoring |
+| **Google Analytics** | gtag 1.0.1 | User behavior tracking |
+
+---
+
+## 📁 Cấu Trúc Thư Mục
