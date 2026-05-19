@@ -5,8 +5,7 @@ import type { DailyLog, MealEntry, Ingredient } from "@/types";
 import { getLog, saveLog } from "@/lib/storage";
 import { calculateAndUpdateStreak } from "@/lib/updateStreak";
 
-// ─── Helpers lấy / tạo userId ────────────────────────────────────────────────
-// App chưa có auth → dùng một userId cố định lưu localStorage
+// ─── Helpers lấy / tạo userId ────────────────────────────────────────────
 function getOrCreateUserId(): string {
   if (typeof window === "undefined") return "";
   const stored = localStorage.getItem("calorie_userId");
@@ -16,7 +15,21 @@ function getOrCreateUserId(): string {
   return newId;
 }
 
-// ─── Chuyển dữ liệu từ API sang cấu trúc MealEntry của store ─────────────────
+// ─── Tự động tạo user ẩn danh trong DB nếu chưa có ───────────────────────
+async function ensureUserExists(userId: string): Promise<void> {
+  if (!userId) return;
+  try {
+    await fetch("/api/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: userId }),
+    });
+  } catch {
+    // Bỏ qua lỗi network, localStorage vẫn hoạt động
+  }
+}
+
+// ─── Chuyển dữ liệu từ API sang cấu trúc MealEntry của store ─────────────
 type ApiMeal = {
   id: string;
   mealType: string;
@@ -65,7 +78,6 @@ function apiMealToEntry(meal: ApiMeal): MealEntry {
   };
 }
 
-// ─── Chuyển Ingredient[] của store sang format API cần ───────────────────────
 function ingredientsToApiPayload(
   ingredients: Ingredient[]
 ): { ingredientId: string; amountInGram: number }[] {
@@ -75,7 +87,6 @@ function ingredientsToApiPayload(
   }));
 }
 
-// ─── Sync lên API (fire-and-forget, không block UI) ──────────────────────────
 async function syncAddMealToApi(
   mealType: string,
   date: string,
@@ -107,16 +118,14 @@ async function syncDeleteMealFromApi(mealId: string): Promise<void> {
   try {
     await fetch(`/api/meals/${mealId}`, { method: "DELETE" });
   } catch {
-    // Bỏ qua lỗi network, localStorage đã xóa rồi
+    // Bỏ qua lỗi network
   }
 }
 
-// ─── Kiểm tra mealId có phải UUID từ DB không ────────────────────────────────
 function isDbId(id: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(id);
 }
 
-// ─── Store Types ──────────────────────────────────────────────────────────────
 type StreakCallback = (streak: { currentStreak: number; bestStreak: number }) => void;
 
 type DiaryState = {
@@ -143,40 +152,39 @@ function calcTotalCalories(log: DailyLog): number {
   return log.meals.reduce((sum, meal) => sum + meal.totalCalories, 0);
 }
 
-// ─── Store ────────────────────────────────────────────────────────────────────
 export const useDiaryStore = create<DiaryState>((set, get) => ({
   currentLog: null,
   currentDate: getTodayDate(),
 
-  // Load nhật ký: đọc localStorage trước (nhanh), sau đó fetch DB để đồng bộ
   loadLog: (date: string) => {
     const log = getLog(date) ?? { date, meals: [], totalCalories: 0, water: 0 };
     if (log.water === undefined) log.water = 0;
     set({ currentLog: log, currentDate: date });
 
-    // Fetch từ DB bất đồng bộ để cập nhật nếu có dữ liệu mới hơn
     const userId = getOrCreateUserId();
     if (!userId) return;
 
-    fetch(`/api/meals?userId=${userId}&date=${date}`)
-      .then((res) => res.ok ? res.json() : null)
-      .then((apiMeals: ApiMeal[] | null) => {
-        if (!apiMeals || apiMeals.length === 0) return;
-        const meals = apiMeals.map(apiMealToEntry);
-        const updatedLog: DailyLog = {
-          ...log,
-          meals,
-          totalCalories: meals.reduce((s, m) => s + m.totalCalories, 0),
-        };
-        saveLog(date, updatedLog);
-        set({ currentLog: updatedLog });
-      })
-      .catch(() => {
-        // Giữ nguyên dữ liệu localStorage nếu fetch lỗi
-      });
+    // Đảm bảo user tồn tại trong DB trước khi fetch meals
+    ensureUserExists(userId).then(() => {
+      fetch(`/api/meals?userId=${userId}&date=${date}`)
+        .then((res) => res.ok ? res.json() : null)
+        .then((apiMeals: ApiMeal[] | null) => {
+          if (!apiMeals || apiMeals.length === 0) return;
+          const meals = apiMeals.map(apiMealToEntry);
+          const updatedLog: DailyLog = {
+            ...log,
+            meals,
+            totalCalories: meals.reduce((s, m) => s + m.totalCalories, 0),
+          };
+          saveLog(date, updatedLog);
+          set({ currentLog: updatedLog });
+        })
+        .catch(() => {
+          // Giữ nguyên dữ liệu localStorage nếu fetch lỗi
+        });
+    });
   },
 
-  // Thêm bữa ăn
   addMeal: (meal, onStreakUpdate) => {
     const { currentLog, currentDate } = get();
     if (!currentLog) return;
@@ -194,7 +202,6 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
     onStreakUpdate?.(streak);
   },
 
-  // Xóa bữa ăn
   removeMeal: (mealId, onStreakUpdate) => {
     const { currentLog, currentDate } = get();
     if (!currentLog) return;
@@ -208,7 +215,6 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
     saveLog(currentDate, updated);
     set({ currentLog: updated });
 
-    // Xóa trên DB nếu là ID từ database
     if (isDbId(mealId)) {
       syncDeleteMealFromApi(mealId);
     }
@@ -217,7 +223,6 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
     onStreakUpdate?.(streak);
   },
 
-  // Cập nhật bữa ăn
   updateMeal: (mealId, updatedMeal, onStreakUpdate) => {
     const { currentLog, currentDate } = get();
     if (!currentLog) return;
@@ -235,7 +240,6 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
     onStreakUpdate?.(streak);
   },
 
-  // Thêm nhiều món ăn cùng lúc
   addIngredients: (mealType, newIngredients, onStreakUpdate) => {
     const { currentLog, currentDate, addMeal } = get();
     if (!currentLog) return;
@@ -278,12 +282,10 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
       saveLog(currentDate, updatedLog);
       set({ currentLog: updatedLog });
 
-      // Sync lên DB: xóa bữa cũ, tạo bữa mới với ingredients đã gộp
       if (isDbId(existingMeal.id)) {
         syncDeleteMealFromApi(existingMeal.id).then(() => {
           syncAddMealToApi(mealType, currentDate, updatedIngredients).then((newId) => {
             if (!newId) return;
-            // Cập nhật id mới từ DB vào store
             const latest = get().currentLog;
             if (!latest) return;
             const refreshed: DailyLog = {
@@ -303,7 +305,6 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
       const streak = calculateAndUpdateStreak();
       onStreakUpdate?.(streak);
     } else {
-      // Tạo bữa ăn mới
       const now = new Date();
       const time = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
       const totalCalories = newIngredients.reduce((s, i) => s + i.calories, 0);
@@ -311,7 +312,6 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
 
       addMeal({ id: tempId, mealType, ingredients: newIngredients, totalCalories, time }, onStreakUpdate);
 
-      // Sync lên DB và cập nhật id thật
       syncAddMealToApi(mealType, currentDate, newIngredients).then((dbId) => {
         if (!dbId) return;
         const latest = get().currentLog;
@@ -326,7 +326,6 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
     }
   },
 
-  // Xóa món ăn khỏi bữa ăn
   removeIngredient: (mealId, ingredientId, onStreakUpdate) => {
     const { currentLog, currentDate, removeMeal } = get();
     if (!currentLog) return;
@@ -359,7 +358,6 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
     }
   },
 
-  // Cập nhật lượng nước uống
   updateWater: (water) => {
     const { currentLog, currentDate } = get();
     if (!currentLog) return;
