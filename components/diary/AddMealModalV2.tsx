@@ -99,7 +99,7 @@ export default function AddMealModal({
 
   function handleRemoveFromCart(id: string) {
     setCart((prev) => prev.filter((i) => i.id !== id));
-  }
+}
 
   function handleFoodClick(food: FoodItem) {
     setSelected(food);
@@ -167,7 +167,7 @@ export default function AddMealModal({
                   <div
                     onClick={() => handleFoodClick(food)}
                     className={`flex items-center justify-between px-3.5 py-3 rounded-xl border cursor-pointer transition-all ${
-                      expandedId === food.id
+expandedId === food.id
                         ? "bg-primary/8 border-primary/30"
                         : "bg-surface-container-lowest border-primary/10 hover:border-primary/30 hover:bg-surface-container-low"
                     }`}
@@ -213,7 +213,7 @@ export default function AddMealModal({
                           <span className="font-numbers text-sm text-outline pb-1">g</span>
                         </div>
                         <button
-                          onClick={() => setGrams((g) => String((Number(g) || 100) + 10))}
+onClick={() => setGrams((g) => String((Number(g) || 100) + 10))}
                           className="w-10 h-10 rounded-full bg-primary/10 text-primary text-xl flex items-center justify-center hover:bg-primary/20 transition-colors"
                         >+</button>
                       </div>
@@ -262,7 +262,7 @@ export default function AddMealModal({
                 </div>
               ) : (
                 cart.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between group">
+<div key={item.id} className="flex items-center justify-between group">
                     <div className="flex-1 min-w-0 pr-3">
                       <p className="font-body-md font-semibold text-sm text-on-background truncate">{item.name}</p>
                       <p className="font-numbers text-[10px] text-outline">{item.amount}g • {item.calories} kcal</p>
@@ -285,7 +285,6 @@ export default function AddMealModal({
               </div>
               <button
                 onClick={() => onSave(cart)}
-                disabled={cart.length === 0}
                 className="w-full py-3.5 rounded-xl font-body-md font-bold text-base text-white bg-primary shadow-lg shadow-primary/25 disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
               >
                 Lưu {MEAL_META[mealType].label.toLowerCase()}

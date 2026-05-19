@@ -149,6 +149,8 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
     }
   },
 
+  // FIX: ingredientId có thể là ing.id hoặc ing.name (fallback).
+  // Filter loại bỏ ingredient nếu id match HOẶC (id undefined và name match).
   removeIngredient: (mealId, ingredientId, onStreakUpdate) => {
     const { currentLog, currentDate, removeMeal } = get();
     if (!currentLog) return;
@@ -156,7 +158,15 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
     const meal = currentLog.meals.find((m) => m.id === mealId);
     if (!meal) return;
 
-    const updatedIngredients = meal.ingredients.filter((ing) => ing.id !== ingredientId);
+    const updatedIngredients = meal.ingredients.filter((ing) => {
+      if (ing.id) {
+        // Nếu ingredient có id → so sánh theo id
+        return ing.id !== ingredientId;
+      } else {
+        // Fallback: ingredient không có id → so sánh theo name
+        return ing.name !== ingredientId;
+      }
+    });
 
     if (updatedIngredients.length === 0) {
       removeMeal(mealId, onStreakUpdate);
