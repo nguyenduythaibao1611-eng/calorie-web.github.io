@@ -23,7 +23,7 @@
 | Đặng Đức Minh | 24020001 | Backend Developer / Database |
 | Từ Văn Huy Hoàng | 24020009 | Full-stack Developer / Tech Lead |
 | Trần Tiến Đạt | 24020013 | Frontend Developer / UI |
-| Lê Hoàng Triều | _(Student ID)_ | Frontend Developer / Animations & Stats |
+| Lê Hoàng Triều | 24020012 | Frontend Developer / Animations & Stats |
 
 ---
 
@@ -480,7 +480,7 @@ The project uses **Tailwind CSS v4** integrated via PostCSS. Key utility classes
 | Đặng Đức Minh | 24020001 | [`docs/src/content/docs/self-reports/self-report-24020001.md`](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/blob/main/docs/src/content/docs/self-reports/self-report-24020001.md) |
 | Từ Văn Huy Hoàng | 24020009 | [`docs/src/content/docs/self-reports/self-report-24020009.md`](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/blob/main/docs/src/content/docs/self-reports/self-report-24020009.md) |
 | Trần Tiến Đạt | 24020013 | [`docs/src/content/docs/self-reports/self-report-24020013.md`](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/blob/main/docs/src/content/docs/self-reports/self-report-24020013.md) |
-| Lê Hoàng Triều | 24020012 | [`docs/src/content/docs/self-reports-[StudentID].md`](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/blob/main/docs/src/content/docs/self-reports/self-report-24020012.md) |
+| Lê Hoàng Triều | 24020012 | [`docs/src/content/docs/self-reports-24020012.md`](https://github.com/nguyenduythaibao1611-eng/calorie-web.github.io/blob/main/docs/src/content/docs/self-reports/self-report-24020012.md) |
 
 ---
 
